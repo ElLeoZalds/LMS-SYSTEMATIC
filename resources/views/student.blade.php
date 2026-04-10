@@ -188,32 +188,36 @@
             <div class="row g-4">
                 <!-- Curso en progreso 1 -->
                 <div class="col-lg-4 col-md-6">
-                    <div class="course-card card h-100 rounded-4 overflow-hidden">
-                        <img src="https://picsum.photos/id/1015/600/320" class="card-img-top" alt="Python Bootcamp">
-                        <div class="card-body">
-                            <h6 class="fw-bold">Complete Python Bootcamp 2026</h6>
-                            <p class="text-muted small">Por John Doe • 68% completado</p>
-                            <div class="progress mb-2">
-                                <div class="progress-bar bg-primary" style="width: 68%"></div>
+                    <a href="/curso/python-bootcamp" class="text-decoration-none text-dark">
+                        <div class="course-card card h-100 rounded-4 overflow-hidden">
+                            <img src="https://picsum.photos/id/1015/600/320" class="card-img-top" alt="Python Bootcamp">
+                            <div class="card-body">
+                                <h6 class="fw-bold">Complete Python Bootcamp 2026</h6>
+                                <p class="text-muted small">Por John Doe • 68% completado</p>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-primary" style="width: 68%"></div>
+                                </div>
+                                <small class="text-muted">Última lección: Funciones Avanzadas</small>
                             </div>
-                            <small class="text-muted">Última lección: Funciones Avanzadas</small>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
                 <!-- Curso en progreso 2 -->
                 <div class="col-lg-4 col-md-6">
-                    <div class="course-card card h-100 rounded-4 overflow-hidden">
-                        <img src="https://picsum.photos/id/201/600/320" class="card-img-top" alt="JavaScript">
-                        <div class="card-body">
-                            <h6 class="fw-bold">The Complete JavaScript Course</h6>
-                            <p class="text-muted small">Por Jassica William • 42% completado</p>
-                            <div class="progress mb-2">
-                                <div class="progress-bar bg-primary" style="width: 42%"></div>
+                    <a href="/curso/javascript-course" class="text-decoration-none text-dark">
+                        <div class="course-card card h-100 rounded-4 overflow-hidden">
+                            <img src="https://picsum.photos/id/201/600/320" class="card-img-top" alt="JavaScript">
+                            <div class="card-body">
+                                <h6 class="fw-bold">The Complete JavaScript Course</h6>
+                                <p class="text-muted small">Por Jassica William • 42% completado</p>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-primary" style="width: 42%"></div>
+                                </div>
+                                <small class="text-muted">Última lección: Async/Await</small>
                             </div>
-                            <small class="text-muted">Última lección: Async/Await</small>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -266,31 +270,31 @@
     </div>
 
     <footer class="bg-white border-top mt-5">
-    <div class="container-fluid px-4 py-4">
-        <div class="row align-items-center">
+        <div class="container-fluid px-4 py-4">
+            <div class="row align-items-center">
 
-            <!-- Logo / Marca -->
-            <div class="col-md-4 mb-3 mb-md-0">
-                <h6 class="fw-bold mb-1">Systematic</h6>
-                <small class="text-muted">Aprende sin límites 🚀</small>
+                <!-- Logo / Marca -->
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h6 class="fw-bold mb-1">Systematic</h6>
+                    <small class="text-muted">Aprende sin límites 🚀</small>
+                </div>
+
+                <!-- Links -->
+                <div class="col-md-4 mb-3 mb-md-0 text-md-center">
+                    <a href="#" class="text-decoration-none text-muted me-3">Ayuda</a>
+                    <a href="#" class="text-decoration-none text-muted me-3">Privacidad</a>
+                    <a href="#" class="text-decoration-none text-muted">Términos</a>
+                </div>
+
+                <!-- Copyright -->
+                <div class="col-md-4 text-md-end">
+                    <small class="text-muted">
+                        © 2026 Systematic. Todos los derechos reservados.
+                    </small>
+                </div>
+
             </div>
-
-            <!-- Links -->
-            <div class="col-md-4 mb-3 mb-md-0 text-md-center">
-                <a href="#" class="text-decoration-none text-muted me-3">Ayuda</a>
-                <a href="#" class="text-decoration-none text-muted me-3">Privacidad</a>
-                <a href="#" class="text-decoration-none text-muted">Términos</a>
-            </div>
-
-            <!-- Copyright -->
-            <div class="col-md-4 text-md-end">
-                <small class="text-muted">
-                    © 2026 Systematic. Todos los derechos reservados.
-                </small>
-            </div>
-
         </div>
-    </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
