@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumina Learn - Dashboard</title>
+    <title>Systematic - Dashboard</title>
 
     <!-- Bootstrap 5.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -164,7 +164,7 @@
             </ul>
 
             <div class="mt-auto px-3 pt-4 small text-muted">
-                <p class="mb-1">© 2026 Lumina Learn</p>
+                <p class="mb-1">© 2026 Systematic</p>
                 <a href="#" class="text-decoration-none text-muted">Ayuda</a> •
                 <a href="#" class="text-decoration-none text-muted">Privacidad</a>
             </div>
@@ -250,7 +250,7 @@
     <!-- Offcanvas para móvil y tablet -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="offcanvasLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasLabel">Lumina Learn</h5>
+            <h5 class="offcanvas-title" id="offcanvasLabel">Systematic</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
         </div>
         <div class="offcanvas-body p-0">
@@ -271,7 +271,7 @@
 
             <!-- Logo / Marca -->
             <div class="col-md-4 mb-3 mb-md-0">
-                <h6 class="fw-bold mb-1">Lumina Learn</h6>
+                <h6 class="fw-bold mb-1">Systematic</h6>
                 <small class="text-muted">Aprende sin límites 🚀</small>
             </div>
 
@@ -285,7 +285,7 @@
             <!-- Copyright -->
             <div class="col-md-4 text-md-end">
                 <small class="text-muted">
-                    © 2026 Lumina Learn. Todos los derechos reservados.
+                    © 2026 Systematic. Todos los derechos reservados.
                 </small>
             </div>
 
