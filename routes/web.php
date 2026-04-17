@@ -31,30 +31,26 @@ Route::get('/newroll', function () {
     return view('/modulos/rollActions');
 });
 
-// Route::get('/newpeople', function () {
-//     return view('/modulos/peopleActions');
-// });
+Route::get('/newspecialty', function () {
+    return view('/modulos/specialtyActions');
+});
 
-// Route::get('/newpeople', function () {
-//     return view('/modulos/peopleActions');
-// });
+Route::get('/newuser_roll', function () {
+    return view('/modulos/user_rollActions');
+});
 
-// Route::get('/newpeople', function () {
-//     return view('/modulos/peopleActions');
-// });
+Route::get('/newcourse', function () {
+    return view('/modulos/courseActions');
+});
 
-// Route::get('/newpeople', function () {
-//     return view('/modulos/peopleActions');
-// });
+Route::get('/newtraining', function () {
+    return view('/modulos/trainigActions');
+});
 
-// Route::get('/newpeople', function () {
-//     return view('/modulos/peopleActions');
-// });
+Route::get('/newpay_method', function () {
+    return view('/modulos/pay_methodActions');
+});
 
-// Route::get('/newpeople', function () {
-//     return view('/modulos/peopleActions');
-// });
-
-// Route::get('/newpeople', function () {
-//     return view('/modulos/peopleActions');
-// });
+Route::get('/newregistration', function () {
+    return view('/modulos/registrationActions');
+});
