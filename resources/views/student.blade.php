@@ -145,7 +145,7 @@
     <div class="d-flex" style="padding-top: 76px;">
 
         <!-- SIDEBAR IZQUIERDO -->
-        <div class="sidebar d-none d-xl-flex flex-column p-3" style="width: 260px;">
+        <div class="sidebar d-none d-lg-flex flex-column p-3" style="width: 260px;">
             <ul class="nav flex-column">
                 <li><a href="#" class="nav-link active d-flex align-items-center gap-3"><i class="fa fa-home fa-lg"></i> <span>Dashboard</span></a></li>
                 <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-book fa-lg"></i> <span>Mis Cursos</span></a></li>
@@ -161,7 +161,6 @@
             <ul class="nav flex-column">
                 <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-compass fa-lg"></i> <span>Explorar Cursos</span></a></li>
                 <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-users fa-lg"></i> <span>Instructores</span></a></li>
-                <li><a href="{{ asset('actions') }}" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-users fa-lg"></i> <span>Acciones</span></a></li>
             </ul>
 
             <div class="mt-auto px-3 pt-4 small text-muted">
@@ -224,7 +223,7 @@
         </div>
 
         <!-- RIGHT SIDEBAR (solo en pantallas muy grandes) -->
-        <div class="right-sidebar d-none d-xxl-flex flex-column p-4 bg-white border-start" style="width: 300px; height: calc(100vh - 76px); overflow-y: auto;">
+        <div class="right-sidebar d-none d-xl-flex flex-column p-4 bg-white border-start" style="width: 300px; height: calc(100vh - 76px); overflow-y: auto;">
             <div class="text-center mb-4">
                 <img src="{{ asset('images/undraw_profile_2.svg') }}" alt="Usuario" class="rounded-circle mb-3" width="110" height="110">
                 <h5 class="fw-bold">Usuario</h5>
