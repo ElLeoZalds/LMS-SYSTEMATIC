@@ -22,3 +22,39 @@ Route::get('/actions', function () {
 Route::get('/newpeople', function () {
     return view('/modulos/peopleActions');
 });
+
+Route::get('/newuser', function () {
+    return view('/modulos/userActions');
+});
+
+Route::get('/newroll', function () {
+    return view('/modulos/rollActions');
+});
+
+// Route::get('/newpeople', function () {
+//     return view('/modulos/peopleActions');
+// });
+
+// Route::get('/newpeople', function () {
+//     return view('/modulos/peopleActions');
+// });
+
+// Route::get('/newpeople', function () {
+//     return view('/modulos/peopleActions');
+// });
+
+// Route::get('/newpeople', function () {
+//     return view('/modulos/peopleActions');
+// });
+
+// Route::get('/newpeople', function () {
+//     return view('/modulos/peopleActions');
+// });
+
+// Route::get('/newpeople', function () {
+//     return view('/modulos/peopleActions');
+// });
+
+// Route::get('/newpeople', function () {
+//     return view('/modulos/peopleActions');
+// });

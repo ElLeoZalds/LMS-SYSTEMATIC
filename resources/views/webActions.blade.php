@@ -41,16 +41,58 @@
             <i class="fa fa-play-circle text-primary"></i>
           </a>
 
-          <a href="#" class="list-group-item lesson-item d-flex justify-content-between align-items-center">
+          <a href=" {{ asset('newuser') }} " class="list-group-item lesson-item d-flex justify-content-between align-items-center">
             <div>
               <strong class="p-4">2. Usuarios</strong>
             </div>
             <i class="fa fa-play-circle text-primary"></i>
           </a>
 
-          <a href="#" class="list-group-item lesson-item d-flex justify-content-between align-items-center">
+          <a href=" {{ asset('newroll') }} " class="list-group-item lesson-item d-flex justify-content-between align-items-center">
             <div>
               <strong class="p-4">3. Roles</strong>
+            </div>
+            <i class="fa fa-play-circle text-primary"></i>
+          </a>
+
+          <a href=" {{ asset('newspecialty') }} " class="list-group-item lesson-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong class="p-4">4. Especialidades</strong>
+            </div>
+            <i class="fa fa-play-circle text-primary"></i>
+          </a>
+
+          <a href=" {{ asset('newuser_roll') }} " class="list-group-item lesson-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong class="p-4">5. Roles de Usuario</strong>
+            </div>
+            <i class="fa fa-play-circle text-primary"></i>
+          </a>
+
+          <a href=" {{ asset('newcourse') }} " class="list-group-item lesson-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong class="p-4">6. Cursos</strong>
+            </div>
+            <i class="fa fa-play-circle text-primary"></i>
+          </a>
+
+          <a href=" {{ asset('newtraining') }} " class="list-group-item lesson-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong class="p-4">7. Capacitaciones</strong>
+            </div>
+            <i class="fa fa-play-circle text-primary"></i>
+          </a>
+
+          <a href=" {{ asset('newpay_method') }} " class="list-group-item lesson-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong class="p-4">8. Métodos de Pago</strong>
+            </div>
+            <i class="fa fa-play-circle text-primary"></i>
+          </a>
+
+          <a href=" {{ asset('newregistration') }} " class="list-group-item lesson-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong class="p-4">9. Matrículas</strong>
             </div>
             <i class="fa fa-play-circle text-primary"></i>
           </a>
