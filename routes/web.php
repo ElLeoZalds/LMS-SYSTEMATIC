@@ -1,16 +1,20 @@
-    <?php
+<?php
 
-    use Illuminate\Support\Facades\Route;
-    use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
-    Route::get('/', function () {
-        return view('login');
-    });
+Route::get('/', function () {
+    return view('login');
+});
 
-    Route::post('/login', function (Request $request) {
-        return view('student');
-    });
-    
-    Route::get('/curso/{slug}', function ($slug) {
+Route::post('/login', function (Request $request) {
+    return view('student');
+});
+
+Route::get('/curso/{slug}', function ($slug) {
     return view('course-dashboard', compact('slug'));
+});
+
+Route::get('/actions', function () {
+    return view('webActions');
 });

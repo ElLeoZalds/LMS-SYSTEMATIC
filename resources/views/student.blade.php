@@ -161,6 +161,7 @@
             <ul class="nav flex-column">
                 <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-compass fa-lg"></i> <span>Explorar Cursos</span></a></li>
                 <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-users fa-lg"></i> <span>Instructores</span></a></li>
+                <li><a href="{{ asset('actions') }}" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-users fa-lg"></i> <span>Acciones</span></a></li>
             </ul>
 
             <div class="mt-auto px-3 pt-4 small text-muted">
