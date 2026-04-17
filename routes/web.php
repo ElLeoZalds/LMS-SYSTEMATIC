@@ -18,3 +18,7 @@ Route::get('/curso/{slug}', function ($slug) {
 Route::get('/actions', function () {
     return view('webActions');
 });
+
+Route::get('/newpeople', function () {
+    return view('/modulos/peopleActions');
+});

@@ -6,6 +6,6 @@
   <title>Document</title>
 </head>
 <body>
-  
+  <h1>acciones de persona</h1>
 </body>
 </html>
