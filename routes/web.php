@@ -1,61 +1,81 @@
 <?php
 
-use App\Http\Controllers\ProfesorController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
-
-//Vista para profesor
-Route::get('/profesor', [ProfesorController::class, 'index']);
-
+// LOGIN
 Route::get('/', function () {
-    return view('login');
+    return view('auth.login');
 });
 
 Route::post('/login', function (Request $request) {
-    return view('student');
+
+    // Simulación simple de roles
+    $role = $request->input('role'); // luego lo cambias por BD
+
+    if ($role === 'teacher') {
+        return redirect('/dashboard/teacher');
+    }
+
+    return redirect('/dashboard/student');
 });
 
+// DASHBOARDS
+Route::get('/dashboard/student', function () {
+    return view('dashboard.student');
+});
+
+Route::get('/dashboard/teacher', function () {
+    return view('dashboard.teacher');
+})->name('dashboard.teacher');
+
+// CURSOS
 Route::get('/curso/{slug}', function ($slug) {
-    return view('course-dashboard', compact('slug'));
+    return view('courses.manage', compact('slug'));
 });
 
+// ACCIONES
 Route::get('/actions', function () {
-    return view('webActions');
+    return view('actions.index');
 });
 
-Route::get('/newpeople', function () {
-    return view('/modulos/peopleActions');
-});
+// MODULOS
+Route::prefix('modulos')->group(function () {
 
-Route::get('/newuser', function () {
-    return view('/modulos/userActions');
-});
+    Route::get('/people', function () {
+        return view('modulos.people');
+    });
 
-Route::get('/newroll', function () {
-    return view('/modulos/rollActions');
-});
+    Route::get('/user', function () {
+        return view('modulos.user');
+    });
 
-Route::get('/newspecialty', function () {
-    return view('/modulos/specialtyActions');
-});
+    Route::get('/role', function () {
+        return view('modulos.role');
+    });
 
-Route::get('/newuser_roll', function () {
-    return view('/modulos/user_rollActions');
-});
+    Route::get('/specialty', function () {
+        return view('modulos.specialty');
+    });
 
-Route::get('/newcourse', function () {
-    return view('/modulos/courseActions');
-});
+    Route::get('/user-role', function () {
+        return view('modulos.user_role');
+    });
 
-Route::get('/newtraining', function () {
-    return view('/modulos/trainigActions');
-});
+    Route::get('/course', function () {
+        return view('modulos.course');
+    });
 
-Route::get('/newpay_method', function () {
-    return view('/modulos/pay_methodActions');
-});
+    Route::get('/training', function () {
+        return view('modulos.training');
+    });
 
-Route::get('/newregistration', function () {
-    return view('/modulos/registrationActions');
+    Route::get('/pay-method', function () {
+        return view('modulos.pay_method');
+    });
+
+    Route::get('/registration', function () {
+        return view('modulos.registration');
+    });
+
 });

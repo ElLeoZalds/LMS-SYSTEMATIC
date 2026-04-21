@@ -128,7 +128,7 @@
             </form>
 
             <div class="d-flex align-items-center gap-4">
-                <a href="{{ url('/profesor') }}" class="btn btn-primary">
+                <a href="{{ url('/dashboard/teacher') }}" class="btn btn-primary">
                     Ir a vista profesor
                 </a>
 
