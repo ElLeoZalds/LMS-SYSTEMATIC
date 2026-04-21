@@ -1,7 +1,12 @@
 <?php
 
+use App\Http\Controllers\ProfesorController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+
+
+//Vista para profesor
+Route::get('/profesor', [ProfesorController::class, 'index']);
 
 Route::get('/', function () {
     return view('login');
