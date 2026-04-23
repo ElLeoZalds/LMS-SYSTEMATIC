@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Models\Course;
+use App\Http\Controllers\ExplorecoursesController;
 
 // LOGIN
 Route::get('/', function () {
@@ -29,10 +31,10 @@ Route::get('/dashboard/teacher', function () {
     return view('dashboard.teacher');
 })->name('dashboard.teacher');
 
+Route::get('/explorar-cursos', [ExplorecoursesController::class, 'index'])
+    ->name('explore-courses.dashboard');
 // CURSOS
-Route::get('/curso/{slug}', function ($slug) {
-    return view('courses.manage', compact('slug'));
-});
+
 
 // ACCIONES
 Route::get('/actions', function () {

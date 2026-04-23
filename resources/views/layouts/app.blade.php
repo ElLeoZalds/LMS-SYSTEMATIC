@@ -19,17 +19,26 @@
 
     @include('components.navbar')
 
-    <div class="d-flex" style="padding-top: 76px;">
+<div class="container-fluid" style="padding-top: 76px;">
+    <div class="row">
 
-        @include('components.sidebar')
+        <!-- Sidebar -->
+        <div class="col-lg-2 d-none d-lg-block">
+            @include('components.sidebar')
+        </div>
 
-        <div class="flex-grow-1 p-4">
+        <!-- Contenido -->
+        <div class="col-12 col-lg-7 p-4">
             @yield('content')
         </div>
 
-        @include('components.right-sidebar')
+        <!-- Right Sidebar -->
+        <div class="col-xl-3 d-none d-xl-block">
+            @include('components.right-sidebar')
+        </div>
 
     </div>
+</div>
 
     @include('components.footer')
 
