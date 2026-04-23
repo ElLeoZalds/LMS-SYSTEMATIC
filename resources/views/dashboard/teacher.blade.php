@@ -68,6 +68,7 @@
                 <li><a href="#" class="nav-link"><i class="fa fa-users"></i> Estudiantes</a></li>
                 <li><a href="#" class="nav-link"><i class="fa fa-tasks"></i> Tareas</a></li>
                 <li><a href="#" class="nav-link"><i class="fa fa-chart-bar"></i> Estadísticas</a></li>
+                <li><a href="#" class="nav-link"><i class="fa fa-chart-bar"></i> Administracion</a></li>
             </ul>
         </div>
 
