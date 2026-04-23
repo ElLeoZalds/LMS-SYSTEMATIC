@@ -11,24 +11,6 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-
-        .section-title {
-            font-weight: 700;
-        }
-
-        .lesson-item {
-            border-radius: 10px;
-            transition: 0.2s;
-        }
-
-        .lesson-item:hover {
-            background-color: #f1f5ff;
-        }
-    </style>
 </head>
 
 <body>
@@ -116,4 +98,5 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

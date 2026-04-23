@@ -10,8 +10,8 @@ Route::get('/', function () {
 
 Route::post('/login', function (Request $request) {
 
-    // Simulación simple de roles
-    $role = $request->input('role'); // luego lo cambias por BD
+
+    $role = $request->input('role');
 
     if ($role === 'teacher') {
         return redirect('/dashboard/teacher');
@@ -77,5 +77,4 @@ Route::prefix('modulos')->group(function () {
     Route::get('/registration', function () {
         return view('modulos.registration');
     });
-
 });

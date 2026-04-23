@@ -1,0 +1,128 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.section-title {
+    font-weight: 700;
+}
+
+.lesson-item {
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+.lesson-item:hover {
+    background-color: #f1f5ff;
+}
+
+:root {
+    --primary: #0d6efd;
+    --primary-dark: #0b5ed7;
+    --accent: #6f42c1;
+    --success: #198754;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar-brand span {
+    background-color: var(--primary);
+}
+
+.sidebar {
+    height: 100vh;
+    overflow-y: auto;
+    background: #fff;
+    border-right: 1px solid #dee2e6;
+    position: sticky;
+    top: 0;
+}
+
+.nav-link {
+    color: #555;
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    transition: all 0.2s;
+}
+
+.nav-link.active,
+.nav-link:hover {
+    background-color: #e7f1ff;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.course-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.course-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(13, 110, 253, 0.15);
+}
+
+.progress {
+    height: 6px;
+}
+
+.section-header {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #198754;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.sidebar {
+    height: 100vh;
+    background: #fff;
+    border-right: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+}
+
+.nav-link {
+    color: #555;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: #e7f1ff;
+    color: #0d6efd;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    transition: 0.3s;
+}
