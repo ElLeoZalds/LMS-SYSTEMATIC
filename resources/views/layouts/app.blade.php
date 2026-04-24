@@ -19,26 +19,28 @@
 
     @include('components.navbar')
 
-<div class="container-fluid" style="padding-top: 76px;">
-    <div class="row">
+    <div class="container-fluid" style="padding-top: 76px;">
+        <div class="row">
 
-        <!-- Sidebar -->
-        <div class="col-lg-2 d-none d-lg-block">
-            @include('components.sidebar')
+            <!-- Sidebar -->
+            <div class="col-lg-2 d-none d-lg-block">
+                @if(!View::hasSection('noSidebar'))
+                    @include('components.sidebar')
+                @endif
+            </div>
+
+            <!-- Contenido -->
+            <div class="col-12 col-lg-7 p-4">
+                @yield('content')
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="col-xl-3 d-none d-xl-block">
+                @include('components.right-sidebar')
+            </div>
+
         </div>
-
-        <!-- Contenido -->
-        <div class="col-12 col-lg-7 p-4">
-            @yield('content')
-        </div>
-
-        <!-- Right Sidebar -->
-        <div class="col-xl-3 d-none d-xl-block">
-            @include('components.right-sidebar')
-        </div>
-
     </div>
-</div>
 
     @include('components.footer')
 
