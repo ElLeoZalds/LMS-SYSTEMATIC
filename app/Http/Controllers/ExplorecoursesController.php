@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\Course;
 use App\Models\Especialidad;
-
+use Spipu\Html2Pdf\Html2Pdf;
 use Illuminate\Http\Request;
 
 class ExplorecoursesController extends Controller
@@ -63,5 +62,25 @@ class ExplorecoursesController extends Controller
         $course = Course::findOrFail($id);
         $course->delete();
         return redirect()->route('cursos.index')->with('success', 'Curso eliminado correctamente');
+    }
+
+    public function reporte()
+    {
+        $courses = Course::all();
+
+        // Renderizar vista Blade a HTML
+        $html = view('dashboard.courses.reporte', compact('courses'))->render();
+
+        $html2pdf = new Html2Pdf();
+        $html2pdf->writeHTML($html);
+
+        return response(
+            $html2pdf->output('reporte_cursos.pdf'),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="reporte_cursos.pdf"'
+            ]
+        );
     }
 }

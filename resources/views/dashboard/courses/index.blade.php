@@ -6,9 +6,12 @@
 <div class="container mt-4">
     <h2>Listado de Cursos</h2>
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success">{{ session('success') }}</div>
     @endif
     <a href="{{ route('cursos.create') }}" class="btn btn-success mb-3">Crear Curso</a>
+    <a href="{{ route('cursos.reporte') }}" class="btn btn-danger mb-3">
+        <i class="fa fa-file-pdf"></i> Generar Reporte PDF
+    </a></thead>
     <table class="table table-bordered">
         <thead>
             <tr>

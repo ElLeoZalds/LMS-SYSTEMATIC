@@ -57,6 +57,10 @@ Route::get('/cursos/{id}/edit', [ExplorecoursesController::class, 'edit'])->name
 Route::put('/cursos/{id}', [ExplorecoursesController::class, 'update'])->name('cursos.update');
 Route::delete('/cursos/{id}', [ExplorecoursesController::class, 'destroy'])->name('cursos.destroy');
 
+// REPORTE (ruta separada)
+Route::get('/cursos/reporte', [ExplorecoursesController::class, 'reporte'])
+    ->name('cursos.reporte');
+
 // Rutas CRUD Especialidades
 Route::get('/especialidades', [SpecialtyController::class, 'index'])->name('especialidades.index');
 // Route::get('/especialidades/create', [SpecialtyController::class, 'create'])->name('especialidades.create');
