@@ -41,6 +41,10 @@ Route::get('/dashboard/admin/specialty', function () {
     return view('modulos.specialtyActions');
 })->name('modulos.specialtyActions');
 
+Route::get('/dashboard/admin/user', function () {
+    return view('modulos.userActions');
+})->name('modulos.userActions');
+
 Route::get('/explorar-cursos', [ExplorecoursesController::class, 'index'])
     ->name('explore-courses.dashboard');
 
