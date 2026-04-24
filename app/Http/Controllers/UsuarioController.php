@@ -16,7 +16,10 @@ class UsuarioController extends Controller
             ->select('u.*', 'p.nombres as persona_nombre')
             ->get();
 
-        return view('modulos.usuarios', compact('usuarios'));
+        // traer personas para el select
+        $personas = DB::table('personas')->get();
+
+        return view('modulos.usuarios', compact('usuarios', 'personas'));
     }
 
     public function store(Request $request)
@@ -48,7 +51,9 @@ class UsuarioController extends Controller
             ->select('u.*', 'p.nombres as persona_nombre')
             ->get();
 
-        return view('modulos.usuarios', compact('usuario', 'usuarios'));
+        $personas = DB::table('personas')->get();
+
+        return view('modulos.usuarios', compact('usuario', 'usuarios', 'personas'));
     }
 
     public function update(Request $request, $id)
