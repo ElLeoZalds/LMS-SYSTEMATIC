@@ -27,9 +27,15 @@ Route::get('/dashboard/student', function () {
     return view('dashboard.student');
 });
 
+//Profe4sores
 Route::get('/dashboard/teacher', function () {
     return view('dashboard.teacher');
 })->name('dashboard.teacher');
+
+//Administradores
+Route::get('/dashboard/admin', function () {
+    return view('dashboard.admin');
+})->name('dashboard.admin');
 
 Route::get('/explorar-cursos', [ExplorecoursesController::class, 'index'])
     ->name('explore-courses.dashboard');
