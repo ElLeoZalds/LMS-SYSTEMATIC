@@ -1,12 +1,12 @@
 <div class="sidebar d-none d-lg-flex flex-column p-3" style="width: 260px;">
     <ul class="nav flex-column">
-        <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-user fa-lg"></i> <span>Usuario</span></a></li>
-        <li><a href="#" class="nav-link active d-flex align-items-center gap-3"><i class="fa fa-home fa-lg"></i> <span>Dashboard</span></a></li>
-        <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-book fa-lg"></i> <span>Mis Cursos</span></a></li>
-        <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-road fa-lg"></i> <span>Learning Paths</span></a></li>
-        <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-calendar fa-lg"></i> <span>Calendario</span></a></li>
-        <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-trophy fa-lg"></i> <span>Certificados</span></a></li>
-        <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-chart-bar fa-lg"></i> <span>Progreso</span></a></li>
+        <li><a href="{{ route('dashboard.usuario') }}" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-user fa-lg"></i> <span>Usuario</span></a></li>
+        <li><a href="{{ route('dashboard.calendario') }}" class="nav-link active d-flex align-items-center gap-3"><i class="fa fa-home fa-lg"></i> <span>Dashboard</span></a></li>
+        <li><a href="{{ route('dashboard.mis-cursos') }}" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-book fa-lg"></i> <span>Mis Cursos</span></a></li>
+        <li><a href="{{ route('dashboard.learning-paths') }}" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-road fa-lg"></i> <span>Learning Paths</span></a></li>
+        <li><a href="{{ route('dashboard.calendario') }}" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-calendar fa-lg"></i> <span>Calendario</span></a></li>
+        <li><a href="{{ route('dashboard.certificados') }}" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-trophy fa-lg"></i> <span>Certificados</span></a></li>
+        <li><a href="{{ route('dashboard.progreso') }}" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-chart-bar fa-lg"></i> <span>Progreso</span></a></li>
     </ul>
 
     <hr class="my-4">
