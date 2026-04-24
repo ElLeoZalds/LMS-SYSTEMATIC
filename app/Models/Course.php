@@ -18,4 +18,9 @@ class Course extends Model
         'cantidadhoras',
         'precioreferencial'
     ];
+
+    public function especialidad()
+    {
+        return $this->belongsTo(Especialidad::class, 'idespecialidad', 'idespecialidad');
+    }
 }

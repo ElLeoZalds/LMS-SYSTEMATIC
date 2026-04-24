@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Http\Controllers\ExplorecoursesController;
+use App\Http\Controllers\SpecialtyController;
+use App\Http\Controllers\ReportController;
 
 // LOGIN
 Route::get('/', function () {
@@ -37,9 +39,8 @@ Route::get('/dashboard/admin', function () {
     return view('dashboard.admin');
 })->name('dashboard.admin');
 
-Route::get('/dashboard/admin/specialty', function () {
-    return view('modulos.specialtyActions');
-})->name('modulos.specialtyActions');
+Route::get('/dashboard/admin/specialty', [SpecialtyController::class, 'index'])
+    ->name('modulos.specialtyActions');
 
 Route::get('/dashboard/admin/user', function () {
     return view('modulos.userActions');
@@ -55,6 +56,18 @@ Route::post('/cursos', [ExplorecoursesController::class, 'store'])->name('cursos
 Route::get('/cursos/{id}/edit', [ExplorecoursesController::class, 'edit'])->name('cursos.edit');
 Route::put('/cursos/{id}', [ExplorecoursesController::class, 'update'])->name('cursos.update');
 Route::delete('/cursos/{id}', [ExplorecoursesController::class, 'destroy'])->name('cursos.destroy');
+
+// Rutas CRUD Especialidades
+Route::get('/especialidades', [SpecialtyController::class, 'index'])->name('especialidades.index');
+Route::get('/especialidades/create', [SpecialtyController::class, 'create'])->name('especialidades.create');
+Route::post('/especialidades', [SpecialtyController::class, 'store'])->name('especialidades.store');
+Route::get('/especialidades/{id}/edit', [SpecialtyController::class, 'edit'])->name('especialidades.edit');
+Route::put('/especialidades/{id}', [SpecialtyController::class, 'update'])->name('especialidades.update');
+Route::delete('/especialidades/{id}', [SpecialtyController::class, 'destroy'])->name('especialidades.destroy');
+
+// Rutas de Reportes PDF
+Route::get('/reportes/cursos', [ReportController::class, 'coursesPdf'])->name('reportes.cursos');
+Route::get('/reportes/especialidades', [ReportController::class, 'specialtiesPdf'])->name('reportes.especialidades');
 
 // Rutas Sidebar
 Route::get('/usuario', function () {
