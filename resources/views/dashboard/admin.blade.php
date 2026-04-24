@@ -12,8 +12,8 @@
     <!-- SIDEBAR PERSONALIZADO -->
     <div class="col-md-2 d-none d-lg-flex flex-column p-3" style="min-height: 100vh;">
         <ul class="nav flex-column">
-            <li><a href="#" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-user fa-lg"></i> <span>Especilidades</span></a></li>
-            <li><a href="#" class="nav-link active d-flex align-items-center gap-3"><i class="fa fa-home fa-lg"></i> <span>Usuarios</span></a></li>
+            <li><a href="{{ url('/dashboard/admin/specialty') }}" class="nav-link d-flex align-items-center gap-3"><i class="fa fa-user fa-lg"></i> <span>Especilidades</span></a></li>
+            <li><a href="{{ url('/dashboard/admin/user') }}" class="nav-link active d-flex align-items-center gap-3"><i class="fa fa-home fa-lg"></i> <span>Usuarios</span></a></li>
         </ul>
 
         <hr class="my-4">
