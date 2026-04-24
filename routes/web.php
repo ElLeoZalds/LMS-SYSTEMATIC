@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Http\Controllers\ExplorecoursesController;
 use App\Http\Controllers\SpecialtyController;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ReportController;
 
 // LOGIN
@@ -42,9 +43,8 @@ Route::get('/dashboard/admin', function () {
 Route::get('/dashboard/admin/specialty', [SpecialtyController::class, 'index'])
     ->name('modulos.specialtyActions');
 
-Route::get('/dashboard/admin/user', function () {
-    return view('modulos.userActions');
-})->name('modulos.userActions');
+Route::get('/dashboard/admin/user', [UsuarioController::class, 'index'])
+    ->name('modulos.usuarios');
 
 Route::get('/explorar-cursos', [ExplorecoursesController::class, 'index'])
     ->name('explore-courses.dashboard');
@@ -59,11 +59,27 @@ Route::delete('/cursos/{id}', [ExplorecoursesController::class, 'destroy'])->nam
 
 // Rutas CRUD Especialidades
 Route::get('/especialidades', [SpecialtyController::class, 'index'])->name('especialidades.index');
-Route::get('/especialidades/create', [SpecialtyController::class, 'create'])->name('especialidades.create');
+// Route::get('/especialidades/create', [SpecialtyController::class, 'create'])->name('especialidades.create');
 Route::post('/especialidades', [SpecialtyController::class, 'store'])->name('especialidades.store');
 Route::get('/especialidades/{id}/edit', [SpecialtyController::class, 'edit'])->name('especialidades.edit');
 Route::put('/especialidades/{id}', [SpecialtyController::class, 'update'])->name('especialidades.update');
 Route::delete('/especialidades/{id}', [SpecialtyController::class, 'destroy'])->name('especialidades.destroy');
+
+// Rutas CRUD Usuarios
+// LISTAR
+Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+
+// CREAR
+Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+
+// EDITAR
+Route::get('/usuarios/{id}/edit', [UsuarioController::class, 'edit'])->name('usuarios.edit');
+
+// ACTUALIZAR
+Route::put('/usuarios/{id}', [UsuarioController::class, 'update'])->name('usuarios.update');
+
+// ELIMINAR
+Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
 
 // Rutas de Reportes PDF
 Route::get('/reportes/cursos', [ReportController::class, 'coursesPdf'])->name('reportes.cursos');
@@ -143,3 +159,6 @@ Route::prefix('modulos')->group(function () {
         return view('modulos.registration');
     });
 });
+
+
+

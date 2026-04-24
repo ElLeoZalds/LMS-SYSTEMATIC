@@ -13,43 +13,44 @@ class SpecialtyController extends Controller
         return view('modulos.specialtyActions', compact('especialidades'));
     }
 
-    public function create()
-    {
-        return view('modulos.specialtyActions');
-    }
-
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'especialidad' => 'required|string|max:100|unique:especialidades,especialidad',
+        $request->validate([
+            'especialidad' => 'required|max:100|unique:especialidades,especialidad'
         ]);
 
-        Especialidad::create($validated);
-        return redirect()->route('especialidades.index')->with('success', 'Especialidad creada correctamente');
+        Especialidad::create($request->all());
+
+        return redirect()->route('especialidades.index')
+            ->with('success', 'Creado correctamente');
     }
 
     public function edit($id)
     {
         $especialidad = Especialidad::findOrFail($id);
         $especialidades = Especialidad::all();
+
         return view('modulos.specialtyActions', compact('especialidad', 'especialidades'));
     }
 
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'especialidad' => 'required|string|max:100|unique:especialidades,especialidad,' . $id . ',idespecialidad',
+        $request->validate([
+            'especialidad' => 'required|max:100|unique:especialidades,especialidad,' . $id . ',idespecialidad'
         ]);
 
-        $especialidad = Especialidad::findOrFail($id);
-        $especialidad->update($validated);
-        return redirect()->route('especialidades.index')->with('success', 'Especialidad actualizada correctamente');
+        $esp = Especialidad::findOrFail($id);
+        $esp->update($request->all());
+
+        return redirect()->route('especialidades.index')
+            ->with('success', 'Actualizado correctamente');
     }
 
     public function destroy($id)
     {
-        $especialidad = Especialidad::findOrFail($id);
-        $especialidad->delete();
-        return redirect()->route('especialidades.index')->with('success', 'Especialidad eliminada correctamente');
+        Especialidad::findOrFail($id)->delete();
+
+        return redirect()->route('especialidades.index')
+            ->with('success', 'Eliminado correctamente');
     }
 }
