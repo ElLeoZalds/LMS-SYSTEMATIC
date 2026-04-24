@@ -20,6 +20,9 @@
             <a href="{{ url('/dashboard/teacher') }}" class="btn btn-primary">
                 Ir a vista profesor
             </a>
+            <a href="{{ url('/dashboard/admin') }}" class="btn btn-primary">
+                Ir a vista Administración
+            </a>
 
             <div class="position-relative" style="cursor: pointer;">
                 <i class="fa fa-bell fa-2x text-dark"></i>
