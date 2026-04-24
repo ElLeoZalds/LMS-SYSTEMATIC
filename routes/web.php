@@ -27,7 +27,7 @@ Route::get('/dashboard/student', function () {
     return view('dashboard.student');
 });
 
-//Profe4sores
+//Profesores
 Route::get('/dashboard/teacher', function () {
     return view('dashboard.teacher');
 })->name('dashboard.teacher');
@@ -43,7 +43,43 @@ Route::get('/dashboard/admin', function () {
 
 Route::get('/explorar-cursos', [ExplorecoursesController::class, 'index'])
     ->name('explore-courses.dashboard');
-// CURSOS
+
+// Rutas CRUD Cursos
+Route::get('/cursos', [ExplorecoursesController::class, 'index'])->name('cursos.index');
+Route::get('/cursos/create', [ExplorecoursesController::class, 'create'])->name('cursos.create');
+Route::post('/cursos', [ExplorecoursesController::class, 'store'])->name('cursos.store');
+Route::get('/cursos/{id}/edit', [ExplorecoursesController::class, 'edit'])->name('cursos.edit');
+Route::put('/cursos/{id}', [ExplorecoursesController::class, 'update'])->name('cursos.update');
+Route::delete('/cursos/{id}', [ExplorecoursesController::class, 'destroy'])->name('cursos.destroy');
+
+// Rutas Sidebar
+Route::get('/usuario', function () {
+    return view('dashboard.usuario');
+})->name('dashboard.usuario');
+
+Route::get('/mi-dashboard', function () {
+    return view('dashboard.dashboard');
+})->name('dashboard.main');
+
+Route::get('/mis-cursos', function () {
+    return view('dashboard.mis-cursos');
+})->name('dashboard.mis-cursos');
+
+Route::get('/learning-paths', function () {
+    return view('dashboard.learning-paths');
+})->name('dashboard.learning-paths');
+
+Route::get('/calendario', function () {
+    return view('dashboard.calendario');
+})->name('dashboard.calendario');
+
+Route::get('/certificados', function () {
+    return view('dashboard.certificados');
+})->name('dashboard.certificados');
+
+Route::get('/progreso', function () {
+    return view('dashboard.progreso');
+})->name('dashboard.progreso');
 
 
 // ACCIONES
