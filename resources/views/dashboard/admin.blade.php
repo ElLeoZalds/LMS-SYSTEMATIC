@@ -1,75 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Systematic - Panel Administrativo</title>
+@section('title', 'Dashboard Administrador')
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-
-        .sidebar {
-            height: 100vh;
-            background: #fff;
-            border-right: 1px solid #ddd;
-            position: sticky;
-            top: 0;
-        }
-
-        .nav-link {
-            color: #555;
-            padding: 12px;
-            border-radius: 10px;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            background: #e7f1ff;
-            color: #0d6efd;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-5px);
-            transition: 0.3s;
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- NAVBAR -->
-    <nav class="navbar bg-white shadow-sm px-4">
-        <h5 class="fw-bold">Panel Docente</h5>
-
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-primary">
-                <i class="fa fa-plus"></i> Nuevo Curso
-            </button>
-            <i class="fa fa-bell fa-lg"></i>
-            <img src="https://i.pravatar.cc/40" class="rounded-circle">
-        </div>
-    </nav>
-
-    <div class="d-flex">
-
-        <!-- SIDEBAR -->
-        <div class="sidebar p-3" style="width:250px;">
-            <ul class="nav flex-column">
-                <li><a href="#" class="nav-link active"><i class="fa fa-home"></i> Capacitaciones</a></li>
-                <li><a href="#" class="nav-link"><i class="fa fa-book"></i> Especialidades</a></li>
-                <li><a href="#" class="nav-link"><i class="fa fa-users"></i> Matriculas</a></li>
-                <li><a href="#" class="nav-link"><i class="fa fa-tasks"></i> Usuarios</a></li>
-                <li><a href="#" class="nav-link"><i class="fa fa-chart-bar"></i> Roles de usuario</a></li>
-            </ul>
-        </div>
+@section('content')
 
         <!-- CONTENIDO -->
         <div class="p-4 w-100">
@@ -171,8 +104,4 @@
 
         </div>
 
-    </div>
-
-</body>
-
-</html>
+@endsection
