@@ -43,13 +43,13 @@
         </thead>
         <tbody>
             @foreach($courses as $course)
-            <tr>
-                <td>{{ $course->idcurso }}</td>
-                <td>{{ $course->titulo }}</td>
-                <td>{{ $course->descripcion }}</td>
-                <td>{{ $course->cantidadhoras }}</td>
-                <td>S/ {{ $course->precioreferencial }}</td>
-            </tr>
+                <tr>
+                    <td>{{ $course->idcurso }}</td>
+                    <td>{{ $course->titulo }}</td>
+                    <td>{{ $course->descripcion }}</td>
+                    <td>{{ $course->cantidadhoras }}</td>
+                    <td>S/ {{ $course->precioreferencial }}</td>
+                </tr>
             @endforeach
         </tbody>
     </table>

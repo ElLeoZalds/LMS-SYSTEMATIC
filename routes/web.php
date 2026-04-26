@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\Course;
 use App\Http\Controllers\ExplorecoursesController;
 use App\Http\Controllers\SpecialtyController;
@@ -56,6 +58,8 @@ Route::post('/cursos', [ExplorecoursesController::class, 'store'])->name('cursos
 Route::get('/cursos/{id}/edit', [ExplorecoursesController::class, 'edit'])->name('cursos.edit');
 Route::put('/cursos/{id}', [ExplorecoursesController::class, 'update'])->name('cursos.update');
 Route::delete('/cursos/{id}', [ExplorecoursesController::class, 'destroy'])->name('cursos.destroy');
+Route::get('/cursos/{id}/matriculas', [ExplorecoursesController::class, 'matriculas'])->name('cursos.matriculas');
+Route::post('/cursos/{id}/matriculas', [ExplorecoursesController::class, 'storeMatricula'])->name('cursos.matriculas.store');
 
 // REPORTE (ruta separada)
 Route::get('/cursos/reporte', [ExplorecoursesController::class, 'reporte'])
@@ -106,8 +110,90 @@ Route::get('/learning-paths', function () {
     return view('dashboard.learning-paths');
 })->name('dashboard.learning-paths');
 
-Route::get('/calendario', function () {
-    return view('dashboard.calendario');
+Route::get('/calendario', function (Request $request) {
+    $viewMode = $request->query('view', 'week');
+    $selectedDate = Carbon::parse($request->query('date', now()));
+    $today = Carbon::now();
+
+    $weekStart = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
+    $weekEnd = $selectedDate->copy()->endOfWeek(Carbon::SUNDAY);
+    $monthStart = $selectedDate->copy()->startOfMonth();
+    $monthEnd = $selectedDate->copy()->endOfMonth();
+
+    if ($viewMode === 'month') {
+        $calendarStart = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
+        $calendarEnd = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
+    } else {
+        $calendarStart = $weekStart;
+        $calendarEnd = $weekEnd;
+    }
+
+    $rawEvents = DB::table('horarios')
+        ->join('capacitaciones', 'horarios.idcapacitacion', '=', 'capacitaciones.idcapacitacion')
+        ->join('cursos', 'capacitaciones.idcurso', '=', 'cursos.idcurso')
+        ->whereBetween('fecha', [$calendarStart->toDateString(), $calendarEnd->toDateString()])
+        ->select('horarios.*', 'cursos.titulo as curso', 'capacitaciones.modalidad')
+        ->orderBy('fecha')
+        ->orderBy('inicio')
+        ->get();
+
+    $eventsByDate = [];
+    foreach ($rawEvents as $event) {
+        $eventsByDate[$event->fecha][] = $event;
+    }
+
+    $calendarDays = [];
+    for ($date = $calendarStart->copy(); $date->lte($calendarEnd); $date->addDay()) {
+        $calendarDays[] = [
+            'date' => $date->copy(),
+            'events' => $eventsByDate[$date->toDateString()] ?? [],
+            'currentMonth' => $date->month === $selectedDate->month,
+        ];
+    }
+
+    $calendarWeeks = array_chunk($calendarDays, 7);
+
+    $classesThisWeek = DB::table('horarios')
+        ->whereBetween('fecha', [$today->copy()->startOfWeek(Carbon::MONDAY)->toDateString(), $today->copy()->endOfWeek(Carbon::SUNDAY)->toDateString()])
+        ->count();
+
+    $tasksPending = DB::table('evaluaciones')
+        ->where('activo', true)
+        ->whereBetween('fechafin', [$today->toDateString(), $today->copy()->addDays(7)->toDateString()])
+        ->count();
+
+    $upcomingTasks = DB::table('evaluaciones')
+        ->join('capacitaciones', 'evaluaciones.idcapacitacion', '=', 'capacitaciones.idcapacitacion')
+        ->join('cursos', 'capacitaciones.idcurso', '=', 'cursos.idcurso')
+        ->where('evaluaciones.activo', true)
+        ->whereBetween('evaluaciones.fechafin', [$today->toDateString(), $today->copy()->addDays(14)->toDateString()])
+        ->select('evaluaciones.titulo', 'cursos.titulo as curso', 'evaluaciones.fechafin')
+        ->orderBy('evaluaciones.fechafin')
+        ->limit(5)
+        ->get();
+
+    $prevDate = $viewMode === 'month'
+        ? $selectedDate->copy()->subMonth()->format('Y-m-d')
+        : $selectedDate->copy()->subWeek()->format('Y-m-d');
+
+    $nextDate = $viewMode === 'month'
+        ? $selectedDate->copy()->addMonth()->format('Y-m-d')
+        : $selectedDate->copy()->addWeek()->format('Y-m-d');
+
+    return view('dashboard.calendario', compact(
+        'viewMode',
+        'selectedDate',
+        'weekStart',
+        'weekEnd',
+        'monthStart',
+        'monthEnd',
+        'calendarWeeks',
+        'classesThisWeek',
+        'tasksPending',
+        'upcomingTasks',
+        'prevDate',
+        'nextDate'
+    ));
 })->name('dashboard.calendario');
 
 Route::get('/certificados', function () {

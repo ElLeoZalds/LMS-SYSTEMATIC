@@ -15,23 +15,35 @@
 
     @include('components.navbar')
 
-    <div class="container-fluid" style="padding-top: 76px;">
-        <div class="row">
-
-            <!-- SIDEBAR -->
-            @if(!View::hasSection('noSidebar'))
-                <div class="col-lg-2 d-none d-lg-block">
-                    @include('components.sidebar')
-                </div>
-            @endif
-
-            <!-- CONTENIDO -->
-            <div class="@if(View::hasSection('noSidebar')) col-12 @else col-12 col-lg-10 @endif p-4">
-                @yield('content')
-            </div>
-
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">Menú</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            @include('components.sidebar')
         </div>
     </div>
+
+    <main class="main-layout">
+        <div class="container-fluid px-0 px-lg-4" style="padding-top: 96px;">
+            <div class="row g-0">
+
+                @if(!View::hasSection('noSidebar'))
+                    <aside class="col-lg-2 d-none d-lg-block pe-lg-4">
+                        <div class="sidebar d-flex flex-column h-100">
+                            @include('components.sidebar')
+                        </div>
+                    </aside>
+                @endif
+
+                <section class="@if(View::hasSection('noSidebar')) col-12 @else col-12 col-lg-10 @endif p-4">
+                    @yield('content')
+                </section>
+
+            </div>
+        </div>
+    </main>
 
     @include('components.footer')
 

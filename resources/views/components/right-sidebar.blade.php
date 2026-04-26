@@ -1,6 +1,8 @@
-<div class="right-sidebar d-none d-xl-flex flex-column p-4 bg-white border-start" style="width: 300px; height: calc(100vh - 76px); overflow-y: auto;">
+<div class="right-sidebar d-none d-xl-flex flex-column p-4 bg-white border-start"
+    style="width: 300px; height: calc(100vh - 76px); overflow-y: auto;">
     <div class="text-center mb-4">
-        <img src="{{ asset('images/undraw_profile_2.svg') }}" alt="Usuario" class="rounded-circle mb-3" width="110" height="110">
+        <img src="{{ asset('images/undraw_profile_2.svg') }}" alt="Usuario" class="rounded-circle mb-3" width="110"
+            height="110">
         <h5 class="fw-bold">Usuario</h5>
         <p class="text-muted">Estudiante • 7 cursos activos</p>
     </div>
