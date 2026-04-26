@@ -48,22 +48,22 @@ Route::get('/dashboard/admin/specialty', [SpecialtyController::class, 'index'])
 Route::get('/dashboard/admin/user', [UsuarioController::class, 'index'])
     ->name('modulos.usuarios');
 
-Route::get('/explorar-cursos', [ExplorecoursesController::class, 'index'])
+Route::get('/explore-courses', [ExplorecoursesController::class, 'index'])
     ->name('explore-courses.dashboard');
 
-// Rutas CRUD Cursos
-Route::get('/cursos', [ExplorecoursesController::class, 'index'])->name('cursos.index');
-Route::get('/cursos/create', [ExplorecoursesController::class, 'create'])->name('cursos.create');
-Route::post('/cursos', [ExplorecoursesController::class, 'store'])->name('cursos.store');
-Route::get('/cursos/{id}/edit', [ExplorecoursesController::class, 'edit'])->name('cursos.edit');
-Route::put('/cursos/{id}', [ExplorecoursesController::class, 'update'])->name('cursos.update');
-Route::delete('/cursos/{id}', [ExplorecoursesController::class, 'destroy'])->name('cursos.destroy');
-Route::get('/cursos/{id}/matriculas', [ExplorecoursesController::class, 'matriculas'])->name('cursos.matriculas');
-Route::post('/cursos/{id}/matriculas', [ExplorecoursesController::class, 'storeMatricula'])->name('cursos.matriculas.store');
+// Courses CRUD routes
+Route::get('/courses', [ExplorecoursesController::class, 'index'])->name('courses.index');
+Route::get('/courses/create', [ExplorecoursesController::class, 'create'])->name('courses.create');
+Route::post('/courses', [ExplorecoursesController::class, 'store'])->name('courses.store');
+Route::get('/courses/{id}/edit', [ExplorecoursesController::class, 'edit'])->name('courses.edit');
+Route::put('/courses/{id}', [ExplorecoursesController::class, 'update'])->name('courses.update');
+Route::delete('/courses/{id}', [ExplorecoursesController::class, 'destroy'])->name('courses.destroy');
+Route::get('/courses/{id}/enrollments', [ExplorecoursesController::class, 'matriculas'])->name('courses.enrollments');
+Route::post('/courses/{id}/enrollments', [ExplorecoursesController::class, 'storeMatricula'])->name('courses.enrollments.store');
 
-// REPORTE (ruta separada)
-Route::get('/cursos/reporte', [ExplorecoursesController::class, 'reporte'])
-    ->name('cursos.reporte');
+// REPORT (separate route)
+Route::get('/courses/report', [ExplorecoursesController::class, 'reporte'])
+    ->name('courses.report');
 
 // Rutas CRUD Especialidades
 Route::get('/especialidades', [SpecialtyController::class, 'index'])->name('especialidades.index');
@@ -93,24 +93,24 @@ Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy'])->name('us
 Route::get('/reportes/cursos', [ReportController::class, 'coursesPdf'])->name('reportes.cursos');
 Route::get('/reportes/especialidades', [ReportController::class, 'specialtiesPdf'])->name('reportes.especialidades');
 
-// Rutas Sidebar
-Route::get('/usuario', function () {
-    return view('dashboard.usuario');
-})->name('dashboard.usuario');
+// Sidebar routes
+Route::get('/user', function () {
+    return view('dashboard.user');
+})->name('dashboard.user');
 
-Route::get('/mi-dashboard', function () {
+Route::get('/dashboard/home', function () {
     return view('dashboard.dashboard');
 })->name('dashboard.main');
 
-Route::get('/mis-cursos', function () {
-    return view('dashboard.mis-cursos');
-})->name('dashboard.mis-cursos');
+Route::get('/my-courses', function () {
+    return view('dashboard.my-courses');
+})->name('dashboard.my-courses');
 
 Route::get('/learning-paths', function () {
     return view('dashboard.learning-paths');
 })->name('dashboard.learning-paths');
 
-Route::get('/calendario', function (Request $request) {
+Route::get('/calendar', function (Request $request) {
     $viewMode = $request->query('view', 'week');
     $selectedDate = Carbon::parse($request->query('date', now()));
     $today = Carbon::now();
@@ -180,7 +180,7 @@ Route::get('/calendario', function (Request $request) {
         ? $selectedDate->copy()->addMonth()->format('Y-m-d')
         : $selectedDate->copy()->addWeek()->format('Y-m-d');
 
-    return view('dashboard.calendario', compact(
+    return view('dashboard.calendar', compact(
         'viewMode',
         'selectedDate',
         'weekStart',
@@ -194,15 +194,15 @@ Route::get('/calendario', function (Request $request) {
         'prevDate',
         'nextDate'
     ));
-})->name('dashboard.calendario');
+})->name('dashboard.calendar');
 
-Route::get('/certificados', function () {
-    return view('dashboard.certificados');
-})->name('dashboard.certificados');
+Route::get('/certificates', function () {
+    return view('dashboard.certificates');
+})->name('dashboard.certificates');
 
-Route::get('/progreso', function () {
-    return view('dashboard.progreso');
-})->name('dashboard.progreso');
+Route::get('/progress', function () {
+    return view('dashboard.progress');
+})->name('dashboard.progress');
 
 
 // ACCIONES

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Cursos</title>
+    <title>Courses Report</title>
 </head>
 
 <body>
@@ -29,16 +29,16 @@
         }
     </style>
 
-    <h2>Reporte General de Cursos</h2>
+    <h2>Courses Report</h2>
 
     <table>
         <thead>
             <tr>
                 <th>#</th>
-                <th>Título</th>
-                <th>Descripción</th>
-                <th>Horas</th>
-                <th>Precio</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Hours</th>
+                <th>Price</th>
             </tr>
         </thead>
         <tbody>

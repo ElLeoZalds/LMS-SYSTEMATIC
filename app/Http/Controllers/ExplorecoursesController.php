@@ -33,7 +33,7 @@ class ExplorecoursesController extends Controller
             'pathbanner' => 'nullable|string',
         ]);
         Course::create($validated);
-        return redirect()->route('cursos.index')->with('success', 'Curso creado correctamente');
+        return redirect()->route('courses.index')->with('success', 'Curso creado correctamente');
     }
 
     public function edit($id)
@@ -55,14 +55,14 @@ class ExplorecoursesController extends Controller
         ]);
         $course = Course::findOrFail($id);
         $course->update($validated);
-        return redirect()->route('cursos.index')->with('success', 'Curso actualizado correctamente');
+        return redirect()->route('courses.index')->with('success', 'Curso actualizado correctamente');
     }
 
     public function destroy($id)
     {
         $course = Course::findOrFail($id);
         $course->delete();
-        return redirect()->route('cursos.index')->with('success', 'Curso eliminado correctamente');
+        return redirect()->route('courses.index')->with('success', 'Curso eliminado correctamente');
     }
 
     public function matriculas($id)
@@ -127,7 +127,7 @@ class ExplorecoursesController extends Controller
             'estado' => 'A',
         ]);
 
-        return redirect()->route('cursos.matriculas', $course->idcurso)->with('success', 'Estudiante agregado al curso correctamente.');
+        return redirect()->route('courses.enrollments', $course->idcurso)->with('success', 'Estudiante agregado al curso correctamente.');
     }
 
     public function reporte()
@@ -135,7 +135,7 @@ class ExplorecoursesController extends Controller
         $courses = Course::all();
 
         // Renderizar vista Blade a HTML
-        $html = view('dashboard.courses.reporte', compact('courses'))->render();
+        $html = view('dashboard.courses.report', compact('courses'))->render();
 
         $html2pdf = new Html2Pdf();
         $html2pdf->writeHTML($html);

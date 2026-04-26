@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Agregar estudiante al curso')
+@section('title', 'Enroll Student')
 
 @section('content')
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2>Inscribir estudiante en el curso</h2>
-                <p class="text-muted mb-0">Curso: <strong>{{ $course->titulo }}</strong></p>
+                <h2>Enroll Student in Course</h2>
+                <p class="text-muted mb-0">Course: <strong>{{ $course->titulo }}</strong></p>
             </div>
-            <a href="{{ route('cursos.index') }}" class="btn btn-secondary">Volver al listado de cursos</a>
+            <a href="{{ route('courses.index') }}" class="btn btn-secondary">Back to courses</a>
         </div>
 
         @if(session('success'))
@@ -32,19 +32,19 @@
             <div class="col-lg-6 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Agregar estudiante</h5>
+                        <h5 class="card-title mb-3">Add Student</h5>
                         @if($capacitaciones->isEmpty())
                             <div class="alert alert-warning">
                                 No hay capacitaciones creadas para este curso. Crea primero una capacitación para poder
                                 inscribir estudiantes.
                             </div>
                         @else
-                            <form action="{{ route('cursos.matriculas.store', $course->idcurso) }}" method="POST">
+                            <form action="{{ route('courses.enrollments.store', $course->idcurso) }}" method="POST">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="idcapacitacion" class="form-label">Capacitación</label>
                                     <select name="idcapacitacion" id="idcapacitacion" class="form-select" required>
-                                        <option value="">Selecciona una capacitación</option>
+                                        <option value="">Select a training session</option>
                                         @foreach($capacitaciones as $capacitacion)
                                             <option value="{{ $capacitacion->idcapacitacion }}">
                                                 #{{ $capacitacion->idcapacitacion }} · {{ $capacitacion->modalidad }}
@@ -53,9 +53,9 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="idalumno" class="form-label">Estudiante</label>
+                                    <label for="idalumno" class="form-label">Student</label>
                                     <select name="idalumno" id="idalumno" class="form-select" required>
-                                        <option value="">Selecciona un estudiante</option>
+                                        <option value="">Select a student</option>
                                         @foreach($students as $student)
                                             <option value="{{ $student->idusuario }}">
                                                 {{ $student->nombres }} {{ $student->apellidos }} ({{ $student->username }})
@@ -63,7 +63,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Inscribir estudiante</button>
+                                <button type="submit" class="btn btn-primary">Enroll student</button>
                             </form>
                         @endif
                     </div>
@@ -73,9 +73,9 @@
             <div class="col-lg-6 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Estudiantes inscritos</h5>
+                        <h5 class="card-title mb-3">Enrolled students</h5>
                         @if($enrollments->isEmpty())
-                            <p class="text-muted">Aún no hay estudiantes matriculados en este curso.</p>
+                            <p class="text-muted">There are no students enrolled in this course yet.</p>
                         @else
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered mb-0">
