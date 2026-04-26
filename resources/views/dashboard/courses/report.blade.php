@@ -4,34 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Courses Report</title>
+    <link rel="stylesheet" href="{{ asset('css/reports.css') }}">
 </head>
 
-<body>
+<body class="report report-summary">
 
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
+    <h2 class="report-title">Courses Report</h2>
 
-        th {
-            background-color: #000000;
-            color: #ffffff;
-            padding: 8px;
-            text-align: center;
-        }
-
-        td {
-            border: 1px solid #ddd;
-            padding: 6px;
-            text-align: center;
-        }
-    </style>
-
-    <h2>Courses Report</h2>
-
-    <table>
+    <table class="report-table report-summary centered">
         <thead>
             <tr>
                 <th>#</th>

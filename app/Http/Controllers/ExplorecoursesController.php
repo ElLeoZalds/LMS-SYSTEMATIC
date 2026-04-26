@@ -13,13 +13,8 @@ class ExplorecoursesController extends Controller
     public function index()
     {
         $courses = Course::all();
-        return view('dashboard.courses.index', compact('courses'));
-    }
-
-    public function create()
-    {
         $especialidades = Especialidad::all();
-        return view('dashboard.courses.create', compact('especialidades'));
+        return view('dashboard.courses.index', compact('courses', 'especialidades'));
     }
 
     public function store(Request $request)
@@ -34,13 +29,6 @@ class ExplorecoursesController extends Controller
         ]);
         Course::create($validated);
         return redirect()->route('courses.index')->with('success', 'Curso creado correctamente');
-    }
-
-    public function edit($id)
-    {
-        $course = Course::findOrFail($id);
-        $especialidades = Especialidad::all();
-        return view('dashboard.courses.edit', compact('course', 'especialidades'));
     }
 
     public function update(Request $request, $id)

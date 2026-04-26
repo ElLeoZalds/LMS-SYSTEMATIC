@@ -3,24 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Reporte de Especialidades</title>
-    <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; }
-        h1 { text-align: center; color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #2196F3; color: white; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        .header { margin-bottom: 20px; }
-        .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #666; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/reports.css') }}">
 </head>
-<body>
+<body class="report report-specialties">
     <div class="header">
         <h1>Reporte de Especialidades</h1>
         <p>Fecha de generación: {{ date('d/m/Y H:i:s') }}</p>
     </div>
 
-    <table>
+    <table class="report-table report-specialties left-aligned">
         <thead>
             <tr>
                 <th>ID</th>

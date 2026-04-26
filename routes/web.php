@@ -53,9 +53,7 @@ Route::get('/explore-courses', [ExplorecoursesController::class, 'index'])
 
 // Courses CRUD routes
 Route::get('/courses', [ExplorecoursesController::class, 'index'])->name('courses.index');
-Route::get('/courses/create', [ExplorecoursesController::class, 'create'])->name('courses.create');
 Route::post('/courses', [ExplorecoursesController::class, 'store'])->name('courses.store');
-Route::get('/courses/{id}/edit', [ExplorecoursesController::class, 'edit'])->name('courses.edit');
 Route::put('/courses/{id}', [ExplorecoursesController::class, 'update'])->name('courses.update');
 Route::delete('/courses/{id}', [ExplorecoursesController::class, 'destroy'])->name('courses.destroy');
 Route::get('/courses/{id}/enrollments', [ExplorecoursesController::class, 'matriculas'])->name('courses.enrollments');

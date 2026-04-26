@@ -1,0 +1,64 @@
+body.report {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.report-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.report-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.report-table th,
+.report-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.report-table.centered th,
+.report-table.centered td {
+    text-align: center;
+}
+
+.report-table.left-aligned th,
+.report-table.left-aligned td {
+    text-align: left;
+}
+
+.report-table.report-summary th {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.report-table.report-specialties th {
+    background-color: #2196f3;
+    color: #ffffff;
+}
+
+.report-table.report-courses th {
+    background-color: #4caf50;
+    color: #ffffff;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+}

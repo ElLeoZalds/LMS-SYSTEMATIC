@@ -3,58 +3,6 @@
 @section('title', 'Calendar')
 
 @section('content')
-    <style>
-        .calendar-table {
-            table-layout: fixed;
-            width: 100%;
-        }
-
-        .calendar-table th,
-        .calendar-table td {
-            min-width: 120px;
-            min-height: 180px;
-            vertical-align: top;
-            padding: 0.75rem;
-        }
-
-        .calendar-cell {
-            position: relative;
-            height: 100%;
-        }
-
-        .calendar-cell-number {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .calendar-cell-empty {
-            min-height: 160px;
-        }
-
-        .calendar-event {
-            display: block;
-            margin-bottom: 0.6rem;
-            text-align: left;
-            padding: 0.8rem;
-            border-radius: 0.8rem;
-        }
-
-        .calendar-event .event-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-        }
-
-        .calendar-event .event-meta {
-            font-size: 0.82rem;
-        }
-
-        .calendar-day-muted {
-            opacity: 0.65;
-        }
-    </style>
 
     <div class="container-fluid mt-4">
         <div class="row gy-4">
