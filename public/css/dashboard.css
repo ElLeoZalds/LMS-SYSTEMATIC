@@ -8,6 +8,13 @@
     --text: #363f4d;
 }
 
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
 body {
     font-family:
         "Segoe UI",
@@ -16,7 +23,6 @@ body {
         sans-serif;
     background-color: var(--surface-muted);
     color: var(--text);
-    min-height: 100vh;
 }
 
 .navbar.fixed-top {
@@ -33,13 +39,13 @@ body {
 }
 
 .sidebar {
-    height: calc(100vh - 96px);
+    min-height: calc(100vh - 96px);
     overflow-y: auto;
     background: var(--surface);
     border-right: 1px solid #dee2e6;
     position: sticky;
     top: 96px;
-    border-radius: 1rem;
+    border-radius: 0;
 }
 
 .sidebar-content {

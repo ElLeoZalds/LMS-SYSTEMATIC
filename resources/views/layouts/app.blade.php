@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard')</title>
+    <title>@yield('title', 'Panel')</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -26,11 +26,11 @@
     </div>
 
     <main class="main-layout">
-        <div class="container-fluid px-0 px-lg-4" style="padding-top: 96px;">
+        <div class="container-fluid px-0" style="padding-top: 96px;">
             <div class="row g-0">
 
                 @if(!View::hasSection('noSidebar'))
-                    <aside class="col-lg-2 d-none d-lg-block pe-lg-4">
+                    <aside class="col-lg-2 d-none d-lg-block pe-lg-0">
                         <div class="sidebar d-flex flex-column h-100">
                             @include('components.sidebar')
                         </div>

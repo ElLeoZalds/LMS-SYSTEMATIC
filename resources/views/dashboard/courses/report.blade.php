@@ -3,22 +3,22 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Courses Report</title>
+    <title>Reporte de cursos</title>
     <link rel="stylesheet" href="{{ asset('css/reports.css') }}">
 </head>
 
 <body class="report report-summary">
 
-    <h2 class="report-title">Courses Report</h2>
+    <h2 class="report-title">Reporte de cursos</h2>
 
     <table class="report-table report-summary centered">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Hours</th>
-                <th>Price</th>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Horas</th>
+                <th>Precio</th>
             </tr>
         </thead>
         <tbody>

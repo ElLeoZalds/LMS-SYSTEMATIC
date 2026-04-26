@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'My Courses')
+@section('title', 'Mis cursos')
 
 @section('content')
 <div class="container mt-4">
-    <h2>My Courses</h2>
-    <p class="text-muted">View all the courses you are enrolled in here.</p>
+    <h2>Mis cursos</h2>
+    <p class="text-muted">Revisa todos los cursos en los que estás inscrito aquí.</p>
     <!-- Contenido de mis cursos -->
 </div>
 @endsection
