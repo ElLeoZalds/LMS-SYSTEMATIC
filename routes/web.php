@@ -9,6 +9,7 @@ use App\Http\Controllers\ExplorecoursesController;
 use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\DashboardController;
 
 // LOGIN
 Route::get('/', function () {
@@ -28,19 +29,13 @@ Route::post('/login', function (Request $request) {
 });
 
 // DASHBOARDS
-Route::get('/dashboard/student', function () {
-    return view('dashboard.student');
-});
+Route::get('/dashboard/student', [DashboardController::class, 'student'])->name('dashboard.student');
 
 //Profesores
-Route::get('/dashboard/teacher', function () {
-    return view('dashboard.teacher');
-})->name('dashboard.teacher');
+Route::get('/dashboard/teacher', [DashboardController::class, 'teacher'])->name('dashboard.teacher');
 
 //Administradores
-Route::get('/dashboard/admin', function () {
-    return view('dashboard.admin');
-})->name('dashboard.admin');
+Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
 
 Route::get('/dashboard/admin/specialty', [SpecialtyController::class, 'index'])
     ->name('modulos.specialtyActions');
@@ -92,21 +87,13 @@ Route::get('/reportes/cursos', [ReportController::class, 'coursesPdf'])->name('r
 Route::get('/reportes/especialidades', [ReportController::class, 'specialtiesPdf'])->name('reportes.especialidades');
 
 // Sidebar routes
-Route::get('/user', function () {
-    return view('dashboard.user');
-})->name('dashboard.user');
+Route::get('/user', [DashboardController::class, 'user'])->name('dashboard.user');
 
-Route::get('/dashboard/home', function () {
-    return view('dashboard.dashboard');
-})->name('dashboard.main');
+Route::get('/dashboard/home', [DashboardController::class, 'main'])->name('dashboard.main');
 
-Route::get('/my-courses', function () {
-    return view('dashboard.my-courses');
-})->name('dashboard.my-courses');
+Route::get('/my-courses', [DashboardController::class, 'myCourses'])->name('dashboard.my-courses');
 
-Route::get('/learning-paths', function () {
-    return view('dashboard.learning-paths');
-})->name('dashboard.learning-paths');
+Route::get('/learning-paths', [DashboardController::class, 'learningPaths'])->name('dashboard.learning-paths');
 
 Route::get('/calendar', function (Request $request) {
     $viewMode = $request->query('view', 'week');
@@ -194,13 +181,11 @@ Route::get('/calendar', function (Request $request) {
     ));
 })->name('dashboard.calendar');
 
-Route::get('/certificates', function () {
-    return view('dashboard.certificates');
-})->name('dashboard.certificates');
+Route::get('/certificates', [DashboardController::class, 'certificates'])
+    ->name('dashboard.certificates');
 
-Route::get('/progress', function () {
-    return view('dashboard.progress');
-})->name('dashboard.progress');
+Route::get('/progress', [DashboardController::class, 'progress'])
+    ->name('dashboard.progress');
 
 
 // ACCIONES

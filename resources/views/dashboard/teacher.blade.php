@@ -4,85 +4,99 @@
 
 @section('content')
 <div class="container-fluid mt-4">
-    <div class="p-4 bg-white rounded-4 shadow-sm">
-        <div class="row mb-4">
-            <div class="col-md-3 mb-3 mb-md-0">
-                <div class="card p-3 text-center card-hover h-100">
-                    <h6>Cursos totales</h6>
-                    <h3>5</h3>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3 mb-md-0">
-                <div class="card p-3 text-center card-hover h-100">
-                    <h6>Estudiantes</h6>
-                    <h3>10</h3>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3 mb-md-0">
-                <div class="card p-3 text-center card-hover h-100">
-                    <h6>Tareas pendientes</h6>
-                    <h3>8</h3>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card p-3 text-center card-hover h-100">
-                    <h6>Progreso promedio</h6>
-                    <h3>74%</h3>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Panel Docente</h2>
+            <p class="text-muted mb-0">Gestiona tus cursos, alumnos y próximas clases desde un solo lugar.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ route('dashboard.calendar') }}" class="btn btn-outline-primary btn-sm">Ver calendario</a>
+            <a href="{{ route('dashboard.admin') }}" class="btn btn-primary btn-sm">Estadísticas</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card section-card h-100 text-center">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted mb-2">Capacitaciones</h6>
+                    <h3 class="mb-0">{{ $courseCount }}</h3>
                 </div>
             </div>
         </div>
-
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
-            <h5 class="mb-0">Mis cursos</h5>
-            <a href="#" class="text-decoration-none">Ver todo</a>
+        <div class="col-md-3">
+            <div class="card section-card h-100 text-center">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted mb-2">Estudiantes</h6>
+                    <h3 class="mb-0">{{ $studentsCount }}</h3>
+                </div>
+            </div>
         </div>
+        <div class="col-md-3">
+            <div class="card section-card h-100 text-center">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted mb-2">Tareas activas</h6>
+                    <h3 class="mb-0">{{ $pendingTasks }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card section-card h-100 text-center">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted mb-2">Progreso medio</h6>
+                    <h3 class="mb-0">{{ $averageProgress }}%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div class="row gy-4">
-            <div class="col-md-6">
-                <div class="card card-hover h-100">
-                    <img src="" class="card-img-top" alt="Curso avanzado de React">
-                    <div class="card-body">
-                        <h6>Curso avanzado de React</h6>
-                        <p class="text-muted small">35 estudiantes</p>
-
-                        <div class="progress mb-2">
-                            <div class="progress-bar" style="width: 60%"></div>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-sm btn-outline-primary">Editar</button>
-                            <button class="btn btn-sm btn-outline-success">Ver</button>
-                        </div>
+    <div class="row g-4">
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Clases próximas</h5>
+                        <a href="{{ route('dashboard.calendar') }}" class="text-decoration-none">Ver calendario</a>
                     </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card card-hover h-100">
-                    <img src="" class="card-img-top" alt="Python para Data Science">
-                    <div class="card-body">
-                        <h6>Python para Data Science</h6>
-                        <p class="text-muted small">50 estudiantes</p>
-
-                        <div class="progress mb-2">
-                            <div class="progress-bar" style="width: 80%"></div>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-sm btn-outline-primary">Editar</button>
-                            <button class="btn btn-sm btn-outline-success">Ver</button>
-                        </div>
-                    </div>
+                    <ul class="list-group list-group-flush">
+                        @forelse($upcomingClasses as $session)
+                            <li class="list-group-item py-3">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>{{ $session->titulo }}</strong>
+                                        <p class="mb-0 text-muted small">{{ $session->fecha }} • {{ $session->modalidad }}</p>
+                                    </div>
+                                    <span class="badge bg-primary align-self-center">{{ $session->inicio }}</span>
+                                </div>
+                            </li>
+                        @empty
+                            <li class="list-group-item text-muted">No hay clases próximas programadas.</li>
+                        @endforelse
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <div class="mt-5">
-            <h5>Actividad reciente</h5>
-            <ul class="list-group">
-                <li class="list-group-item">Juan entregó una tarea en "Curso avanzado de React"</li>
-                <li class="list-group-item">Nuevo estudiante inscrito en "Python para Data Science"</li>
-            </ul>
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Cursos con más estudiantes</h5>
+                        <a href="#" class="text-decoration-none">Ver todo</a>
+                    </div>
+                    @foreach($topCourses as $course)
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>{{ $course->titulo }}</div>
+                                <span class="badge bg-secondary">{{ $course->inscritos }}</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ min(100, $course->inscritos * 2) }}%;"></div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
     </div>
 </div>

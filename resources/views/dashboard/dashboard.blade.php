@@ -22,9 +22,9 @@
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
                                 <h6 class="text-uppercase text-muted mb-2">Cursos activos</h6>
-                                <h3 class="mb-0">8</h3>
+                                <h3 class="mb-0">{{ $totalCourses }}</h3>
                             </div>
-                            <div class="info-badge">Nivel 2</div>
+                            <div class="info-badge">Actual</div>
                         </div>
                         <p class="text-muted mb-0">Continúa con tus cursos actuales y revisa los nuevos recursos disponibles.</p>
                     </div>
@@ -35,12 +35,12 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
-                                <h6 class="text-uppercase text-muted mb-2">Próxima clase</h6>
-                                <h3 class="mb-0">Mañana</h3>
+                                <h6 class="text-uppercase text-muted mb-2">Próxima evaluación</h6>
+                                <h3 class="mb-0">{{ $upcomingEvaluations->first()->curso ?? 'Sin eventos' }}</h3>
                             </div>
-                            <div class="info-badge">09:00</div>
+                            <div class="info-badge">{{ optional($upcomingEvaluations->first())->fechafin ?? 'N/A' }}</div>
                         </div>
-                        <p class="text-muted mb-0">Revisa tu calendario para las clases y tareas programadas.</p>
+                        <p class="text-muted mb-0">Revisa las fechas de entrega y evalúa tu progreso.</p>
                     </div>
                 </div>
             </div>
@@ -50,15 +50,15 @@
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
                                 <h6 class="text-uppercase text-muted mb-2">Progreso</h6>
-                                <h3 class="mb-0">64%</h3>
+                                <h3 class="mb-0">{{ $activityProgress }}%</h3>
                             </div>
                             <div class="info-badge">En curso</div>
                         </div>
                         <div class="progress rounded-pill mb-2">
-                            <div class="progress-bar bg-primary rounded-pill" role="progressbar" style="width: 64%;"
-                                aria-valuenow="64" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-primary rounded-pill" role="progressbar"
+                                style="width: {{ $activityProgress }}%;" aria-valuenow="{{ $activityProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        <p class="text-muted mb-0">Estás avanzando muy bien en tus asignaciones.</p>
+                        <p class="text-muted mb-0">Sigue avanzando con tus cursos y tareas pendientes.</p>
                     </div>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
                                 <h6 class="text-uppercase text-muted mb-2">Notificaciones</h6>
-                                <h3 class="mb-0">3 nuevas</h3>
+                                <h3 class="mb-0">{{ $upcomingEvaluations->count() }} nuevas</h3>
                             </div>
                             <div class="info-badge">Reciente</div>
                         </div>
@@ -92,15 +92,31 @@
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <div class="border rounded-3 p-3 h-100 bg-white">
-                                    <h6 class="mb-2">Última clase</h6>
-                                    <p class="mb-0 text-muted">Fundamentos de programación, módulo 3.</p>
+                                    <h6 class="mb-2">Cursos inscritos</h6>
+                                    <p class="mb-0 text-muted">Tienes {{ $activeEnrollments }} inscripciones activas.</p>
                                 </div>
                             </div>
                             <div class="col-12 col-md-6">
                                 <div class="border rounded-3 p-3 h-100 bg-white">
-                                    <h6 class="mb-2">Nueva tarea</h6>
-                                    <p class="mb-0 text-muted">Revisa tu evaluación antes de enviarla.</p>
+                                    <h6 class="mb-2">Evaluaciones próximas</h6>
+                                    <p class="mb-0 text-muted">{{ $upcomingEvaluations->count() }} evaluaciones activas por revisar.</p>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6 class="mb-3">Cursos más populares</h6>
+                            <div class="list-group">
+                                @forelse ($popularCourses as $course)
+                                    <div class="list-group-item list-group-item-action rounded-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>{{ $course->titulo }}</div>
+                                            <span class="badge bg-primary">{{ $course->inscritos }} inscritos</span>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="list-group-item rounded-3 text-muted">No hay cursos populares aún.</div>
+                                @endforelse
                             </div>
                         </div>
                     </div>
@@ -112,12 +128,10 @@
                     <div class="card-body">
                         <h5 class="mb-3">Accesos rápidos</h5>
                         <div class="list-group">
-                            <a href="{{ route('dashboard.calendar') }}"
-                                class="list-group-item list-group-item-action rounded-3">Calendario</a>
-                            <a href="{{ route('dashboard.my-courses') }}"
-                                class="list-group-item list-group-item-action rounded-3">Mis cursos</a>
-                            <a href="#" class="list-group-item list-group-item-action rounded-3">Evaluaciones</a>
-                            <a href="#" class="list-group-item list-group-item-action rounded-3">Certificados</a>
+                            <a href="{{ route('dashboard.calendar') }}" class="list-group-item list-group-item-action rounded-3">Calendario</a>
+                            <a href="{{ route('dashboard.my-courses') }}" class="list-group-item list-group-item-action rounded-3">Mis cursos</a>
+                            <a href="{{ route('dashboard.progress') }}" class="list-group-item list-group-item-action rounded-3">Progreso</a>
+                            <a href="{{ route('dashboard.certificates') }}" class="list-group-item list-group-item-action rounded-3">Certificados</a>
                         </div>
                     </div>
                 </div>
