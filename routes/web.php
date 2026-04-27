@@ -17,12 +17,15 @@ Route::get('/', function () {
 });
 
 Route::post('/login', function (Request $request) {
-
-
-    $role = $request->input('role');
+    $role = $request->input('role', 'student');
+    $request->session()->put('user_role', $role);
 
     if ($role === 'teacher') {
         return redirect('/dashboard/teacher');
+    }
+
+    if ($role === 'admin') {
+        return redirect('/dashboard/admin');
     }
 
     return redirect('/dashboard/student');

@@ -29,6 +29,15 @@
                     <input type="password" name="password" class="form-control" placeholder="********">
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Acceder como</label>
+                    <select name="role" class="form-select">
+                        <option value="student" selected>Estudiante</option>
+                        <option value="teacher">Docente</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+
                 <button type="submit" class="btn btn-primary w-100">
                     Iniciar Sesión
                 </button>
