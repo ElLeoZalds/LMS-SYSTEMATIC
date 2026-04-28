@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Reporte de Cursos</title>
     <link rel="stylesheet" href="{{ asset('css/reports.css') }}">
 </head>
+
 <body class="report report-courses">
     <div class="header">
         <h1>Reporte de Cursos</h1>
@@ -40,4 +42,5 @@
         <p>Sistema LMS - Systematic</p>
     </div>
 </body>
+
 </html>

@@ -60,17 +60,17 @@
                     </div>
                     <ul class="list-group list-group-flush">
                         @forelse($upcomingClasses as $session)
-                            <li class="list-group-item py-3">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <strong>{{ $session->titulo }}</strong>
-                                        <p class="mb-0 text-muted small">{{ $session->fecha }} • {{ $session->modalidad }}</p>
-                                    </div>
-                                    <span class="badge bg-primary align-self-center">{{ $session->inicio }}</span>
+                        <li class="list-group-item py-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ $session->titulo }}</strong>
+                                    <p class="mb-0 text-muted small">{{ $session->fecha }} • {{ $session->modalidad }}</p>
                                 </div>
-                            </li>
+                                <span class="badge bg-primary align-self-center">{{ $session->inicio }}</span>
+                            </div>
+                        </li>
                         @empty
-                            <li class="list-group-item text-muted">No hay clases próximas programadas.</li>
+                        <li class="list-group-item text-muted">No hay clases próximas programadas.</li>
                         @endforelse
                     </ul>
                 </div>
@@ -85,15 +85,15 @@
                         <a href="#" class="text-decoration-none">Ver todo</a>
                     </div>
                     @foreach($topCourses as $course)
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>{{ $course->titulo }}</div>
-                                <span class="badge bg-secondary">{{ $course->inscritos }}</span>
-                            </div>
-                            <div class="progress mt-2" style="height: 8px;">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ min(100, $course->inscritos * 2) }}%;"></div>
-                            </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>{{ $course->titulo }}</div>
+                            <span class="badge bg-secondary">{{ $course->inscritos }}</span>
                         </div>
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ min(100, $course->inscritos * 2) }}%;"></div>
+                        </div>
+                    </div>
                     @endforeach
                 </div>
             </div>

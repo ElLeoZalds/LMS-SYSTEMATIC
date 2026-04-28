@@ -30,11 +30,11 @@
                 <div class="card-body">
                     <h6 class="text-uppercase text-muted mb-2">Próxima clase</h6>
                     @if($nextClass)
-                        <h3 class="mb-0">{{ $nextClass->titulo }}</h3>
-                        <p class="text-muted mb-0">{{ $nextClass->fecha }} · {{ $nextClass->inicio }}</p>
+                    <h3 class="mb-0">{{ $nextClass->titulo }}</h3>
+                    <p class="text-muted mb-0">{{ $nextClass->fecha }} · {{ $nextClass->inicio }}</p>
                     @else
-                        <h3 class="mb-0">Sin clase próxima</h3>
-                        <p class="text-muted mb-0">Revisa el calendario para programar tu próxima sesión.</p>
+                    <h3 class="mb-0">Sin clase próxima</h3>
+                    <p class="text-muted mb-0">Revisa el calendario para programar tu próxima sesión.</p>
                     @endif
                 </div>
             </div>
@@ -57,20 +57,20 @@
 
     <div class="row g-4">
         @forelse ($courses as $course)
-            <div class="col-lg-4 col-md-6">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $course->titulo }}</h5>
-                        <p class="text-muted small mb-3">{{ \Illuminate\Support\Str::limit($course->descripcion, 85) }}</p>
-                        <span class="badge bg-secondary mb-3">{{ $course->modalidad }}</span>
-                        <p class="mb-0"><strong>Inscrito:</strong> {{ $course->fechamatricula }}</p>
-                    </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ $course->titulo }}</h5>
+                    <p class="text-muted small mb-3">{{ \Illuminate\Support\Str::limit($course->descripcion, 85) }}</p>
+                    <span class="badge bg-secondary mb-3">{{ $course->modalidad }}</span>
+                    <p class="mb-0"><strong>Inscrito:</strong> {{ $course->fechamatricula }}</p>
                 </div>
             </div>
+        </div>
         @empty
-            <div class="col-12">
-                <div class="alert alert-light">No hay cursos inscritos en este momento.</div>
-            </div>
+        <div class="col-12">
+            <div class="alert alert-light">No hay cursos inscritos en este momento.</div>
+        </div>
         @endforelse
     </div>
 </div>

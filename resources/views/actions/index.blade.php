@@ -14,7 +14,6 @@
 </div>
 
 <div class="row g-4">
-    <!-- Curso en progreso 1 -->
     <div class="col-lg-4 col-md-6">
         <a href="/curso/python-bootcamp" class="text-decoration-none text-dark">
             <div class="course-card card h-100 rounded-4 overflow-hidden">
@@ -31,7 +30,6 @@
         </a>
     </div>
 
-    <!-- Curso en progreso 2 -->
     <div class="col-lg-4 col-md-6">
         <a href="/curso/javascript-course" class="text-decoration-none text-dark">
             <div class="course-card card h-100 rounded-4 overflow-hidden">

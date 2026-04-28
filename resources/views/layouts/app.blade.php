@@ -30,11 +30,11 @@
             <div class="row g-0">
 
                 @if(!View::hasSection('noSidebar'))
-                    <aside class="col-lg-2 d-none d-lg-block pe-lg-0">
-                        <div class="sidebar d-flex flex-column h-100">
-                            @include('components.sidebar')
-                        </div>
-                    </aside>
+                <aside class="col-lg-2 d-none d-lg-block pe-lg-0">
+                    <div class="sidebar d-flex flex-column h-100">
+                        @include('components.sidebar')
+                    </div>
+                </aside>
                 @endif
 
                 <section class="@if(View::hasSection('noSidebar')) col-12 @else col-12 col-lg-10 @endif p-4">

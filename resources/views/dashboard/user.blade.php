@@ -12,34 +12,34 @@
                     <p class="text-muted">Ver y actualizar tu información de perfil aquí.</p>
 
                     @if($user)
-                        <div class="row mt-4">
-                            <div class="col-md-6 mb-3">
-                                <strong>Nombre completo</strong>
-                                <p class="mb-0">{{ $user->nombres }} {{ $user->apellidos }}</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Usuario</strong>
-                                <p class="mb-0">{{ $user->username }}</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Email</strong>
-                                <p class="mb-0">{{ $user->email ?? 'No registrado' }}</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Teléfono</strong>
-                                <p class="mb-0">{{ $user->telefono ?? 'No registrado' }}</p>
-                            </div>
-                            <div class="col-12 mb-3">
-                                <strong>Dirección</strong>
-                                <p class="mb-0">{{ $user->direccion ?? 'No registrada' }}</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Fecha de creación</strong>
-                                <p class="mb-0">{{ \Carbon\Carbon::parse($user->fechacreacion)->format('d M Y') }}</p>
-                            </div>
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <strong>Nombre completo</strong>
+                            <p class="mb-0">{{ $user->nombres }} {{ $user->apellidos }}</p>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Usuario</strong>
+                            <p class="mb-0">{{ $user->username }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Email</strong>
+                            <p class="mb-0">{{ $user->email ?? 'No registrado' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Teléfono</strong>
+                            <p class="mb-0">{{ $user->telefono ?? 'No registrado' }}</p>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <strong>Dirección</strong>
+                            <p class="mb-0">{{ $user->direccion ?? 'No registrada' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Fecha de creación</strong>
+                            <p class="mb-0">{{ \Carbon\Carbon::parse($user->fechacreacion)->format('d M Y') }}</p>
+                        </div>
+                    </div>
                     @else
-                        <p class="text-muted">No se encontraron datos de usuario.</p>
+                    <p class="text-muted">No se encontraron datos de usuario.</p>
                     @endif
                 </div>
             </div>

@@ -49,9 +49,6 @@
         <p class="text-center mt-3 text-muted">
             ¿No tienes cuenta? <a href="#">Regístrate</a>
         </p>
-
     </div>
-
 </div>
-
 @endsection

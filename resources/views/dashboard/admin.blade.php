@@ -39,15 +39,15 @@
 
         <div class="row gy-4">
             @foreach($recentUsers as $user)
-                <div class="col-md-3">
-                    <div class="card card-hover h-100">
-                        <div class="card-body">
-                            <h6 class="mb-2">{{ $user->nombres }} {{ $user->apellidos }}</h6>
-                            <p class="text-muted small mb-2">{{ $user->username }}</p>
-                            <p class="mb-0 small text-muted">Creado: {{ \Carbon\Carbon::parse($user->fechacreacion)->format('d M Y') }}</p>
-                        </div>
+            <div class="col-md-3">
+                <div class="card card-hover h-100">
+                    <div class="card-body">
+                        <h6 class="mb-2">{{ $user->nombres }} {{ $user->apellidos }}</h6>
+                        <p class="text-muted small mb-2">{{ $user->username }}</p>
+                        <p class="mb-0 small text-muted">Creado: {{ \Carbon\Carbon::parse($user->fechacreacion)->format('d M Y') }}</p>
                     </div>
                 </div>
+            </div>
             @endforeach
         </div>
 

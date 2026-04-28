@@ -43,21 +43,21 @@
         <div class="card-body">
             <h5 class="mb-3">Progreso por curso</h5>
             @if($courseProgress->isEmpty())
-                <div class="text-muted">No hay datos de progreso disponibles.</div>
+            <div class="text-muted">No hay datos de progreso disponibles.</div>
             @else
-                <div class="list-group list-group-flush">
-                    @foreach($courseProgress as $course)
-                        <div class="list-group-item border-0 px-0 py-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div>{{ $course->titulo }}</div>
-                                <small class="text-muted">{{ $course->inscritos }} inscritos</small>
-                            </div>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ min(100, $course->inscritos * 3) }}%;"></div>
-                            </div>
-                        </div>
-                    @endforeach
+            <div class="list-group list-group-flush">
+                @foreach($courseProgress as $course)
+                <div class="list-group-item border-0 px-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>{{ $course->titulo }}</div>
+                        <small class="text-muted">{{ $course->inscritos }} inscritos</small>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ min(100, $course->inscritos * 3) }}%;"></div>
+                    </div>
                 </div>
+                @endforeach
+            </div>
             @endif
         </div>
     </div>

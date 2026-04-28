@@ -5,31 +5,29 @@
 @section('content')
 <div class="container mt-4">
     <h2>Gestión de Especialidades</h2>
-    
+
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <!-- BOTÓN CREAR -->
     <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#especialidadModal">
         Crear Especialidad
     </button>
 
-    <!-- TABLA -->
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Especialidad</th>
-                <th>Acciones</th>
+                <th style="text-align: center;">ID</th>
+                <th style="text-align: center;">Especialidad</th>
+                <th style="text-align: center;">Acciones</th>
             </tr>
         </thead>
         <tbody>
             @forelse($especialidades as $esp)
             <tr>
-                <td>{{ $esp->idespecialidad }}</td>
-                <td>{{ $esp->especialidad }}</td>
-                <td>
+                <td style="text-align: center;">{{ $esp->idespecialidad }}</td>
+                <td style="text-align: center;">{{ $esp->especialidad }}</td>
+                <td style="text-align: center;">
                     <a href="{{ route('especialidades.edit', $esp->idespecialidad) }}" class="btn btn-primary btn-sm">
                         Editar
                     </a>
@@ -51,10 +49,8 @@
             @endforelse
         </tbody>
     </table>
-
 </div>
 
-<!-- MODAL (crear + editar) -->
 <div class="modal fade" id="especialidadModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -73,7 +69,7 @@
 
                 @csrf
                 @if(isset($especialidad))
-                    @method('PUT')
+                @method('PUT')
                 @endif
 
                 <div class="modal-body">
@@ -101,7 +97,7 @@
 @push('scripts')
 @if(isset($especialidad))
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         var modal = new bootstrap.Modal(document.getElementById('especialidadModal'));
         modal.show();
     });

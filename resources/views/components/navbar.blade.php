@@ -22,8 +22,6 @@
             </form>
 
             <div class="d-flex flex-wrap align-items-center gap-2 gap-lg-3 justify-content-end w-100 w-lg-auto">
-                <a href="{{ url('/dashboard/teacher') }}" class="btn btn-outline-primary btn-sm">Docente</a>
-                <a href="{{ url('/dashboard/admin') }}" class="btn btn-primary btn-sm">Administrador</a>
 
                 <div class="position-relative d-inline-flex align-items-center px-2 py-1 bg-light rounded-3">
                     <i class="fa fa-bell text-dark"></i>
