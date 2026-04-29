@@ -61,17 +61,22 @@ class UsuarioController extends Controller
         $request->validate([
             'idpersona' => 'required|integer',
             'username' => 'required|max:50|unique:usuarios,username,' . $id . ',idusuario',
-            'password' => 'required|min:6'
+            'password' => 'nullable|min:6'
         ]);
 
         $usuario = Usuario::findOrFail($id);
 
-        $usuario->update([
+        $data = [
             'idpersona' => $request->idpersona,
             'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'fechamodificacion' => now()
-        ]);
+            'fechamodificacion' => now(),
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $usuario->update($data);
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado');
     }

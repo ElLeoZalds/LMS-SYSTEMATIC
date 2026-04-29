@@ -38,6 +38,7 @@
     <div class="mb-4">
         <h6 class="text-uppercase text-muted small fw-bold mb-3">Administración</h6>
         <ul class="nav flex-column gap-1 mb-3">
+            <li><a href="{{ route('dashboard.admin') }}" class="nav-link d-flex align-items-center gap-3 {{ request()->routeIs('dashboard.admin') ? 'active' : '' }}"><i class="fa fa-tachometer-alt fa-lg"></i> <span>Panel admin</span></a></li>
             <li><a href="{{ route('courses.index') }}" class="nav-link d-flex align-items-center gap-3 {{ request()->routeIs('courses.index') ? 'active' : '' }}"><i class="fa fa-chalkboard-teacher fa-lg"></i> <span>Gestión de cursos</span></a></li>
             <li><a href="{{ route('modulos.specialtyActions') }}" class="nav-link d-flex align-items-center gap-3 {{ request()->routeIs('modulos.specialtyActions') || request()->routeIs('especialidades.*') ? 'active' : '' }}"><i class="fa fa-list fa-lg"></i> <span>Gestión de especialidades</span></a></li>
             <li><a href="{{ route('modulos.usuarios') }}" class="nav-link d-flex align-items-center gap-3 {{ request()->routeIs('modulos.usuarios') || request()->routeIs('usuarios.*') ? 'active' : '' }}"><i class="fa fa-users fa-lg"></i> <span>Gestión de usuarios</span></a></li>

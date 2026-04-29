@@ -55,6 +55,42 @@
             <h5>Resumen operativo</h5>
             <p class="text-muted">Administra usuarios, especialidades y cursos desde el menú de módulos.</p>
         </div>
+
+        <div class="mt-4">
+            <h5>Acciones rápidas</h5>
+            <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                    <a href="{{ route('courses.index') }}" class="text-decoration-none">
+                        <div class="card card-hover h-100 border-primary">
+                            <div class="card-body text-center">
+                                <h6 class="text-primary">Gestión de cursos</h6>
+                                <p class="mb-0 text-muted">Crear, editar y eliminar cursos.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ route('modulos.specialtyActions') }}" class="text-decoration-none">
+                        <div class="card card-hover h-100 border-success">
+                            <div class="card-body text-center">
+                                <h6 class="text-success">Gestión de especialidades</h6>
+                                <p class="mb-0 text-muted">Crear y administrar especialidades.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ route('modulos.usuarios') }}" class="text-decoration-none">
+                        <div class="card card-hover h-100 border-warning">
+                            <div class="card-body text-center">
+                                <h6 class="text-warning">Gestión de usuarios</h6>
+                                <p class="mb-0 text-muted">Administrar cuentas de usuario y permisos.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

@@ -29,13 +29,28 @@
                         class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
                 </div>
 
-                <div class="d-flex align-items-center gap-2">
+                @php
+                $loggedUser = session('username', 'Usuario');
+                $loggedRole = ucfirst(session('user_role', 'estudiante'));
+            @endphp
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm rounded-pill dropdown-toggle d-flex align-items-center gap-2 shadow-sm"
+                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="{{ asset('images/undraw_profile_2.svg') }}" alt="Usuario"
                         class="rounded-circle border border-2 border-white shadow-sm" width="40" height="40">
-                    <div class="d-none d-md-block">
-                        <small class="fw-bold text-dark">Usuario</small>
+                    <div class="d-none d-md-flex flex-column text-start">
+                        <strong class="text-dark">{{ $loggedUser }}</strong>
+                        <small class="text-muted text-nowrap">{{ $loggedRole }}</small>
                     </div>
-                </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm mt-2">
+                    <li><a class="dropdown-item" href="{{ route('dashboard.user') }}">Mi perfil</a></li>
+                    <li><a class="dropdown-item" href="{{ route('dashboard.main') }}">Panel principal</a></li>
+                    <li><a class="dropdown-item" href="{{ route('dashboard.my-courses') }}">Mis cursos</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="{{ route('logout') }}">Cerrar sesión</a></li>
+                </ul>
+            </div>
             </div>
         </div>
     </div>
