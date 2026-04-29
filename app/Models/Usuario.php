@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\Role;
 
 class Usuario extends Model
 {
@@ -19,4 +21,9 @@ class Usuario extends Model
     ];
 
     public $timestamps = false;
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'usuariosroles', 'idusuario', 'idrol', 'idusuario', 'idrol');
+    }
 }

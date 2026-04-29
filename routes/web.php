@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Course;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ExplorecoursesController;
 use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\UsuarioController;
@@ -12,24 +13,9 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DashboardController;
 
 // LOGIN
-Route::get('/', function () {
-    return view('auth.login');
-});
-
-Route::post('/login', function (Request $request) {
-    $role = $request->input('role', 'student');
-    $request->session()->put('user_role', $role);
-
-    if ($role === 'teacher') {
-        return redirect('/dashboard/teacher');
-    }
-
-    if ($role === 'admin') {
-        return redirect('/dashboard/admin');
-    }
-
-    return redirect('/dashboard/student');
-});
+Route::get('/', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // DASHBOARDS
 Route::get('/dashboard/student', [DashboardController::class, 'student'])->name('dashboard.student');
