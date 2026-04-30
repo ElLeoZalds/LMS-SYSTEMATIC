@@ -46,6 +46,9 @@ body {
     position: sticky;
     top: 96px;
     border-radius: 0;
+    width: 240px;
+    flex: 0 0 240px;
+    /* importante si usas flex */
 }
 
 .sidebar-content {
