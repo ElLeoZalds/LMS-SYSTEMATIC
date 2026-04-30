@@ -30,7 +30,7 @@
 
     <div class="row">
         <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm">
+            <div class="card">
                 <div class="card-body">
                     <h5 class="card-title mb-3">Agregar estudiante</h5>
                     @if($capacitaciones->isEmpty())
@@ -71,7 +71,7 @@
         </div>
 
         <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm">
+            <div class="card">
                 <div class="card-body">
                     <h5 class="card-title mb-3">Estudiantes inscritos</h5>
                     @if($enrollments->isEmpty())

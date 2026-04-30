@@ -6,7 +6,7 @@
 <div class="container-fluid mt-4">
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="card shadow-sm">
+            <div class="card">
                 <div class="card-body">
                     <h2>Perfil de usuario</h2>
                     <p class="text-muted">Ver y actualizar tu información de perfil aquí.</p>
@@ -46,7 +46,7 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5>Resumen</h5>
                     <p class="mb-3 text-muted">Mira tus métricas principales y el estado actual de tu cuenta.</p>

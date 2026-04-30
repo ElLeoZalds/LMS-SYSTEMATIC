@@ -26,7 +26,7 @@
     </div>
 
     <main class="main-layout">
-        <div class="container-fluid px-0" style="padding-top: 96px;">
+        <div class="container-fluid px-2" style="padding-top: 68px;">
             <div class="row g-0">
 
                 @if(!View::hasSection('noSidebar'))

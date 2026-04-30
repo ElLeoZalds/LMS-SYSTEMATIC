@@ -9,10 +9,6 @@
             <h2 class="fw-bold mb-1">Panel Estudiante</h2>
             <p class="text-muted mb-0">Sigue tu ritmo de estudio y revisa tus próximos cursos y tareas.</p>
         </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{{ route('dashboard.calendar') }}" class="btn btn-outline-primary btn-sm">Calendario</a>
-            <a href="{{ route('dashboard.progress') }}" class="btn btn-primary btn-sm">Progreso</a>
-        </div>
     </div>
 
     <div class="row g-4 mb-4">
@@ -30,7 +26,7 @@
                 <div class="card-body">
                     <h6 class="text-uppercase text-muted mb-2">Próxima clase</h6>
                     @if($nextClass)
-                    <h3 class="mb-0">{{ $nextClass->titulo }}</h3>
+                    <h3 class="mb-0">{{ $nextClass->titulo }}</h3>  
                     <p class="text-muted mb-0">{{ $nextClass->fecha }} · {{ $nextClass->inicio }}</p>
                     @else
                     <h3 class="mb-0">Sin clase próxima</h3>
@@ -58,7 +54,7 @@
     <div class="row g-4">
         @forelse ($courses as $course)
         <div class="col-lg-4 col-md-6">
-            <div class="card h-100 shadow-sm">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">{{ $course->titulo }}</h5>
                     <p class="text-muted small mb-3">{{ \Illuminate\Support\Str::limit($course->descripcion, 85) }}</p>

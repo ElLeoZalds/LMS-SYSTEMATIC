@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card">
         <div class="card-body">
             <h5 class="mb-3">Progreso por curso</h5>
             @if($courseProgress->isEmpty())

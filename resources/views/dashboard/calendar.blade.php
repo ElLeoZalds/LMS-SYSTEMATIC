@@ -23,7 +23,7 @@
         </div>
 
         <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100">
                 <div class="card-body">
                     <div
                         class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-3">
@@ -96,7 +96,7 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card shadow-sm mb-4">
+            <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Resumen rápido</h5>
                     <div class="row text-center mt-3">
@@ -121,7 +121,7 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm">
+            <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title mb-0">Tareas próximas</h5>

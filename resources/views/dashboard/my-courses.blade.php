@@ -15,7 +15,7 @@
     <div class="row g-4">
         @forelse($courses as $course)
         <div class="col-lg-4 col-md-6">
-            <div class="card h-100 shadow-sm">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">{{ $course->titulo }}</h5>
                     <p class="text-muted small mb-2">{{ \Illuminate\Support\Str::limit($course->descripcion, 100) }}</p>

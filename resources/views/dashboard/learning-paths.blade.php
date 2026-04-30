@@ -14,7 +14,7 @@
 
     <div class="row g-4">
         <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title mb-3">Especialidades</h5>
                     <ul class="list-group list-group-flush">
@@ -30,7 +30,7 @@
         </div>
 
         <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Cursos recomendados</h5>

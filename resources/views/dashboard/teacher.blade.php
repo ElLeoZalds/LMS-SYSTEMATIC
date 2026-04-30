@@ -9,10 +9,6 @@
             <h2 class="fw-bold mb-1">Panel Docente</h2>
             <p class="text-muted mb-0">Gestiona tus cursos, alumnos y próximas clases desde un solo lugar.</p>
         </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{{ route('dashboard.calendar') }}" class="btn btn-outline-primary btn-sm">Ver calendario</a>
-            <a href="{{ route('dashboard.admin') }}" class="btn btn-primary btn-sm">Estadísticas</a>
-        </div>
     </div>
 
     <div class="row g-4 mb-4">
@@ -52,7 +48,7 @@
 
     <div class="row g-4">
         <div class="col-xl-6">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Clases próximas</h5>
@@ -78,7 +74,7 @@
         </div>
 
         <div class="col-xl-6">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Cursos con más estudiantes</h5>

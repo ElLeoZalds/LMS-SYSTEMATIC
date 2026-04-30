@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm">
+    <nav class="navbar navbar-expand-lg bg-white border-bottom">
         <div class="container-fluid px-4">
             <img src="{{ asset('images/Systematic_logo.png') }}" alt="Logo" class="img-fluid" style="max-width: 100px;">
 
@@ -66,7 +66,7 @@
             </div>
 
             <div class="col-lg-4 mt-4 mt-lg-0">
-                <div class="card border-0 shadow-sm rounded-4">
+                <div class="card border-0 rounded-4">
                     <div class="card-body">
                         <h6 class="fw-bold">Detalles del curso</h6>
                         <p class="text-muted small mb-2">Instructor: John Doe</p>

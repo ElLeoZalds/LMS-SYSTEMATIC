@@ -15,7 +15,7 @@
     <div class="row g-4">
         @forelse($certificates as $certificate)
         <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">{{ $certificate->titulo }}</h5>
                     <p class="text-muted small mb-2">{{ $certificate->modalidad }}</p>
