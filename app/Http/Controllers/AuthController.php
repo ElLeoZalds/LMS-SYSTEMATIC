@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Usuario;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -16,41 +15,56 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'username' => 'required|string|min:3',
-            'password' => 'required|string|min:6',
+            'username' => 'required',
+            'password' => 'required'
         ]);
 
-        $usuario = Usuario::where('username', $request->input('username'))->first();
+        if (
+            Auth::attempt([
+                'username' => $request->username,
+                'password' => $request->password
+            ])
+        ) {
+            $request->session()->regenerate();
 
-        if (! $usuario || ! Hash::check($request->input('password'), $usuario->password) || $usuario->estado !== 'A') {
-            return back()->withInput()->with('error', 'Usuario o contraseña incorrecta');
+            $user = Auth::user();
+            $role = optional($user->roles->first())->name;
+
+            // Si el usuario no tiene rol asignado
+            if (!$role) {
+                Auth::logout();
+                return back()->withErrors([
+                    'username' => 'Usuario sin rol asignado. Contacte al administrador.'
+                ]);
+            }
+
+            if ($role === 'Administrator') {
+                return redirect()->route('admin.dashboard');
+            }
+
+            if ($role === 'Teacher') {
+                return redirect()->route('teacher.dashboard');
+            }
+
+            if ($role === 'Student') {
+                return redirect()->route('student.dashboard');
+            }
+
+            Auth::logout();
         }
 
-        $role = $usuario->roles()->first()?->nombre;
-
-        $request->session()->put([
-            'usuario_id' => $usuario->idusuario,
-            'username' => $usuario->username,
-            'user_role' => $role ? strtolower($role) : 'estudiante',
-            'logged_in' => true,
+        return back()->withErrors([
+            'username' => 'Credenciales incorrectas'
         ]);
-
-        return $this->redirectByRole($role);
     }
 
     public function logout(Request $request)
     {
-        $request->session()->flush();
+        Auth::logout();
 
-        return redirect()->route('login')->with('info', 'Sesión cerrada correctamente');
-    }
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-    protected function redirectByRole(?string $role)
-    {
-        return match (strtolower($role ?? 'estudiante')) {
-            'administrador' => redirect()->route('dashboard.admin'),
-            'docente' => redirect()->route('dashboard.teacher'),
-            default => redirect()->route('dashboard.student'),
-        };
+        return redirect('/login');
     }
 }

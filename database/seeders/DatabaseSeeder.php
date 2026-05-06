@@ -9,25 +9,37 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            PersonasSeeder::class,
+
+            // USERS BASE
+            PeopleSeeder::class,
             RolesSeeder::class,
-            UsuariosSeeder::class,
-            UsuariosRolesSeeder::class,
-            EspecialidadesSeeder::class,
-            ProfesoresEspecialidadesSeeder::class,
-            CursosSeeder::class,
-            CapacitacionesSeeder::class,
-            MetodosPagosSeeder::class,
-            MatriculasSeeder::class,
-            PagosSeeder::class,
-            EvaluacionesSeeder::class,
-            PreguntasSeeder::class,
-            AlternativasSeeder::class,
-            ContenidosSeeder::class,
-            ProgresosSeeder::class,
-            HorariosSeeder::class,
-            AsistenciasSeeder::class,
-            IntentosEvaluacionesSeeder::class,
+            UsersSeeder::class,
+            RoleUserSeeder::class,
+
+            // ACADEMIC STRUCTURE
+            SpecialtiesSeeder::class,
+            TeacherSpecialtiesSeeder::class,
+            CoursesSeeder::class,
+            TrainingsSeeder::class,
+
+            // PAYMENTS & ENROLLMENT
+            PaymentMethodsSeeder::class,
+            EnrollmentsSeeder::class,
+            PaymentsSeeder::class,
+
+            // ACADEMIC CONTENT
+            AssessmentsSeeder::class,
+            QuestionsSeeder::class,
+            AlternativesSeeder::class,
+            ContentsSeeder::class,
+            ProgressSeeder::class,
+
+            // CLASS CONTROL
+            SchedulesSeeder::class,
+            AttendancesSeeder::class,
+
+            // EXAMS TRACKING
+            AssessmentAttemptsSeeder::class,
         ]);
     }
 }

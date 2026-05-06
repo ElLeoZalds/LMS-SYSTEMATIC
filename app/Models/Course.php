@@ -6,21 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
-    protected $table = 'cursos';
-    protected $primaryKey = 'idcurso';
-    public $timestamps = false;
+    protected $primaryKey = 'course_id';
 
     protected $fillable = [
-        'idespecialidad',
-        'pathbanner',
-        'titulo',
-        'descripcion',
-        'cantidadhoras',
-        'precioreferencial'
+        'specialty_id',
+        'banner_path',
+        'title',
+        'description',
+        'hours_count',
+        'reference_price'
     ];
 
-    public function especialidad()
+    public function trainings()
     {
-        return $this->belongsTo(Especialidad::class, 'idespecialidad', 'idespecialidad');
+        return $this->hasMany(Training::class, 'course_id', 'course_id');
+    }
+
+    public function specialty()
+    {
+        return $this->belongsTo(Specialty::class, 'specialty_id', 'specialty_id');
     }
 }
