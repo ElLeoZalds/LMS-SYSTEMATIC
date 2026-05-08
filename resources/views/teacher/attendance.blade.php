@@ -13,46 +13,46 @@
             <h1 class="h3 mb-4 text-gray-800">Tomar Asistencia - {{ $training->course->title }}</h1>
 
             <form action="{{ route('teacher.attendance.store') }}" method="POST" class="row g-3">
-            @csrf
-            <input type="hidden" name="training_id" value="{{ $training->training_id }}">
+                @csrf
+                <input type="hidden" name="training_id" value="{{ $training->training_id }}">
 
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-dark small fw-bold">Estudiante</th>
-                            <th class="text-dark small fw-bold text-center">Presente</th>
-                            <th class="text-dark small fw-bold text-center">Ausente</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($students as $enrollment)
-                        <tr>
-                            <td class="align-middle">
-                                <div class="text-dark">
-                                    {{ optional($enrollment->student->person)->first_names }}
-                                    {{ optional($enrollment->student->person)->last_names }}
-                                </div>
-                            </td>
-                            <td class="align-middle text-center">
-                                <input type="radio" name="attendances[{{ $loop->index }}][status]" value="P" checked>
-                                <input type="hidden" name="attendances[{{ $loop->index }}][student_id]" value="{{ $enrollment->student_id }}">
-                            </td>
-                            <td class="align-middle text-center">
-                                <input type="radio" name="attendances[{{ $loop->index }}][status]" value="A">
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-dark small fw-bold">Estudiante</th>
+                                <th class="text-dark small fw-bold text-center">Presente</th>
+                                <th class="text-dark small fw-bold text-center">Ausente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($students as $enrollment)
+                            <tr>
+                                <td class="align-middle">
+                                    <div class="text-dark">
+                                        {{ optional($enrollment->student->person)->first_names }}
+                                        {{ optional($enrollment->student->person)->last_names }}
+                                    </div>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <input type="radio" name="attendances[{{ $loop->index }}][status]" value="P" checked>
+                                    <input type="hidden" name="attendances[{{ $loop->index }}][student_id]" value="{{ $enrollment->student_id }}">
+                                </td>
+                                <td class="align-middle text-center">
+                                    <input type="radio" name="attendances[{{ $loop->index }}][status]" value="A">
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                    Guardar Asistencia
-                </button>
-            </div>
-        </form>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        Guardar Asistencia
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
-@endsection
+    @endsection

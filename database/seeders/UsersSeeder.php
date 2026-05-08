@@ -43,7 +43,7 @@ class UsersSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now()
             ],
-            // Nuevos estudiantes
+
             [
                 'person_id' => 5,
                 'username' => 'carlos.martinez',

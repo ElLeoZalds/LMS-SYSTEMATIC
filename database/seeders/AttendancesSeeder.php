@@ -35,7 +35,7 @@ class AttendancesSeeder extends Seeder
                 'enrollment_id' => 5,
                 'attendance' => 'present'
             ],
-            // Nuevas asistencias para training 1 (schedule 1)
+
             [
                 'schedule_id' => 1,
                 'enrollment_id' => 6,
@@ -81,7 +81,7 @@ class AttendancesSeeder extends Seeder
                 'enrollment_id' => 14,
                 'attendance' => 'present'
             ],
-            // Training 2 (schedule 2)
+
             [
                 'schedule_id' => 2,
                 'enrollment_id' => 15,
@@ -132,7 +132,7 @@ class AttendancesSeeder extends Seeder
                 'enrollment_id' => 24,
                 'attendance' => 'present'
             ],
-            // Training 3 (schedule 3)
+
             [
                 'schedule_id' => 3,
                 'enrollment_id' => 25,
