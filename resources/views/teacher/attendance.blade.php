@@ -30,7 +30,8 @@
                         <tr>
                             <td class="align-middle">
                                 <div class="text-dark">
-                                    {{ $enrollment->student->person->first_name }} {{ $enrollment->student->person->last_name }}
+                                    {{ optional($enrollment->student->person)->first_names }}
+                                    {{ optional($enrollment->student->person)->last_names }}
                                 </div>
                             </td>
                             <td class="align-middle text-center">
