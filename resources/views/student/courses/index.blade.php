@@ -40,7 +40,10 @@
 
                             <td class="align-middle">
                                 <div class="progress" style="width: 100px;">
-                                    <div class="progress-bar" role="progressbar" style="width: {{ $course->progress_percentage ?? 0 }}%;" aria-valuenow="{{ $course->progress_percentage ?? 0 }}" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" role="progressbar"
+                                        style="width: {{ $course->progress_percentage ?? 0 }}%;"
+                                        aria-valuenow="{{ $course->progress_percentage ?? 0 }}" aria-valuemin="0"
+                                        aria-valuemax="100">
                                         {{ $course->progress_percentage ?? 0 }}%
                                     </div>
                                 </div>

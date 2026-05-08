@@ -30,7 +30,6 @@ class AuthController extends Controller
             $user = Auth::user();
             $role = optional($user->roles->first())->name;
 
-            // Si el usuario no tiene rol asignado
             if (!$role) {
                 Auth::logout();
                 return back()->withErrors([

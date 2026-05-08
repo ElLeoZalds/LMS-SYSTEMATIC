@@ -1,12 +1,12 @@
-    @php
+@php
     $role = optional(auth()->user()->roles->first())->name;
-    @endphp
+@endphp
 
-    <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<!-- Sidebar -->
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-        <!-- Sidebar - Brand -->
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="
         @if($role === 'Administrator')
             {{ route('admin.dashboard') }}
         @elseif($role === 'Teacher')
@@ -15,16 +15,16 @@
             {{ route('student.dashboard') }}
         @endif
     ">
-            <div class="sidebar-brand-icon rotate-n-15">
-                <i class="fas fa-graduation-cap"></i>
-            </div>
-            <div class="sidebar-brand-text mx-3">Systematic LMS</div>
-        </a>
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">Systematic LMS</div>
+    </a>
 
-        <!-- Divider -->
-        <hr class="sidebar-divider my-0">
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
 
-        @if($role === 'Administrator')
+    @if($role === 'Administrator')
         <!-- Nav Item - Dashboard -->
         <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('admin.dashboard') }}">
@@ -73,7 +73,7 @@
             </a>
         </li>
 
-        @elseif($role === 'Teacher')
+    @elseif($role === 'Teacher')
         <!-- Nav Item - Dashboard -->
         <li class="nav-item {{ request()->routeIs('teacher.dashboard') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('teacher.dashboard') }}">
@@ -107,42 +107,42 @@
         </li>
 
         @if(request()->routeIs('teacher.attendance.*') || request()->routeIs('teacher.students'))
-        <!-- Divider -->
-        <hr class="sidebar-divider">
+            <!-- Divider -->
+            <hr class="sidebar-divider">
 
-        <!-- Heading -->
-        <div class="sidebar-heading">
-            Capacitación Actual
-        </div>
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Capacitación Actual
+            </div>
 
-        @php $currentTrainingId = request()->route('id'); @endphp
+            @php $currentTrainingId = request()->route('id'); @endphp
 
-        <!-- Nav Item - Asistencia -->
-        <li class="nav-item {{ request()->routeIs('teacher.attendance.*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('teacher.attendance', $currentTrainingId) }}">
-                <i class="fas fa-fw fa-clipboard-check"></i>
-                <span>Asistencia</span>
-            </a>
-        </li>
+            <!-- Nav Item - Asistencia -->
+            <li class="nav-item {{ request()->routeIs('teacher.attendance.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('teacher.attendance', $currentTrainingId) }}">
+                    <i class="fas fa-fw fa-clipboard-check"></i>
+                    <span>Asistencia</span>
+                </a>
+            </li>
 
-        <!-- Nav Item - Estudiantes -->
-        <li class="nav-item {{ request()->routeIs('teacher.students') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('teacher.students', $currentTrainingId) }}">
-                <i class="fas fa-fw fa-users"></i>
-                <span>Estudiantes</span>
-            </a>
-        </li>
+            <!-- Nav Item - Estudiantes -->
+            <li class="nav-item {{ request()->routeIs('teacher.students') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('teacher.students', $currentTrainingId) }}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Estudiantes</span>
+                </a>
+            </li>
 
-        <!-- Nav Item - Crear Tarea -->
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('teacher.tasks.create', $currentTrainingId) }}">
-                <i class="fas fa-fw fa-plus"></i>
-                <span>Crear Tarea</span>
-            </a>
-        </li>
+            <!-- Nav Item - Crear Tarea -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('teacher.tasks.create', $currentTrainingId) }}">
+                    <i class="fas fa-fw fa-plus"></i>
+                    <span>Crear Tarea</span>
+                </a>
+            </li>
         @endif
 
-        @elseif($role === 'Student')
+    @elseif($role === 'Student')
         <!-- Nav Item - Dashboard -->
         <li class="nav-item {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('student.dashboard') }}">
@@ -182,15 +182,15 @@
                 <span>Certificados</span>
             </a>
         </li>
-        @endif
+    @endif
 
-        <!-- Divider -->
-        <hr class="sidebar-divider d-none d-md-block">
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
 
-        <!-- Sidebar Toggler (Sidebar) -->
-        <div class="text-center d-none d-md-inline">
-            <button class="rounded-circle border-0" id="sidebarToggle"></button>
-        </div>
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
 
-    </ul>
-    <!-- End of Sidebar -->
+</ul>
+<!-- End of Sidebar -->

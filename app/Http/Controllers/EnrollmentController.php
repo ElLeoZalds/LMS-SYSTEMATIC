@@ -11,17 +11,14 @@ class EnrollmentController extends Controller
 {
     public function store($trainingId)
     {
-        // Validar que training exista
         $training = Training::findOrFail($trainingId);
 
         $user = Auth::user();
 
-        // Verificar que el usuario tenga rol Student
         if (!$user->roles->contains('name', 'Student')) {
             return back()->with('error', 'Solo los estudiantes pueden inscribirse en cursos.');
         }
 
-        // 🚨 evitar duplicados
         $exists = Enrollment::where('student_id', $user->user_id)
             ->where('training_id', $trainingId)
             ->first();

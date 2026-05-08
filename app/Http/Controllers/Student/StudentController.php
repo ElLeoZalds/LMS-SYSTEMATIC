@@ -20,7 +20,7 @@ class StudentController extends Controller
             ->get();
 
         $totalCourses = $enrollments->count();
-        $completed = 0; // TODO: Implementar estados 'C' (Completed) cuando se desarrolle la lógica de progreso.
+        $completed = 0;
         $inProgress = $enrollments->where('status', 'A')->count();
 
         return view('student.dashboard', compact(
@@ -45,14 +45,14 @@ class StudentController extends Controller
                 // Calcular progreso por curso
                 $enrollments = Enrollment::where('student_id', $studentId)
                     ->whereHas('training', function ($query) use ($course) {
-                        $query->where('course_id', $course->course_id);
-                    })
+                    $query->where('course_id', $course->course_id);
+                })
                     ->get();
 
                 $totalEnrollments = $enrollments->count();
                 $completedEnrollments = $enrollments->where('status', 'C')->count();
-                $course->progress_percentage = $totalEnrollments > 0 
-                    ? round(($completedEnrollments / $totalEnrollments) * 100) 
+                $course->progress_percentage = $totalEnrollments > 0
+                    ? round(($completedEnrollments / $totalEnrollments) * 100)
                     : 0;
 
                 // Obtener el primer instructor del curso
