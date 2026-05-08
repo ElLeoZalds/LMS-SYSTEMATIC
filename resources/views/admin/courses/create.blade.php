@@ -2,11 +2,13 @@
 
 @section('content')
 
-    <div class="container mt-4">
+    <div class="container-fluid px-4 py-4">
 
-        <h2>Crear Curso</h2>
+        <div class="card shadow mb-4">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-4 text-gray-800">Crear Curso</h1>
 
-        <form method="POST" action="{{ route('admin.courses.store') }}">
+                <form method="POST" action="{{ route('admin.courses.store') }}">
             @csrf
 
             <input type="text" name="title" placeholder="Título" class="form-control mb-2">
@@ -21,7 +23,9 @@
                 Guardar
             </button>
 
-        </form>
+                </form>
+            </div>
+        </div>
 
     </div>
 

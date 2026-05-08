@@ -1,14 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid px-4 py-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="mb-0">Usuarios</h2>
+            <h1 class="h3 mb-4 text-gray-800">Usuarios</h1>
             <button class="btn btn-primary disabled" aria-disabled="true">+ Crear usuario</button>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-sm table-striped table-hover">
+        <div class="card shadow mb-4">
+            <div class="card-body p-3">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover">
                 <thead>
                     <tr>
                         <th class="align-middle">Avatar</th>
@@ -47,6 +49,8 @@
                     @endforeach
                 </tbody>
             </table>
+                </div>
+            </div>
         </div>
 
         {{ $users->links() }}

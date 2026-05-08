@@ -2,24 +2,23 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
     <title>@yield('title', 'Systematic LMS')</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom fonts for this template-->
+    <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-    <!-- FontAwesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- Custom styles for this template-->
+    <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Custom -->
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 
     <style>
         .avatar-circle {
@@ -32,42 +31,58 @@
             align-items: center;
             justify-content: center;
         }
-        .bg-avatar-1 { background: #4e73df; }
-        .bg-avatar-2 { background: #1cc88a; }
-        .bg-avatar-3 { background: #f6c23e; }
-        .bg-avatar-4 { background: #e74a3b; }
+
+        .bg-avatar-1 {
+            background: #4e73df;
+        }
+
+        .bg-avatar-2 {
+            background: #1cc88a;
+        }
+
+        .bg-avatar-3 {
+            background: #f6c23e;
+        }
+
+        .bg-avatar-4 {
+            background: #e74a3b;
+        }
+
         .table-borderless tr {
             padding: 0.5rem 0;
         }
+
         .table-borderless .border-bottom {
             border-bottom: 1px solid #dee2e6 !important;
         }
     </style>
 </head>
 
-<body class="bg-light d-flex flex-column min-vh-100">
+<body id="page-top">
 
-    {{-- NAVBAR --}}
-    @include('components.navbar')
+    <!-- Page Wrapper -->
+    <div id="wrapper">
 
-    <div class="flex-grow-1" style="padding-top: 70px;">
+        @auth
+            @unless(View::hasSection('noSidebar'))
+                @include('components.sidebar')
+            @endunless
+        @endauth
 
-        <div class="container-fluid">
-            <div class="row g-0">
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
 
-                {{-- SIDEBAR DESKTOP --}}
+            <!-- Main Content -->
+            <div id="content">
+
                 @auth
                     @unless(View::hasSection('noSidebar'))
-                        <aside class="col-lg-2 d-none d-lg-block bg-white border-end">
-                            <div class="h-100 p-3">
-                                @include('components.sidebar')
-                            </div>
-                        </aside>
+                        @include('components.navbar')
                     @endunless
                 @endauth
 
-                {{-- CONTENIDO --}}
-                <main class="@auth @unless(View::hasSection('noSidebar')) col-lg-10 @endunless @endauth col-12 p-4">
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
 
                     {{-- ALERTAS --}}
                     @if(session('success'))
@@ -86,17 +101,34 @@
 
                     @yield('content')
 
-                </main>
+                </div>
+                <!-- /.container-fluid -->
 
             </div>
+            <!-- End of Main Content -->
+
+            @include('components.footer')
+
         </div>
+        <!-- End of Content Wrapper -->
 
     </div>
+    <!-- End of Page Wrapper -->
 
-    {{-- FOOTER --}}
-    @include('components.footer')
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap core JavaScript-->
+    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 
 </body>
 

@@ -5,7 +5,7 @@
     <div class="container-fluid">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="mb-0">Mis cursos</h2>
+            <h1 class="h3 mb-4 text-gray-800">Mis cursos</h1>
         </div>
 
         <div class="table-responsive">

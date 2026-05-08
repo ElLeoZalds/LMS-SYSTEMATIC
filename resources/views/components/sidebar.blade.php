@@ -2,111 +2,195 @@
     $role = optional(auth()->user()->roles->first())->name;
 @endphp
 
-<div class="sidebar-content d-flex flex-column h-100 p-3">
+<!-- Sidebar -->
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-    <span class="badge bg-secondary mb-3">
-        Rol: {{ $role ? ucfirst(strtolower($role)) : 'Sin asignar' }}
-    </span>
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="
+        @if($role === 'Administrator')
+            {{ route('admin.dashboard') }}
+        @elseif($role === 'Teacher')
+            {{ route('teacher.dashboard') }}
+        @else
+            {{ route('student.dashboard') }}
+        @endif
+    ">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">Systematic LMS</div>
+    </a>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
 
     @if($role === 'Administrator')
-        <div class="mb-3">
-            <h6 class="text-muted mb-2">Administración</h6>
-            <div class="d-grid gap-2">
-                <a href="{{ route('admin.dashboard') }}" class="btn {{ request()->routeIs('admin.dashboard') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                    <i class="bi bi-house-door me-2"></i>Dashboard
-                </a>
-                <a href="{{ route('admin.users.index') }}" class="btn {{ request()->routeIs('admin.users.*') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                    <i class="bi bi-people me-2"></i>Usuarios
-                </a>
-                <a href="{{ route('admin.specialties.index') }}" class="btn {{ request()->routeIs('admin.specialties.*') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                    <i class="bi bi-tags me-2"></i>Especialidades
-                </a>
-                <a href="{{ route('admin.courses.index') }}" class="btn {{ request()->routeIs('admin.courses.*') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                    <i class="bi bi-book me-2"></i>Cursos
-                </a>
-                <a href="{{ route('admin.trainings.index') }}" class="btn {{ request()->routeIs('admin.trainings.*') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                    <i class="bi bi-mortarboard me-2"></i>Capacitaciones
-                </a>
-            </div>
-        </div>
-    @elseif($role === 'Teacher')
-        <div class="mb-3">
-            <h6 class="text-muted mb-2 small">General</h6>
-            <div class="d-grid gap-2">
-                <a href="{{ route('teacher.dashboard') }}" class="btn {{ request()->routeIs('teacher.dashboard') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                    <i class="bi bi-house-door me-2"></i>Dashboard
-                </a>
-            </div>
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Heading -->
+        <div class="sidebar-heading">
+            Administración
         </div>
 
-        <div class="mb-3">
-            <h6 class="text-muted mb-2 small">Gestión</h6>
-            <div class="d-grid gap-2">
-                <a href="{{ route('teacher.courses') }}" class="btn {{ request()->routeIs('teacher.courses.*') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                    <i class="bi bi-journal-bookmark me-2"></i>Mis cursos
-                </a>
-                <a href="#" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-clipboard-check me-2"></i>Evaluaciones
-                </a>
-                <a href="#" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-people me-2"></i>Mis estudiantes
-                </a>
-            </div>
+        <!-- Nav Item - Usuarios -->
+        <li class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.users.index') }}">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Usuarios</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Especialidades -->
+        <li class="nav-item {{ request()->routeIs('admin.specialties.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.specialties.index') }}">
+                <i class="fas fa-fw fa-tags"></i>
+                <span>Especialidades</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Cursos -->
+        <li class="nav-item {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.courses.index') }}">
+                <i class="fas fa-fw fa-book"></i>
+                <span>Cursos</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Capacitaciones -->
+        <li class="nav-item {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.trainings.index') }}">
+                <i class="fas fa-fw fa-graduation-cap"></i>
+                <span>Capacitaciones</span>
+            </a>
+        </li>
+
+    @elseif($role === 'Teacher')
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item {{ request()->routeIs('teacher.dashboard') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('teacher.dashboard') }}">
+                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Heading -->
+        <div class="sidebar-heading">
+            Gestión
         </div>
+
+        <!-- Nav Item - Mis Cursos -->
+        <li class="nav-item {{ request()->routeIs('teacher.courses.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('teacher.courses') }}">
+                <i class="fas fa-fw fa-book-open"></i>
+                <span>Mis Cursos</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Evaluaciones -->
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-fw fa-clipboard-check"></i>
+                <span>Evaluaciones</span>
+            </a>
+        </li>
 
         @if(request()->routeIs('teacher.attendance.*') || request()->routeIs('teacher.students'))
-            <div class="mb-3">
-                <h6 class="text-muted mb-2 small">Capacitación Actual</h6>
-                <div class="d-grid gap-2">
-                    @php $currentTrainingId = request()->route('id'); @endphp
-                    <a href="{{ route('teacher.attendance', $currentTrainingId) }}" class="btn {{ request()->routeIs('teacher.attendance.*') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                        <i class="bi bi-clipboard-check me-2"></i>📋 Asistencia
-                    </a>
-                    <a href="{{ route('teacher.students', $currentTrainingId) }}" class="btn {{ request()->routeIs('teacher.students') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                        <i class="bi bi-people me-2"></i>🎓 Estudiantes
-                    </a>
-                    <a href="{{ route('teacher.tasks.create', $currentTrainingId) }}" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-plus-circle me-2"></i>➕ Crear Tarea
-                    </a>
-                    <a href="#" class="btn btn-outline-secondary btn-sm" disabled>
-                        <i class="bi bi-star me-2"></i>📝 Calificaciones (próximamente)
-                    </a>
-                </div>
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Capacitación Actual
             </div>
-        @endif
-    @elseif($role === 'Student')
-        <div class="mb-3">
-            <h6 class="text-muted mb-2 small">General</h6>
-            <div class="d-grid gap-2">
-                <a href="{{ route('student.dashboard') }}" class="btn {{ request()->routeIs('student.dashboard') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                    <i class="bi bi-house-door me-2"></i>Inicio
+
+            @php $currentTrainingId = request()->route('id'); @endphp
+
+            <!-- Nav Item - Asistencia -->
+            <li class="nav-item {{ request()->routeIs('teacher.attendance.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('teacher.attendance', $currentTrainingId) }}">
+                    <i class="fas fa-fw fa-clipboard-check"></i>
+                    <span>Asistencia</span>
                 </a>
-            </div>
+            </li>
+
+            <!-- Nav Item - Estudiantes -->
+            <li class="nav-item {{ request()->routeIs('teacher.students') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('teacher.students', $currentTrainingId) }}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Estudiantes</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Crear Tarea -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('teacher.tasks.create', $currentTrainingId) }}">
+                    <i class="fas fa-fw fa-plus"></i>
+                    <span>Crear Tarea</span>
+                </a>
+            </li>
+        @endif
+
+    @elseif($role === 'Student')
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('student.dashboard') }}">
+                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <span>Inicio</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Heading -->
+        <div class="sidebar-heading">
+            Aprendizaje
         </div>
 
-        <div class="mb-3">
-            <h6 class="text-muted mb-2 small">Aprendizaje</h6>
-            <div class="d-grid gap-2">
-                <a href="{{ route('student.courses.index') }}" class="btn {{ request()->routeIs('student.courses.*') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
-                    <i class="bi bi-book me-2"></i>Mis cursos
-                </a>
-                <a href="#" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-trophy me-2"></i>Mis calificaciones
-                </a>
-                <a href="#" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-award me-2"></i>Certificados
-                </a>
-            </div>
-        </div>
+        <!-- Nav Item - Mis Cursos -->
+        <li class="nav-item {{ request()->routeIs('student.courses.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('student.courses.index') }}">
+                <i class="fas fa-fw fa-book"></i>
+                <span>Mis Cursos</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Calificaciones -->
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-fw fa-trophy"></i>
+                <span>Calificaciones</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Certificados -->
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fas fa-fw fa-certificate"></i>
+                <span>Certificados</span>
+            </a>
+        </li>
     @endif
 
-    @auth
-        <form method="POST" action="{{ route('logout') }}" class="mt-4">
-            @csrf
-            <button type="submit" class="btn btn-outline-danger w-100 text-start">
-                🔒 Cerrar sesión
-            </button>
-        </form>
-    @endauth
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
 
-</div>
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+
+</ul>
+<!-- End of Sidebar -->

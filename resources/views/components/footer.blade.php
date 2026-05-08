@@ -1,7 +1,9 @@
-<footer class="bg-white border-top mt-auto">
-    <div class="container py-3 text-center">
-        <small class="text-muted">
-            © {{ date('Y') }} Systematic LMS
-        </small>
+<!-- Footer -->
+<footer class="sticky-footer bg-white">
+    <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+            <span>Copyright &copy; Systematic LMS {{ date('Y') }}</span>
+        </div>
     </div>
 </footer>
+<!-- End of Footer -->

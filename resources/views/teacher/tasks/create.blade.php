@@ -1,15 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">  {{-- Padding reducido para alta densidad --}}
+<div class="container-fluid px-4 py-4">
     <div class="mb-3">
         <a href="{{ route('teacher.courses') }}" class="text-decoration-none small">
             <i class="bi bi-arrow-left me-2"></i>Volver a mis cursos
         </a>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-4">  {{-- Padding reducido --}}
-        <h1 class="h4 font-weight-bold mb-4">Crear Tarea - {{ $training->course->title }}</h1>  {{-- Fuente nítida, título pequeño --}}
+    <div class="card shadow mb-4">
+        <div class="card-body p-4">
+            <h1 class="h3 mb-4 text-gray-800">Crear Tarea - {{ $training->course->title }}</h1>
 
         <form action="{{ route('teacher.tasks.store') }}" method="POST" class="row g-3">  {{-- Grid con gap reducido --}}
             @csrf
@@ -50,6 +51,7 @@
                 <button type="submit" class="btn btn-primary btn-sm">Crear Tarea</button>  {{-- Botón pequeño para densidad --}}
             </div>
         </form>
+        </div>
     </div>
 </div>
 @endsection

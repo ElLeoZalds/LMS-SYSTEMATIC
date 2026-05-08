@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">  {{-- Padding reducido --}}
+<div class="container-fluid px-4 py-4">
     <div class="mb-4">
-        <h1 class="h3 font-weight-bold">Resumen de Actividad</h1>
+        <h1 class="h3 mb-4 text-gray-800">Resumen de Actividad</h1>
         <p class="text-muted small">Vista general de tus capacitaciones y tareas recientes.</p>
     </div>
 

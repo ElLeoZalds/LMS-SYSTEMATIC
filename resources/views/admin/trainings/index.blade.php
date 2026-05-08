@@ -2,11 +2,11 @@
 
 @section('content')
 
-    <div class="container">
+    <div class="container-fluid px-4 py-4">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h2 class="mb-0">Capacitaciones</h2>
+                <h1 class="h3 mb-4 text-gray-800">Capacitaciones</h1>
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary btn-sm mt-2">Volver</a>
             </div>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTrainingModal">
@@ -14,8 +14,10 @@
             </button>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-sm table-striped table-hover">
+        <div class="card shadow mb-4">
+            <div class="card-body p-3">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover">
                 <thead>
                     <tr>
                         <th class="align-middle">Avatar</th>
@@ -75,6 +77,8 @@
                     @endforelse
                 </tbody>
             </table>
+                </div>
+            </div>
         </div>
 
         <!-- Modal -->

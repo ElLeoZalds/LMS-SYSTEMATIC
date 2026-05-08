@@ -4,9 +4,11 @@
 
 @section('content')
 
-    <h2 class="mb-4">Dashboard Administrador</h2>
+    <div class="container-fluid px-4 py-4">
 
-    <div class="row g-3">
+        <h1 class="h3 mb-4 text-gray-800">Dashboard Administrador</h1>
+
+        <div class="row g-3">
 
         <div class="col-md-3">
             <div class="card p-3 shadow-sm text-center">
@@ -64,4 +66,5 @@
 
     </table>
 
+    </div>
 @endsection

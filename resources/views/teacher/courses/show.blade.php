@@ -76,7 +76,7 @@
             
             <!-- Inicio / Dashboard -->
             @if(request('tab', 'inicio') === 'inicio')
-                <h2 class="h3 fw-bold text-dark mb-4">Panel del Curso</h2>
+                <h1 class="h3 mb-4 text-gray-800">Panel del Curso</h1>
                 
                 <!-- Quick Actions -->
                 <div class="row g-3 mb-4">

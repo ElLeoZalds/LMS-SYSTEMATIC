@@ -4,7 +4,7 @@
 <div class="container-fluid px-4 py-5">
     <!-- Header -->
     <div class="mb-5">
-        <h1 class="h2 fw-bold text-dark">Mis Capacitaciones</h1>
+        <h1 class="h3 mb-4 text-gray-800">Mis Capacitaciones</h1>
         <p class="text-muted">Accede a tus cursos y gestiona tus estudiantes</p>
     </div>
 

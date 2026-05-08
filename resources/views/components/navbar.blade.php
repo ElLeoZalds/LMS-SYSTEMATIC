@@ -1,51 +1,61 @@
-<nav class="navbar navbar-expand-lg bg-white border-bottom fixed-top">
-    <div class="container-fluid px-3">
+<!-- Topbar -->
+<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
-        <a href="/" class="navbar-brand">
-            Systematic
-        </a>
+    <!-- Sidebar Toggle (Topbar) -->
+    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+        <i class="fa fa-bars"></i>
+    </button>
 
-        @auth
-            @php
-                $role = optional(auth()->user()->roles->first())->name;
-            @endphp
+    <!-- Topbar Navbar -->
+    <ul class="navbar-nav ml-auto">
 
-            <div class="ms-auto dropdown">
-                <button class="btn btn-light d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+        <!-- Nav Item - User Information -->
+        <li class="nav-item dropdown no-arrow">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                    {{ auth()->user()->username }}
+                </span>
+                <img class="img-profile rounded-circle"
+                    src="{{ asset('img/undraw_profile.svg') }}">
+            </a>
+            <!-- Dropdown - User Information -->
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                aria-labelledby="userDropdown">
+                @php
+                    $role = optional(auth()->user()->roles->first())->name;
+                @endphp
 
-                    <i class="fa fa-user-circle fa-lg"></i>
+                @if($role === 'Teacher')
+                    <a class="dropdown-item" href="{{ route('teacher.dashboard') }}">
+                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Dashboard
+                    </a>
+                @elseif($role === 'Administrator')
+                    <a class="dropdown-item" href="{{ route('admin.dashboard') }}">
+                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Dashboard
+                    </a>
+                @else
+                    <a class="dropdown-item" href="{{ route('student.dashboard') }}">
+                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Dashboard
+                    </a>
+                @endif
 
-                    <span class="d-none d-md-inline">
-                        {{ auth()->user()->username }}
-                    </span>
-                </button>
-
-                <ul class="dropdown-menu dropdown-menu-end">
-
-                    @if($role === 'Teacher')
-                        <li><a class="dropdown-item" href="{{ route('teacher.dashboard') }}">Dashboard</a></li>
-                    @elseif($role === 'Administrator')
-                        <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                    @else
-                        <li><a class="dropdown-item" href="{{ route('student.dashboard') }}">Dashboard</a></li>
-                    @endif
-
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-
-                    <li>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button class="dropdown-item text-danger">
-                                Cerrar sesión
-                            </button>
-                        </form>
-                    </li>
-
-                </ul>
+                <div class="dropdown-divider"></div>
+                <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                    @csrf
+                    <button class="dropdown-item" type="submit">
+                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Cerrar sesión
+                    </button>
+                </form>
             </div>
-        @endauth
+        </li>
 
-    </div>
+    </ul>
+
+</nav>
+<!-- End of Topbar -->
 </nav>
