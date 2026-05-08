@@ -53,6 +53,27 @@
                 </a>
             </div>
         </div>
+
+        @if(request()->routeIs('teacher.attendance.*') || request()->routeIs('teacher.students'))
+            <div class="mb-3">
+                <h6 class="text-muted mb-2 small">Capacitación Actual</h6>
+                <div class="d-grid gap-2">
+                    @php $currentTrainingId = request()->route('id'); @endphp
+                    <a href="{{ route('teacher.attendance', $currentTrainingId) }}" class="btn {{ request()->routeIs('teacher.attendance.*') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
+                        <i class="bi bi-clipboard-check me-2"></i>📋 Asistencia
+                    </a>
+                    <a href="{{ route('teacher.students', $currentTrainingId) }}" class="btn {{ request()->routeIs('teacher.students') ? 'btn-primary' : 'btn-outline-primary' }} btn-sm">
+                        <i class="bi bi-people me-2"></i>🎓 Estudiantes
+                    </a>
+                    <a href="{{ route('teacher.tasks.create', $currentTrainingId) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-plus-circle me-2"></i>➕ Crear Tarea
+                    </a>
+                    <a href="#" class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="bi bi-star me-2"></i>📝 Calificaciones (próximamente)
+                    </a>
+                </div>
+            </div>
+        @endif
     @elseif($role === 'Student')
         <div class="mb-3">
             <h6 class="text-muted mb-2 small">General</h6>

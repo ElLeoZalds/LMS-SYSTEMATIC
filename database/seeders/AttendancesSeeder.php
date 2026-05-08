@@ -34,6 +34,114 @@ class AttendancesSeeder extends Seeder
                 'schedule_id' => 5,
                 'enrollment_id' => 5,
                 'attendance' => 'present'
+            ],
+            // Nuevas asistencias para training 1 (schedule 1)
+            [
+                'schedule_id' => 1,
+                'enrollment_id' => 6,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 1,
+                'enrollment_id' => 7,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 1,
+                'enrollment_id' => 8,
+                'attendance' => 'late'
+            ],
+            [
+                'schedule_id' => 1,
+                'enrollment_id' => 9,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 1,
+                'enrollment_id' => 10,
+                'attendance' => 'absent'
+            ],
+            [
+                'schedule_id' => 1,
+                'enrollment_id' => 11,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 1,
+                'enrollment_id' => 12,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 1,
+                'enrollment_id' => 13,
+                'attendance' => 'late'
+            ],
+            [
+                'schedule_id' => 1,
+                'enrollment_id' => 14,
+                'attendance' => 'present'
+            ],
+            // Training 2 (schedule 2)
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 15,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 16,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 17,
+                'attendance' => 'absent'
+            ],
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 18,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 19,
+                'attendance' => 'late'
+            ],
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 20,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 21,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 22,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 23,
+                'attendance' => 'absent'
+            ],
+            [
+                'schedule_id' => 2,
+                'enrollment_id' => 24,
+                'attendance' => 'present'
+            ],
+            // Training 3 (schedule 3)
+            [
+                'schedule_id' => 3,
+                'enrollment_id' => 25,
+                'attendance' => 'present'
+            ],
+            [
+                'schedule_id' => 3,
+                'enrollment_id' => 26,
+                'attendance' => 'late'
             ]
         ]);
     }

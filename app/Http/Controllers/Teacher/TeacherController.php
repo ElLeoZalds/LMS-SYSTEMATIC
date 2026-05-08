@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Training;
+use App\Models\Attendance;
+use App\Models\Assessment;
+use App\Models\Enrollment;
+use Illuminate\Support\Facades\DB;
 
 class TeacherController extends Controller
 {
@@ -12,18 +16,23 @@ class TeacherController extends Controller
     {
         $user = auth()->user();
 
-        $trainings = Training::with(['course', 'enrollments'])
-            ->withCount('enrollments')
-            ->where('teacher_id', $user->user_id)
+        // Estadísticas
+        $totalStudents = Enrollment::whereHas('training', fn($q) => $q->where('teacher_id', $user->user_id))->count();
+        $totalActiveTrainings = $user->trainings->where('status', 'A')->count();  // Asumiendo 'A' para activo
+        $totalTasks = Assessment::whereHas('training', fn($q) => $q->where('teacher_id', $user->user_id))->count();
+
+        // Actividad Reciente: Últimos 10 assessments
+        $recentActivities = Assessment::with('training.course')
+            ->whereHas('training', fn($q) => $q->where('teacher_id', $user->user_id))
+            ->latest('created_at')
+            ->take(10)
             ->get();
 
-        $totalCourses = $trainings->count();
-        $totalStudents = $trainings->sum('enrollments_count');
-
         return view('teacher.dashboard', compact(
-            'trainings',
-            'totalCourses',
-            'totalStudents'
+            'totalStudents',
+            'totalActiveTrainings',
+            'totalTasks',
+            'recentActivities'
         ));
     }
 
@@ -31,14 +40,33 @@ class TeacherController extends Controller
     {
         $user = auth()->user();
 
-        $courses = Training::with('course')
+        $trainings = Training::with('course')
             ->where('teacher_id', $user->user_id)
-            ->get()
-            ->pluck('course')
-            ->unique('course_id')
-            ->values();
+            ->get();
 
-        return view('teacher.courses.index', compact('courses'));
+        return view('teacher.courses.index', compact('trainings'));
+    }
+
+    public function show($id)
+    {
+        $user = auth()->user();
+
+        // Validar que el training pertenezca al docente (seguridad)
+        $training = Training::with([
+            'course',
+            'enrollments.student.person',
+            'assessments'
+        ])
+            ->where('training_id', $id)
+            ->where('teacher_id', $user->user_id)
+            ->firstOrFail();
+
+        // Contar estadísticas para el panel
+        $totalStudents = $training->enrollments->count();
+        $totalAssessments = $training->assessments->count();
+        $totalAttendanceRecords = Attendance::whereHas('schedule', fn($q) => $q->where('training_id', $id))->count();
+
+        return view('teacher.courses.show', compact('training', 'totalStudents', 'totalAssessments', 'totalAttendanceRecords'));
     }
 
     public function students($id)
@@ -57,5 +85,119 @@ class TeacherController extends Controller
         $students = $training->enrollments;
 
         return view('teacher.courses.students', compact('training', 'students'));
+    }
+
+    public function attendance($id)
+    {
+        $user = auth()->user();
+
+        $training = Training::with([
+            'course',
+            'enrollments.student.person'
+        ])
+            ->where('training_id', $id)
+            ->where('teacher_id', $user->user_id)
+            ->firstOrFail();
+
+        $students = $training->enrollments;
+
+        return view('teacher.attendance', compact('training', 'students'));
+    }
+
+    public function storeAttendance(Request $request)
+    {
+        $request->validate([
+            'training_id' => 'required|exists:trainings,training_id',
+            'attendances' => 'required|array',
+            'attendances.*.student_id' => 'required|exists:users,user_id',
+            'attendances.*.status' => 'required|in:P,A'
+        ]);
+
+        $user = auth()->user();
+
+        // Validar que el training pertenezca al docente
+        $training = Training::where('training_id', $request->training_id)
+            ->where('teacher_id', $user->user_id)
+            ->first();
+
+        if (!$training) {
+            abort(403, 'No autorizado: Este training no te pertenece.');
+        }
+
+        // Obtener IDs de estudiantes inscritos
+        $enrolledStudentIds = $training->enrollments->pluck('student_id')->toArray();
+
+        DB::transaction(function () use ($request, $enrolledStudentIds) {
+            $date = now()->toDateString();
+
+            foreach ($request->attendances as $attendance) {
+                // Validar que el estudiante esté inscrito
+                if (!in_array($attendance['student_id'], $enrolledStudentIds)) {
+                    continue; // O lanzar error, pero por simplicidad, ignorar
+                }
+
+                Attendance::updateOrCreate(
+                    [
+                        'training_id' => $request->training_id,
+                        'student_id' => $attendance['student_id'],
+                        'date' => $date
+                    ],
+                    [
+                        'status' => $attendance['status']
+                    ]
+                );
+            }
+        });
+
+        return redirect()->back()->with('success', 'Asistencia registrada correctamente.');
+    }
+
+    public function createTask($training_id)
+    {
+        $user = auth()->user();
+
+        // Validar propiedad del training
+        $training = Training::with('course')
+            ->where('training_id', $training_id)
+            ->where('teacher_id', $user->user_id)
+            ->firstOrFail();
+
+        return view('teacher.tasks.create', compact('training'));
+    }
+
+    public function storeTask(Request $request)
+    {
+        $request->validate([
+            'training_id' => 'required|exists:trainings,training_id',
+            'title' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'start_date' => 'nullable|date|before_or_equal:end_date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $user = auth()->user();
+
+        // Validar propiedad del training
+        $training = Training::where('training_id', $request->training_id)
+            ->where('teacher_id', $user->user_id)
+            ->first();
+
+        if (!$training) {
+            abort(403, 'No autorizado: Este training no te pertenece.');
+        }
+
+        // Crear la tarea en assessments
+        Assessment::create([
+            'training_id' => $request->training_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'start_date' => $request->start_date ?: now()->toDateString(),
+            'end_date' => $request->end_date,
+            'allowed_attempts' => 1,  // Fijado para tareas
+            'active' => true,
+        ]);
+
+        return redirect()->route('teacher.attendance', $request->training_id)
+            ->with('success', 'Tarea creada correctamente.');
     }
 }
