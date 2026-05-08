@@ -15,6 +15,7 @@ use App\Http\Controllers\EnrollmentController;
 | ROOT
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -81,4 +82,3 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'role:Student'])
 
     Route::get('/courses', [StudentController::class, 'courses'])->name('courses.index');
 });
-

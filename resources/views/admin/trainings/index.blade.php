@@ -20,7 +20,7 @@
                     <table class="table table-sm table-striped table-hover">
                 <thead>
                     <tr>
-                        <th class="align-middle">Avatar</th>
+                        <th class="align-middle"></th>
                         <th class="align-middle">Capacitación</th>
                         <th class="align-middle">Detalles</th>
                         <th class="align-middle">Estado</th>
