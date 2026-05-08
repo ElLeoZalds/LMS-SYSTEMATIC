@@ -16,6 +16,12 @@
                     @csrf
                     <input type="hidden" name="training_id" value="{{ $training->training_id }}">
 
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-success" onclick="markAllPresent()">
+                            Marcar Todos como Asistidos
+                        </button>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="table-light">
@@ -23,6 +29,7 @@
                                     <th class="text-dark small fw-bold">Estudiante</th>
                                     <th class="text-dark small fw-bold text-center">Presente</th>
                                     <th class="text-dark small fw-bold text-center">Ausente</th>
+                                    <th class="text-dark small fw-bold text-center">Justificado</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -43,6 +50,9 @@
                                         <td class="align-middle text-center">
                                             <input type="radio" name="attendances[{{ $loop->index }}][status]" value="A">
                                         </td>
+                                        <td class="align-middle text-center">
+                                            <input type="radio" name="attendances[{{ $loop->index }}][status]" value="J">
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -57,4 +67,13 @@
                 </form>
             </div>
         </div>
+
+        <script>
+            function markAllPresent() {
+                var radios = document.querySelectorAll('input[type="radio"][value="P"]');
+                radios.forEach(function(radio) {
+                    radio.checked = true;
+                });
+            }
+        </script>
 @endsection
