@@ -25,6 +25,12 @@ class Assessment extends Model
 
     public function questions()
     {
-        return $this->hasMany(Question::class, 'assessment_id', 'assessment_id');
+        return $this->hasMany(Question::class, 'assessment_id', 'assessment_id')
+            ->orderBy('order_index');
+    }
+
+    public function attempts()
+    {
+        return $this->hasMany(AssessmentAttempt::class, 'assessment_id', 'assessment_id');
     }
 }

@@ -87,10 +87,15 @@
                                             Intentos: {{ $assessment->allowed_attempts ?? 1 }}
                                         </small>
                                     </div>
-                                    <div class="text-end">
-                                        <span class="badge bg-{{ $assessment->active ? 'success' : 'secondary' }} mb-2">
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <span class="badge bg-{{ $assessment->active ? 'success' : 'secondary' }}">
                                             {{ $assessment->active ? 'Activo' : 'Inactivo' }}
                                         </span>
+                                        @if($assessment->active)
+                                            <a href="{{ route('student.assessment.take', $assessment->assessment_id) }}" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-pencil-square me-1"></i>Tomar examen
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

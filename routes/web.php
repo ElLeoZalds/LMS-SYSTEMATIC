@@ -88,4 +88,7 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'role:Student'])
 
     Route::get('/courses', [StudentController::class, 'courses'])->name('courses.index');
     Route::get('/courses/{id}', [StudentCourseController::class, 'show'])->name('courses.show');
+
+    Route::get('/assessment/{id}/take', [StudentCourseController::class, 'takeExam'])->name('assessment.take');
+    Route::post('/assessment/{id}/submit', [StudentCourseController::class, 'submitExam'])->name('assessment.submit');
 });
