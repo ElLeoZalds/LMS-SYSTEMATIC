@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Training;
 use App\Models\Attendance;
 use App\Models\Assessment;
+use App\Models\AssessmentAttempt;
 use App\Models\Enrollment;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +21,10 @@ class TeacherController extends Controller
         $totalActiveTrainings = $user->trainings->where('status', 'A')->count();
         $totalTasks = Assessment::whereHas('training', fn($q) => $q->where('teacher_id', $user->user_id))->count();
 
+        $totalAttempts = AssessmentAttempt::whereHas('assessment.training', fn($q) => $q->where('teacher_id', $user->user_id))->count();
+        $averageScore = AssessmentAttempt::whereHas('assessment.training', fn($q) => $q->where('teacher_id', $user->user_id))->avg('score');
+        $averageScore = $averageScore !== null ? round($averageScore, 2) : 0;
+
         $recentActivities = Assessment::with('training.course')
             ->whereHas('training', fn($q) => $q->where('teacher_id', $user->user_id))
             ->latest('created_at')
@@ -30,6 +35,8 @@ class TeacherController extends Controller
             'totalStudents',
             'totalActiveTrainings',
             'totalTasks',
+            'totalAttempts',
+            'averageScore',
             'recentActivities'
         ));
     }

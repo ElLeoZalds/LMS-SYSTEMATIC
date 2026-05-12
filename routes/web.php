@@ -75,7 +75,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])
     Route::get('/tasks/create/{training_id}', [TeacherController::class, 'createTask'])->name('tasks.create');
     Route::post('/tasks/store', [TeacherController::class, 'storeTask'])->name('tasks.store');
 
-    Route::resource('assessments', AssessmentController::class)->only(['index', 'show', 'store']);
+    Route::resource('assessments', AssessmentController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::post('assessments/{assessment}/questions', [AssessmentController::class, 'addQuestion'])->name('assessments.questions.store');
 });
 

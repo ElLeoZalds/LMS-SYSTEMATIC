@@ -103,4 +103,69 @@ class AssessmentController extends Controller
         return redirect()->route('teacher.assessments.show', $assessment->training->training_id)
             ->with('success', 'Pregunta agregada correctamente.');
     }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'allowed_attempts' => 'required|integer|min:1',
+            'active' => 'sometimes|boolean',
+        ]);
+
+        $user = auth()->user();
+
+        $assessment = Assessment::with('training')
+            ->where('assessment_id', $id)
+            ->firstOrFail();
+
+        if ($assessment->training->teacher_id !== $user->user_id) {
+            abort(403, 'No autorizado.');
+        }
+
+        if ($assessment->attempts()->exists()) {
+            return redirect()->back()->withErrors([
+                'assessment' => 'No se puede modificar una evaluación que ya tiene intentos registrados'
+            ]);
+        }
+
+        $assessment->update([
+            'title' => $request->title,
+            'description' => $request->description ?? null,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'allowed_attempts' => $request->allowed_attempts,
+            'active' => $request->has('active'),
+        ]);
+
+        return redirect()->route('teacher.assessments.show', $assessment->training->training_id)
+            ->with('success', 'Evaluación actualizada correctamente.');
+    }
+
+    public function destroy($id)
+    {
+        $user = auth()->user();
+
+        $assessment = Assessment::with('training')
+            ->where('assessment_id', $id)
+            ->firstOrFail();
+
+        if ($assessment->training->teacher_id !== $user->user_id) {
+            abort(403, 'No autorizado.');
+        }
+
+        if ($assessment->attempts()->exists()) {
+            return redirect()->back()->withErrors([
+                'assessment' => 'No se puede modificar una evaluación que ya tiene intentos registrados'
+            ]);
+        }
+
+        $trainingId = $assessment->training->training_id;
+        $assessment->delete();
+
+        return redirect()->route('teacher.assessments.show', $trainingId)
+            ->with('success', 'Evaluación eliminada correctamente.');
+    }
 }

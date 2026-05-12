@@ -7,6 +7,28 @@
             <p class="text-muted small">Vista general de tus capacitaciones y tareas recientes.</p>
         </div>
 
+        {{-- KPIs de rendimiento docente --}}
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm p-3">
+                    <div class="card-body text-center">
+                        <i class="bi bi-bar-chart-fill text-info h4 mb-2"></i>
+                        <h5 class="card-title h6 fw-bold">{{ number_format($averageScore, 2, ',', '.') }}</h5>
+                        <p class="card-text small text-muted">Promedio de notas en exámenes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm p-3">
+                    <div class="card-body text-center">
+                        <i class="bi bi-journal-check text-success h4 mb-2"></i>
+                        <h5 class="card-title h6 fw-bold">{{ $totalAttempts }}</h5>
+                        <p class="card-text small text-muted">Total de intentos de examen</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Sección de Estadísticas --}}
         <div class="row g-3 mb-5"> {{-- Gap reducido --}}
             <div class="col-md-4">
@@ -15,7 +37,6 @@
                         <i class="bi bi-people-fill text-primary h4 mb-2"></i>
                         <h5 class="card-title h6 fw-bold">{{ $totalStudents }}</h5>
                         <p class="card-text small text-muted">Total de Alumnos</p>
-                    </div>
                 </div>
             </div>
             <div class="col-md-4">
