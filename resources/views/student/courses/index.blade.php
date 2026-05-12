@@ -50,9 +50,9 @@
                             </td>
 
                             <td class="align-middle text-end">
-                                <button class="btn btn-sm btn-success" onclick="continueLearning({{ $course->course_id }})">
+                                <a href="{{ route('student.courses.show', optional($course->trainings->first())->training_id) }}" class="btn btn-sm btn-success">
                                     <i class="bi bi-play-circle me-1"></i>Continuar aprendiendo
-                                </button>
+                                </a>
                             </td>
                         </tr>
                     @empty
@@ -67,12 +67,4 @@
         </div>
 
     </div>
-
-    <script>
-        function continueLearning(courseId) {
-            // Lógica para continuar el curso (redirigir a la lección actual)
-            window.location.href = `/student/courses/${courseId}/learn`;
-        }
-    </script>
-
 @endsection

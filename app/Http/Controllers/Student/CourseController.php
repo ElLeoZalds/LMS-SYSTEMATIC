@@ -28,7 +28,16 @@ class CourseController extends Controller
             ->where('training_id', $id)
             ->firstOrFail();
 
-        return view('student.courses.show', compact('training'));
+        $enrollment = Enrollment::where('student_id', $studentId)
+            ->where('training_id', $id)
+            ->firstOrFail();
+
+        $attempts = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
+            ->with('assessment')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('student.courses.show', compact('training', 'attempts'));
     }
 
     public function takeExam($assessment_id)
@@ -112,9 +121,9 @@ class CourseController extends Controller
         if ($elapsedSeconds > $maxSeconds) {
             $attempt->score = 0;
             $attempt->save();
+            $attempt->load('assessment');
 
-            return redirect()->route('student.courses.show', $assessment->training_id)
-                ->with('error', 'Se excedió el tiempo de la evaluación. El intento se registró con puntaje 0.');
+            return view('student.assessments.result', compact('attempt'));
         }
 
         $totalScore = 0;
@@ -136,9 +145,10 @@ class CourseController extends Controller
 
         $attempt->score = $totalScore;
         $attempt->save();
+        $attempt->load('assessment');
 
-        return redirect()->route('student.courses.show', $assessment->training_id)
-            ->with('success', "Evaluación completada. Tu puntaje: {$totalScore} puntos.");
+        return view('student.assessments.result', compact('attempt'));
+
     }
 
     private function validateAssessmentAvailability(Assessment $assessment)

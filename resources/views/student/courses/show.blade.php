@@ -104,5 +104,51 @@
                 @endif
             </div>
         </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="card-title fw-bold mb-1">Mi progreso en evaluaciones</h5>
+                        <p class="text-muted small mb-0">Revisa tus intentos y resultados del curso.</p>
+                    </div>
+                </div>
+
+                @if(isset($attempts) && $attempts->isNotEmpty())
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Evaluación</th>
+                                    <th>Fecha</th>
+                                    <th>Puntaje</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($attempts as $attempt)
+                                    <tr>
+                                        <td>{{ $attempt->assessment->title ?? 'Sin evaluación' }}</td>
+                                        <td>{{ optional($attempt->created_at)->format('d/m/Y H:i') }}</td>
+                                        <td>{{ $attempt->score }}</td>
+                                        <td>
+                                            @if($attempt->score > 0)
+                                                <span class="badge bg-success">Aprobado</span>
+                                            @else
+                                                <span class="badge bg-danger">Reprobado</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="alert alert-info mb-0" role="alert">
+                        No tienes intentos registrados para este curso aún.
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
 @endsection
