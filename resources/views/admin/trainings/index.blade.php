@@ -43,11 +43,21 @@
                                         </div>
                                     </td>
                                     <td class="align-middle">
-                                        <div class="text-muted small">
-                                            <div><strong>Inicio:</strong> {{ $training->start_date ? $training->start_date->format('d/m/Y') : 'Sin fecha' }}</div>
-                                            <div><strong>Fin:</strong> {{ $training->end_date ? $training->end_date->format('d/m/Y') : 'Sin fecha' }}</div>
-                                            <div><strong>Horario:</strong> {{ $training->schedule ?? 'Sin horario' }}</div>
-                                        </div>
+                                        @if(!$training->start_date && !$training->end_date && !$training->schedule)
+                                            <span class="badge bg-light text-secondary border">Pendiente de Programación</span>
+                                        @else
+                                            <div class="text-muted small">
+                                                @if($training->start_date)
+                                                    <div><strong>Inicio:</strong> {{ $training->start_date->format('d M Y') }}</div>
+                                                @endif
+                                                @if($training->end_date)
+                                                    <div><strong>Fin:</strong> {{ $training->end_date->format('d M Y') }}</div>
+                                                @endif
+                                                @if($training->schedule)
+                                                    <div><strong>Horario:</strong> {{ $training->schedule }}</div>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="align-middle">
                                         @php
@@ -61,10 +71,9 @@
                                         <span class="badge {{ $badgeClass }}">{{ ucfirst($training->modality) }}</span>
                                     </td>
                                     <td class="align-middle text-end">
-                                        <button class="btn btn-sm btn-success enroll-btn" data-toggle="modal" data-target="#enrollStudentModal"
-                                                data-training-id="{{ $training->training_id }}" data-training-name="{{ optional($training->course)->title ?? 'Sin curso' }}">
+                                        <a href="{{ route('admin.enrollments.create') }}" class="btn btn-sm btn-success">
                                             <i class="fas fa-user-plus"></i>
-                                        </button>
+                                        </a>
                                         <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $training->training_id }}"
                                             data-course="{{ $training->course_id }}" data-teacher="{{ $training->teacher_id }}"
                                             data-modality="{{ $training->modality }}" data-price="{{ $training->price }}">

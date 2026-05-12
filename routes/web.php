@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController;
 use App\Http\Controllers\Teacher\TeacherController;
 use App\Http\Controllers\Teacher\AssessmentController;
 use App\Http\Controllers\Student\StudentController;
@@ -51,6 +52,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Administrator'
     Route::resource('courses', CourseController::class);
     Route::resource('trainings', TrainingController::class);
     Route::post('trainings/{training}/enroll', [TrainingController::class, 'enroll'])->name('trainings.enroll');
+    Route::get('enrollments/create', [AdminEnrollmentController::class, 'create'])->name('enrollments.create');
+    Route::post('enrollments/store', [AdminEnrollmentController::class, 'store'])->name('enrollments.store');
     Route::resource('specialties', SpecialtyController::class);
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index']);
 });
