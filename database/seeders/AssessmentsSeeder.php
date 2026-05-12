@@ -12,8 +12,8 @@ class AssessmentsSeeder extends Seeder
         DB::table('assessments')->insert([
             [
                 'training_id' => 1,
-                'title' => 'Basic Excel Assessment',
-                'description' => 'Basic Excel knowledge evaluation',
+                'title' => 'Evaluación básica de Excel',
+                'description' => 'Evaluación de conocimientos básicos de Excel',
                 'start_date' => now(),
                 'end_date' => now()->addDays(7),
                 'allowed_attempts' => 3,
@@ -23,8 +23,8 @@ class AssessmentsSeeder extends Seeder
             ],
             [
                 'training_id' => 2,
-                'title' => 'Office Suite Assessment',
-                'description' => 'Evaluation of office tools',
+                'title' => 'Evaluación de suite ofimática',
+                'description' => 'Evaluación de herramientas ofimáticas',
                 'start_date' => now(),
                 'end_date' => now()->addDays(7),
                 'allowed_attempts' => 2,
@@ -34,8 +34,8 @@ class AssessmentsSeeder extends Seeder
             ],
             [
                 'training_id' => 3,
-                'title' => 'AutoCAD Assessment',
-                'description' => 'Technical design evaluation in AutoCAD',
+                'title' => 'Evaluación de AutoCAD',
+                'description' => 'Evaluación de diseño técnico en AutoCAD',
                 'start_date' => now(),
                 'end_date' => now()->addDays(7),
                 'allowed_attempts' => 2,
@@ -45,8 +45,8 @@ class AssessmentsSeeder extends Seeder
             ],
             [
                 'training_id' => 4,
-                'title' => 'Revit Assessment',
-                'description' => 'BIM modeling evaluation in Revit',
+                'title' => 'Evaluación de Revit',
+                'description' => 'Evaluación de modelado BIM en Revit',
                 'start_date' => now(),
                 'end_date' => now()->addDays(7),
                 'allowed_attempts' => 2,
@@ -56,8 +56,8 @@ class AssessmentsSeeder extends Seeder
             ],
             [
                 'training_id' => 5,
-                'title' => 'Public Speaking Assessment',
-                'description' => 'Oral communication skills evaluation',
+                'title' => 'Evaluación de oratoria',
+                'description' => 'Evaluación de habilidades de comunicación oral',
                 'start_date' => now(),
                 'end_date' => now()->addDays(7),
                 'allowed_attempts' => 3,

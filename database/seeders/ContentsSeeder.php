@@ -12,50 +12,50 @@ class ContentsSeeder extends Seeder
         DB::table('contents')->insert([
             [
                 'training_id' => 1,
-                'description' => 'Introduction to Excel and working environment',
-                'title' => 'Excel Fundamentals',
+                'description' => 'Introducción a Excel y al entorno de trabajo',
+                'title' => 'Fundamentos de Excel',
                 'type' => 'Video',
                 'order_index' => 1
             ],
             [
                 'training_id' => 1,
-                'description' => 'Basic functions and formulas',
-                'title' => 'Basic Formulas',
+                'description' => 'Funciones y fórmulas básicas',
+                'title' => 'Fórmulas básicas',
                 'type' => 'Document',
                 'order_index' => 2
             ],
             [
                 'training_id' => 2,
-                'description' => 'Word, Excel and PowerPoint tools',
-                'title' => 'Basic Office Suite',
+                'description' => 'Herramientas de Word, Excel y PowerPoint',
+                'title' => 'Suite ofimática básica',
                 'type' => 'Video',
                 'order_index' => 1
             ],
             [
                 'training_id' => 3,
-                'description' => 'Introduction to technical design',
-                'title' => 'AutoCAD Basics',
+                'description' => 'Introducción al diseño técnico',
+                'title' => 'Conceptos básicos de AutoCAD',
                 'type' => 'Video',
                 'order_index' => 1
             ],
             [
                 'training_id' => 4,
-                'description' => 'BIM architectural modeling',
-                'title' => 'Revit Introduction',
+                'description' => 'Modelado arquitectónico BIM',
+                'title' => 'Introducción a Revit',
                 'type' => 'Video',
                 'order_index' => 1
             ],
             [
                 'training_id' => 5,
-                'description' => 'Oral communication techniques',
-                'title' => 'Basic Public Speaking',
+                'description' => 'Técnicas de comunicación oral',
+                'title' => 'Oratoria básica',
                 'type' => 'Document',
                 'order_index' => 1
             ],
             [
                 'training_id' => 6,
-                'description' => 'Graphic design tools',
-                'title' => 'Intro to Graphic Design',
+                'description' => 'Herramientas de diseño gráfico',
+                'title' => 'Introducción al diseño gráfico',
                 'type' => 'Video',
                 'order_index' => 1
             ]

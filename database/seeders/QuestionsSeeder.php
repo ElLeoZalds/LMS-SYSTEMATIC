@@ -12,37 +12,37 @@ class QuestionsSeeder extends Seeder
         DB::table('questions')->insert([
             [
                 'assessment_id' => 1,
-                'question_text' => 'What is a cell in Excel?',
+                'question_text' => '¿Qué es una celda en Excel?',
                 'score' => 10,
                 'order_index' => 1
             ],
             [
                 'assessment_id' => 1,
-                'question_text' => 'How do you perform a sum in Excel?',
+                'question_text' => '¿Cómo se realiza una suma en Excel?',
                 'score' => 10,
                 'order_index' => 2
             ],
             [
                 'assessment_id' => 2,
-                'question_text' => 'What tools are included in office software?',
+                'question_text' => '¿Qué herramientas incluye el software de oficina?',
                 'score' => 10,
                 'order_index' => 1
             ],
             [
                 'assessment_id' => 3,
-                'question_text' => 'What is AutoCAD used for?',
+                'question_text' => '¿Para qué se utiliza AutoCAD?',
                 'score' => 10,
                 'order_index' => 1
             ],
             [
                 'assessment_id' => 4,
-                'question_text' => 'What is BIM modeling in Revit?',
+                'question_text' => '¿Qué es el modelado BIM en Revit?',
                 'score' => 10,
                 'order_index' => 1
             ],
             [
                 'assessment_id' => 5,
-                'question_text' => 'What techniques improve public speaking?',
+                'question_text' => '¿Qué técnicas mejoran la oratoria?',
                 'score' => 10,
                 'order_index' => 1
             ]

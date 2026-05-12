@@ -11,22 +11,22 @@ class PaymentMethodsSeeder extends Seeder
     {
         DB::table('payment_methods')->insert([
             [
-                'payment_method' => 'Cash',
+                'payment_method' => 'Efectivo',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
-                'payment_method' => 'Credit Card',
+                'payment_method' => 'Tarjeta de crédito',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
-                'payment_method' => 'Debit Card',
+                'payment_method' => 'Tarjeta de débito',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
-                'payment_method' => 'Bank Transfer',
+                'payment_method' => 'Transferencia bancaria',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
