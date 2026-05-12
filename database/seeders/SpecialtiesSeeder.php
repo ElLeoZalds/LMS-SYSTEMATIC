@@ -9,84 +9,39 @@ class SpecialtiesSeeder extends Seeder
 {
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('courses')->truncate();
+        DB::table('specialties')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         DB::table('specialties')->insert([
             [
-                'specialty' => 'Professional Excel',
+                'specialty' => 'Ofimática y Análisis de Datos',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
-                'specialty' => 'Professional Office Suite',
+                'specialty' => 'Diseño, Arquitectura e Ingeniería',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
-                'specialty' => 'Professional AutoCAD',
+                'specialty' => 'Programación y Tecnología',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
-                'specialty' => 'Professional Revit',
+                'specialty' => 'Robótica y Tecnología Educativa',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
-                'specialty' => 'Public Speaking',
+                'specialty' => 'Marketing y Producción Multimedia',
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
-                'specialty' => 'Graphic Design',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'Power BI',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'Robotics for Kids and Teens',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'Computer Assembly',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'Video Game Development',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'Python Programming',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'SAP ERP',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'Applied Artificial Intelligence',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'Digital Marketing',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'Video Editing',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'specialty' => 'Professional Surveying',
+                'specialty' => 'Desarrollo Personal y Comunicación',
                 'created_at' => now(),
                 'updated_at' => now()
             ]

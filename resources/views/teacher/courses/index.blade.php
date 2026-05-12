@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid px-4 py-5">
+    <div class="container-fluid px-4 py-1">
         <!-- Header -->
         <div class="mb-5">
             <h1 class="h3 mb-4 text-gray-800">Mis Capacitaciones</h1>

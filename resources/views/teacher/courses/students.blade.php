@@ -2,7 +2,7 @@
 
 @section('content')
 
-    <div class="container-fluid px-4 py-4">
+    <div class="container-fluid px-4 py-1">
 
         <h1 class="h3 mb-4 text-gray-800">
             Estudiantes del curso: {{ $training->course->title }}

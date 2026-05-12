@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid px-4 py-4">
+    <div class="container-fluid px-4 py-1">
         <!-- Header Section -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -211,40 +211,93 @@
 
                     <!-- Contenido/Tareas -->
                 @elseif(request('tab') === 'contenido')
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Contenido y Tareas</h5>
-                        <a href="{{ route('teacher.tasks.create', $training->training_id) }}" class="btn btn-sm btn-success">
-                            <i class="bi bi-plus-lg me-1"></i>Nueva Tarea
-                        </a>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-2">Contenido y Tareas</h5>
+                            <p class="text-muted small mb-0">
+                                Inicio: <strong>{{ $training->start_date ? \Carbon\Carbon::parse($training->start_date)->format('d/m/Y') : 'Sin fecha' }}</strong>
+                                · Fin: <strong>{{ $training->end_date ? \Carbon\Carbon::parse($training->end_date)->format('d/m/Y') : 'Sin fecha' }}</strong>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#createAssessmentModal" data-bs-toggle="modal" data-bs-target="#createAssessmentModal">
+                                <i class="bi bi-plus-lg me-1"></i>Nueva Evaluación
+                            </button>
+                            <a href="{{ route('teacher.tasks.create', $training->training_id) }}" class="btn btn-sm btn-success">
+                                <i class="bi bi-plus-lg me-1"></i>Nueva Tarea
+                            </a>
+                        </div>
                     </div>
 
                     @if($training->assessments->count() > 0)
-                        <div class="row g-3">
-                            @foreach($training->assessments as $assessment)
-                                <div class="col-12">
-                                    <div class="card border-start border-primary border-3 shadow-sm mb-0">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <h6 class="card-title fw-bold text-dark mb-2">{{ $assessment->title }}</h6>
-                                                    <p class="card-text text-muted small mb-0">{{ $assessment->description }}</p>
+                        <div class="row g-3 mb-4">
+                            <div class="col-lg-8">
+                                <div class="card shadow-sm border-0">
+                                    <div class="card-header bg-light py-3">
+                                        <h6 class="mb-0 fw-bold">Evaluaciones creadas</h6>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Título</th>
+                                                    <th class="text-center">Inicio</th>
+                                                    <th class="text-center">Fin</th>
+                                                    <th class="text-center">Intentos</th>
+                                                    <th class="text-center">Estado</th>
+                                                    <th class="text-end">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($training->assessments as $assessment)
+                                                    <tr>
+                                                        <td>{{ $assessment->title }}</td>
+                                                        <td class="text-center">{{ $assessment->start_date ? \Carbon\Carbon::parse($assessment->start_date)->format('d/m/Y') : 'Sin fecha' }}</td>
+                                                        <td class="text-center">{{ $assessment->end_date ? \Carbon\Carbon::parse($assessment->end_date)->format('d/m/Y') : 'Sin fecha' }}</td>
+                                                        <td class="text-center">{{ $assessment->allowed_attempts }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge @if($assessment->active) bg-success @else bg-secondary @endif">{{ $assessment->active ? 'Activo' : 'Inactivo' }}</span>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info">
+                                                                <i class="bi bi-pencil-square"></i> Gestionar Preguntas
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="card shadow-sm border-0 h-100">
+                                    <div class="card-header bg-light py-3">
+                                        <h6 class="mb-0 fw-bold">Tareas existentes</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted small mb-3">Las tareas creadas para este curso se muestran aquí.</p>
+                                        <div class="list-group list-group-flush">
+                                            @foreach($training->assessments as $assessment)
+                                                <div class="list-group-item px-0 border-0">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div>
+                                                            <div class="fw-semibold">{{ $assessment->title }}</div>
+                                                            <small class="text-muted">{{ $assessment->start_date ? \Carbon\Carbon::parse($assessment->start_date)->format('d/m/Y') : 'Sin fecha' }} — {{ $assessment->end_date ? \Carbon\Carbon::parse($assessment->end_date)->format('d/m/Y') : 'Sin fecha' }}</small>
+                                                        </div>
+                                                        <span class="badge @if($assessment->active) bg-success @else bg-secondary @endif">{{ $assessment->active ? 'Activo' : 'Inactivo' }}</span>
+                                                    </div>
                                                 </div>
-                                                <span class="badge @if($assessment->active) bg-success @else bg-secondary @endif ms-2">
-                                                    {{ $assessment->active ? 'Activa' : 'Inactiva' }}
-                                                </span>
-                                            </div>
-                                            <small class="text-muted d-block mt-2">
-                                                <i class="bi bi-calendar-event me-1"></i>Vencimiento:
-                                                <strong>{{ $assessment->end_date->format('d/m/Y') }}</strong>
-                                            </small>
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            </div>
                         </div>
                     @else
                         <div class="alert alert-info text-center mb-0" role="alert">
-                            <i class="bi bi-inbox me-2"></i>No hay tareas creadas aún.
+                            <i class="bi bi-inbox me-2"></i>No hay tareas ni evaluaciones creadas aún.
                         </div>
                     @endif
 
@@ -256,6 +309,56 @@
                         <i class="bi bi-exclamation-triangle me-2"></i>El módulo de calificaciones estará disponible pronto.
                     </div>
                 @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Crear Evaluación -->
+    <div class="modal fade" id="createAssessmentModal" tabindex="-1" role="dialog" aria-labelledby="createAssessmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createAssessmentModalLabel">Nueva Evaluación</h5>
+                    <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('teacher.assessments.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="training_id" value="{{ $training->training_id }}">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="assessment-title" class="form-label">Título</label>
+                            <input type="text" name="title" id="assessment-title" class="form-control" required>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="assessment-description" class="form-label">Descripción</label>
+                            <textarea name="description" id="assessment-description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="assessment-start-date" class="form-label">Fecha de inicio</label>
+                                <input type="date" name="start_date" id="assessment-start-date" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="assessment-end-date" class="form-label">Fecha de fin</label>
+                                <input type="date" name="end_date" id="assessment-end-date" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="assessment-allowed-attempts" class="form-label">Intentos permitidos</label>
+                            <input type="number" name="allowed_attempts" id="assessment-allowed-attempts" class="form-control" min="1" value="1" required>
+                        </div>
+                        <div class="form-check mt-3">
+                            <input type="checkbox" name="active" id="assessment-active" class="form-check-input" checked>
+                            <label class="form-check-label" for="assessment-active">Activo</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Evaluación</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

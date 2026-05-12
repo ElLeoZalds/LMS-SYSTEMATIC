@@ -9,23 +9,9 @@ class TeacherSpecialtiesSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('teacher_specialties')->insert([
-            [
-                'user_id' => 2,
-                'specialty_id' => 1
-            ],
-            [
-                'user_id' => 2,
-                'specialty_id' => 2
-            ],
-            [
-                'user_id' => 3,
-                'specialty_id' => 3
-            ],
-            [
-                'user_id' => 3,
-                'specialty_id' => 4
-            ]
-        ]);
+        DB::table('teacher_specialties')->truncate();
+
+        // Note: Specialty IDs have changed. Update assignments as needed.
+        // For now, leaving empty to avoid invalid references.
     }
 }

@@ -12,10 +12,18 @@ class Training extends Model
         'course_id',
         'teacher_id',
         'administrator_id',
-        'modality',
+        'start_date',
+        'end_date',
+        'schedule',
         'price',
         'creation_date',
         'status'
+    ];
+
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'price' => 'decimal:2',
     ];
 
     public function course()

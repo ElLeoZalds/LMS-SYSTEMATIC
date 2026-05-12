@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid px-4 py-4">
+    <div class="container-fluid px-4 py-1">
         <div class="mb-3">
             <a href="{{ route('teacher.courses') }}" class="text-decoration-none small">
                 <i class="bi bi-arrow-left me-2"></i>Volver a mis cursos

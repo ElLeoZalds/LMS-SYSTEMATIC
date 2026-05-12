@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Training;
 use App\Models\Course;
 use App\Models\User;
+use App\Models\Enrollment;
 
 class TrainingController extends Controller
 {
@@ -22,8 +23,9 @@ class TrainingController extends Controller
 
         $courses = Course::all();
         $teachers = User::whereHas('roles', fn($q) => $q->where('name', 'Teacher'))->get();
+        $students = User::whereHas('roles', fn($q) => $q->where('name', 'Student'))->with('person')->get();
 
-        return view('admin.trainings.index', compact('trainings', 'courses', 'teachers'));
+        return view('admin.trainings.index', compact('trainings', 'courses', 'teachers', 'students'));
     }
 
     /**
@@ -44,7 +46,9 @@ class TrainingController extends Controller
         $request->validate([
             'course_id' => 'required|exists:courses,course_id',
             'teacher_id' => 'required|exists:users,user_id',
-            'modality' => 'required|in:virtual,presential,hybrid',
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'schedule' => 'required|string|max:255',
             'price' => 'required|numeric|min:0.01',
         ]);
 
@@ -52,15 +56,15 @@ class TrainingController extends Controller
             'course_id' => $request->course_id,
             'teacher_id' => $request->teacher_id,
             'administrator_id' => auth()->id(),
-            'modality' => $request->modality,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'schedule' => $request->schedule,
             'price' => $request->price,
             'creation_date' => now()->toDateString(),
             'status' => 'A',
         ]);
 
-        return redirect()
-            ->route('admin.trainings.index')
-            ->with('success', 'Training creado correctamente');
+        return response()->json(['success' => true, 'message' => 'Capacitación creada correctamente']);
     }
 
     /**
@@ -111,5 +115,33 @@ class TrainingController extends Controller
         return redirect()
             ->route('admin.trainings.index')
             ->with('success', 'Training eliminado correctamente');
+    }
+
+    /**
+     * Enroll a student in a training.
+     */
+    public function enroll(Request $request, Training $training)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:users,user_id',
+        ]);
+
+        // Check if already enrolled
+        $exists = Enrollment::where('training_id', $training->training_id)
+                            ->where('student_id', $request->student_id)
+                            ->exists();
+
+        if ($exists) {
+            return response()->json(['success' => false, 'message' => 'El alumno ya está inscrito en este curso.']);
+        }
+
+        Enrollment::create([
+            'training_id' => $training->training_id,
+            'student_id' => $request->student_id,
+            'enrollment_date' => now(),
+            'status' => 'A',
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Alumno inscrito exitosamente.']);
     }
 }

@@ -86,19 +86,43 @@
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    {{-- ALERTAS --}}
+                    {{-- ALERTAS TOAST CON SWEETALERT --}}
                     @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
+                        <script>
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: '{{ session('success') }}',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                backdrop: false,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            });
+                        </script>
                     @endif
 
                     @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
+                        <script>
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: '{{ session('error') }}',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                backdrop: false,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            });
+                        </script>
                     @endif
 
                     @yield('content')
@@ -132,6 +156,7 @@
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 
+    @stack('scripts')
 </body>
 
 </html>

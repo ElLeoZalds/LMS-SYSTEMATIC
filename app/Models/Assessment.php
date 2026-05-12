@@ -22,4 +22,9 @@ class Assessment extends Model
     {
         return $this->belongsTo(Training::class, 'training_id', 'training_id');
     }
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class, 'assessment_id', 'assessment_id');
+    }
 }

@@ -347,6 +347,45 @@ class PeopleSeeder extends Seeder
                 'birth_date' => '1995-12-02',
                 'created_at' => now(),
                 'updated_at' => now()
+            ],
+            [
+                'last_names' => 'Vega Torres',
+                'first_names' => 'Roberto Carlos',
+                'document_type' => 'DNI',
+                'document_number' => '10000027',
+                'phone' => '911112233',
+                'address' => 'Av. Libertad 2020',
+                'email' => 'roberto.vega.027@example.com',
+                'gender' => 'M',
+                'birth_date' => '1985-03-14',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'last_names' => 'Luna Morales',
+                'first_names' => 'Sofia Isabel',
+                'document_type' => 'DNI',
+                'document_number' => '10000028',
+                'phone' => '922223344',
+                'address' => 'Calle Union 2121',
+                'email' => 'sofia.luna.028@example.com',
+                'gender' => 'F',
+                'birth_date' => '1992-07-25',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'last_names' => 'Ponce Reyes',
+                'first_names' => 'Diego Alejandro',
+                'document_type' => 'DNI',
+                'document_number' => '10000029',
+                'phone' => '933334455',
+                'address' => 'Jr. Bolivar 2222',
+                'email' => 'diego.ponce.029@example.com',
+                'gender' => 'M',
+                'birth_date' => '1988-11-30',
+                'created_at' => now(),
+                'updated_at' => now()
             ]
         ]);
     }

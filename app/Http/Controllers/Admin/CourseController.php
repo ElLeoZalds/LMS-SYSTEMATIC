@@ -58,11 +58,21 @@ class CourseController extends Controller
     {
         $course = Course::findOrFail($id);
 
-        $course->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'reference_price' => $request->reference_price
+        $request->validate([
+            'specialty_id' => 'required|exists:specialties,specialty_id',
+            'title' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'hours_count' => 'nullable|integer|min:0',
+            'reference_price' => 'nullable|numeric|min:0',
         ]);
+
+        $course->update($request->only([
+            'specialty_id',
+            'title',
+            'description',
+            'hours_count',
+            'reference_price'
+        ]));
 
         return redirect()->route('admin.courses.index')
             ->with('success', 'Curso actualizado');
