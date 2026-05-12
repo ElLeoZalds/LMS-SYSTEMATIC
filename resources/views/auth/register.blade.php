@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Login - Systematic')
+@section('title', 'Registro - Systematic')
 
 @section('content')
 
@@ -10,54 +10,53 @@
 
             <div class="text-center mb-4">
                 <img src="{{ asset('images/Systematic_logo.png') }}" width="140">
-                <h4 class="mt-3 brand">Bienvenido a Systematic</h4>
-                <p class="text-muted">Inicia sesión para continuar</p>
+                <h4 class="mt-3 brand">Crea tu cuenta</h4>
+                <p class="text-muted">Regístrate para acceder a tus cursos y evaluaciones.</p>
             </div>
 
             <div class="card login-card p-4">
 
-                <form method="POST" action="{{ route('login') }}">
+                <form method="POST" action="{{ route('register.submit') }}">
 
                     @csrf
 
-                    {{-- ALERTA GENERAL --}}
                     @if(session('error'))
                         <div class="alert alert-danger">
                             {{ session('error') }}
                         </div>
                     @endif
 
-                    @if(session('info'))
-                        <div class="alert alert-info">
-                            {{ session('info') }}
-                        </div>
-                    @endif
-
-                    {{-- USERNAME --}}
                     <div class="mb-3">
-                        <label class="form-label">Usuario</label>
-
-                        <input type="text" name="username" value="{{ old('username') }}" class="form-control"
-                            placeholder="usuario" required>
-
-                        @error('username')
+                        <label class="form-label">Nombre completo</label>
+                        <input type="text" name="full_name" value="{{ old('full_name') }}" class="form-control" placeholder="Nombre completo" required>
+                        @error('full_name')
                             <div class="text-danger small">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    {{-- PASSWORD --}}
+                    <div class="mb-3">
+                        <label class="form-label">Correo electrónico</label>
+                        <input type="email" name="email" value="{{ old('email') }}" class="form-control" placeholder="nombre@ejemplo.com" required>
+                        @error('email')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Contraseña</label>
-
                         <input type="password" name="password" class="form-control" placeholder="********" required>
-
                         @error('password')
                             <div class="text-danger small">{{ $message }}</div>
                         @enderror
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar contraseña</label>
+                        <input type="password" name="password_confirmation" class="form-control" placeholder="********" required>
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100">
-                        Iniciar Sesión
+                        Registrarse
                     </button>
 
                 </form>
@@ -65,7 +64,7 @@
             </div>
 
             <p class="text-center mt-3 text-muted">
-                ¿No tienes cuenta? <a href="{{ route('register') }}">Regístrate</a>
+                ¿Ya tienes cuenta? <a href="{{ route('login') }}">Inicia sesión</a>
             </p>
 
         </div>
