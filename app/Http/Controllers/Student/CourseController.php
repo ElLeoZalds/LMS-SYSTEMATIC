@@ -44,7 +44,8 @@ class CourseController extends Controller
     {
         $studentId = auth()->id();
 
-        $assessment = Assessment::with('questions.options')
+        // Actualizado: Cambiado 'questions.options' a 'questions.alternatives'
+        $assessment = Assessment::with('questions.alternatives')
             ->where('assessment_id', $assessment_id)
             ->firstOrFail();
 
@@ -78,7 +79,8 @@ class CourseController extends Controller
             ]);
         }
 
-        $timeLimit = 60;
+        $elapsedMinutes = Carbon::now()->diffInMinutes($attempt->created_at);
+        $timeLimit = max(1, $assessment->time_limit - $elapsedMinutes);
 
         return view('student.courses.take', compact('assessment', 'timeLimit', 'enrollment', 'attempt'));
     }
@@ -87,7 +89,8 @@ class CourseController extends Controller
     {
         $studentId = auth()->id();
 
-        $assessment = Assessment::with('questions.options')
+        // Actualizado: Cambiado 'questions.options' a 'questions.alternatives'
+        $assessment = Assessment::with('questions.alternatives')
             ->where('assessment_id', $assessment_id)
             ->firstOrFail();
 
@@ -97,6 +100,7 @@ class CourseController extends Controller
 
         $this->validateAssessmentAvailability($assessment);
 
+        // Actualizado: Cambiado 'exists:options,option_id' a 'exists:alternatives,option_id'
         $validated = $request->validate([
             'attempt_id' => 'required|integer|exists:assessment_attempts,attempt_id',
             'answers' => 'required|array',
@@ -114,7 +118,7 @@ class CourseController extends Controller
 
         $this->ensureAttemptAllowed($assessment, $enrollment, $attempt);
 
-        $timeLimit = 60;
+        $timeLimit = $assessment->time_limit;
         $elapsedSeconds = Carbon::now()->diffInSeconds($attempt->created_at);
         $maxSeconds = ($timeLimit * 60) + 120;
 
@@ -127,15 +131,14 @@ class CourseController extends Controller
         }
 
         $totalScore = 0;
-        $responses = $validated['answers'] ?? [];
+        $responses = $request->input('answers', []);
 
         foreach ($assessment->questions as $question) {
             $selectedOptionId = $responses[$question->question_id] ?? null;
 
             if ($selectedOptionId) {
-                $selectedOption = $question->options()
-                    ->where('option_id', $selectedOptionId)
-                    ->first();
+                // Actualizado: Cambiado $question->options a $question->alternatives
+                $selectedOption = $question->alternatives->firstWhere('option_id', $selectedOptionId);
 
                 if ($selectedOption && $selectedOption->is_correct) {
                     $totalScore += $question->score;
@@ -148,7 +151,6 @@ class CourseController extends Controller
         $attempt->load('assessment');
 
         return view('student.assessments.result', compact('attempt'));
-
     }
 
     private function validateAssessmentAvailability(Assessment $assessment)
