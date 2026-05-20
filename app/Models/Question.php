@@ -20,9 +20,10 @@ class Question extends Model
         return $this->belongsTo(Assessment::class, 'assessment_id', 'assessment_id');
     }
 
-    public function options()
+    public function alternatives()
     {
-        return $this->hasMany(Option::class, 'question_id', 'question_id')
+        // Apuntamos al nuevo modelo y mantenemos el orden físico de la migración
+        return $this->hasMany(Alternative::class, 'question_id', 'question_id')
             ->orderBy('option_id');
     }
 }

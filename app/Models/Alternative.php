@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Option extends Model
+class Alternative extends Model
 {
-    protected $table = 'alternatives';
+    // Laravel asociará automáticamente este modelo a la tabla 'alternatives'
     protected $primaryKey = 'option_id';
 
     protected $fillable = [
@@ -15,6 +15,9 @@ class Option extends Model
         'is_correct',
     ];
 
+    /**
+     * Get the question that owns the alternative.
+     */
     public function question()
     {
         return $this->belongsTo(Question::class, 'question_id', 'question_id');

@@ -26,7 +26,14 @@ class Attendance extends Model
 
     public function student()
     {
-        return $this->belongsTo(User::class, 'student_id', 'user_id');
+        return $this->hasOneThrough(
+            User::class,
+            Enrollment::class,
+            'enrollment_id',
+            'user_id',
+            'enrollment_id',
+            'student_id'
+        );
     }
 
     public function scopeForDate($query, $date)
