@@ -34,25 +34,40 @@ class AuthController extends Controller
         $lastName = count($nameParts) > 1 ? array_pop($nameParts) : '';
         $firstName = implode(' ', $nameParts);
 
-        $person = People::create([
-            'first_names' => $firstName,
-            'last_names' => $lastName,
-            'email' => $request->email,
-        ]);
+        // Transacción para asegurar la integridad de datos
+        \Illuminate\Support\Facades\DB::beginTransaction();
 
-        $user = User::create([
-            'person_id' => $person->person_id,
-            'username' => $request->email,
-            'password' => Hash::make($request->password),
-            'status' => 'A',
-        ]);
+        try {
+            $person = People::create([
+                'first_names' => $firstName,
+                'last_names' => $lastName,
+                'email' => $request->email,
+            ]);
 
-        $studentRole = Role::where('name', 'Student')->first();
-        if ($studentRole) {
+            $user = User::create([
+                'person_id' => $person->person_id,
+                'username' => $request->email,
+                'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+                'status' => 'A',
+            ]);
+
+            $studentRole = Role::where('name', 'Student')->first();
+            if (!$studentRole) {
+                throw new \Exception('El rol "Student" no está configurado en el sistema. Contacte al administrador.');
+            }
             $user->roles()->attach($studentRole->role_id);
-        }
 
-        return redirect()->route('login')->with('success', '¡Registro completado con éxito! Ahora puedes iniciar sesión');
+            \Illuminate\Support\Facades\DB::commit();
+
+            return redirect()->route('login')
+                ->with('success', '¡Registro completado con éxito! Ahora puedes iniciar sesión.');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->withInput()->withErrors([
+                'email' => 'Ocurrió un error al procesar el registro. Inténtelo de nuevo.'
+            ]);
+        }
     }
 
     public function login(Request $request)
@@ -62,41 +77,38 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        if (
-            Auth::attempt([
-                'username' => $request->username,
-                'password' => $request->password
-            ])
-        ) {
+        // Forzamos que solo entren usuarios activos
+        $credentials = [
+            'username' => $request->username,
+            'password' => $request->password,
+            'status' => 'A'
+        ];
+
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
             $user = Auth::user();
-            $role = optional($user->roles->first())->name;
 
-            if (!$role) {
-                Auth::logout();
-                return back()->withErrors([
-                    'username' => 'Usuario sin rol asignado. Contacte al administrador.'
-                ]);
-            }
-
-            if ($role === 'Administrator') {
+            // Mapeo seguro con colecciones para evitar errores multi-rol
+            if ($user->roles->contains('name', 'Administrator')) {
                 return redirect()->route('admin.dashboard');
             }
 
-            if ($role === 'Teacher') {
+            if ($user->roles->contains('name', 'Teacher')) {
                 return redirect()->route('teacher.dashboard');
             }
 
-            if ($role === 'Student') {
+            if ($user->roles->contains('name', 'Student')) {
                 return redirect()->route('student.dashboard');
             }
 
             Auth::logout();
+            return back()->withErrors([
+                'username' => 'Usuario sin rol válido asignado. Contacte al administrador.'
+            ]);
         }
 
         return back()->withErrors([
-            'username' => 'Credenciales incorrectas'
+            'username' => 'Las credenciales no coinciden o el usuario se encuentra inactivo.'
         ]);
     }
 
