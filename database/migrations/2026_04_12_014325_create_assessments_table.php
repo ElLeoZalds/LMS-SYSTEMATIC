@@ -11,7 +11,6 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('assessments', function (Blueprint $table) {
-
             $table->id('assessment_id');
             $table->unsignedBigInteger('training_id');
             $table->foreign('training_id')->references('training_id')->on('trainings')->onDelete('cascade');
@@ -20,6 +19,7 @@ return new class extends Migration {
             $table->date('start_date');
             $table->date('end_date');
             $table->integer('allowed_attempts');
+            $table->integer('time_limit')->default(60)->comment('en minutos'); // ¡Fusionado aquí perfectamente!
             $table->boolean('active')->default(true);
             $table->timestamps();
         });
