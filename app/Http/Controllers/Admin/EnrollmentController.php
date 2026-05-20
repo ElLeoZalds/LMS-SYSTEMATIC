@@ -34,26 +34,38 @@ class EnrollmentController extends Controller
 
         $trainingId = $request->training_id;
         $studentIds = array_unique($request->student_ids);
-        $createdCount = 0;
 
-        foreach ($studentIds as $studentId) {
-            $exists = Enrollment::where('student_id', $studentId)
-                ->where('training_id', $trainingId)
-                ->exists();
+        // 1. Consultar en una sola query cuáles de los estudiantes enviados ya están inscritos
+        $existingStudentIds = Enrollment::where('training_id', $trainingId)
+            ->whereIn('student_id', $studentIds)
+            ->pluck('student_id')
+            ->toArray();
 
-            if ($exists) {
-                continue;
+        // 2. Filtrar para quedarnos solo con los estudiantes nuevos
+        $newStudentIds = array_diff($studentIds, $existingStudentIds);
+        $createdCount = count($newStudentIds);
+
+        // 3. Si hay estudiantes nuevos, preparar el bloque e insertar masivamente
+        if ($createdCount > 0) {
+            $insertData = [];
+            $adminId = auth()->id();
+            $date = now()->toDateString();
+            $now = now();
+
+            foreach ($newStudentIds as $studentId) {
+                $insertData[] = [
+                    'training_id' => $trainingId,
+                    'student_id' => $studentId,
+                    'administrator_id' => $adminId,
+                    'enrollment_date' => $date,
+                    'status' => 'A',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
 
-            Enrollment::create([
-                'training_id' => $trainingId,
-                'student_id' => $studentId,
-                'administrator_id' => auth()->id(),
-                'enrollment_date' => now()->toDateString(),
-                'status' => 'A'
-            ]);
-
-            $createdCount++;
+            // Inserción masiva en una sola sentencia SQL
+            Enrollment::insert($insertData);
         }
 
         $message = $createdCount > 0
