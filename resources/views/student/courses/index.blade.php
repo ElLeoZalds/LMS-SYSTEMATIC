@@ -24,11 +24,10 @@
 
                             <div class="course-banner position-relative">
                                 @if(!empty($enrollment->training?->course?->banner_path))
-                                    <div class="course-banner-image" style="background-image: url('{{ asset('storage/'.$enrollment->training->course->banner_path) }}?v={{ file_exists(storage_path('app/public/'.$enrollment->training->course->banner_path)) ? filemtime(storage_path('app/public/'.$enrollment->training->course->banner_path)) : time() }}'); height:120px;"></div>
+                                    <div class="course-banner-image" style="background-image: url('{{ asset('storage/'.$enrollment->training->course->banner_path) }}?v={{ file_exists(storage_path('app/public/'.$enrollment->training->course->banner_path)) ? filemtime(storage_path('app/public/'.$enrollment->training->course->banner_path)) : time() }}');"></div>
                                 @else
-                                    <div class="course-banner-fallback d-flex align-items-center justify-content-center text-white"
-                                        style="height:120px; font-size: 2.5rem; font-weight: bold; opacity: 0.9;">
-                                        {{ strtoupper(substr($enrollment->training?->course?->name ?? 'C', 0, 1)) }}
+                                    <div class="course-banner-fallback d-flex align-items-center justify-content-center text-white">
+                                        {{ strtoupper(substr($enrollment->training?->course?->title ?? 'C', 0, 1)) }}
                                     </div>
                                 @endif
                                 <div class="course-banner-overlay"></div>
@@ -37,7 +36,7 @@
                             <div class="card-body d-flex flex-column">
                                 <div>
                                     <h5 class="card-title fw-bold text-dark mb-2 line-clamp-2" style="font-size: 1.1rem;">
-                                        {{ $enrollment->training?->course?->name ?? 'Curso no asignado' }}
+                                        {{ $enrollment->training?->course?->title ?? 'Curso no asignado' }}
                                     </h5>
                                     <p class="text-muted small mb-1">
                                         Modalidad: <strong class="text-dark capitalize">{{ $enrollment->training?->modality ?? 'N/A' }}</strong>
