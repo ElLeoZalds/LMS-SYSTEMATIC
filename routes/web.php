@@ -77,6 +77,9 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])
     Route::get('/courses', [TeacherController::class, 'courses'])->name('courses');
     Route::get('/courses/{id}', [TeacherController::class, 'show'])->name('courses.show');
     Route::get('/students/{id}', [TeacherController::class, 'students'])->name('students');
+    // AJAX endpoints for dashboard filtering
+    Route::get('/ajax/students/{id}', [TeacherController::class, 'ajaxStudents'])->name('ajax.students');
+    Route::get('/ajax/averages/{id}', [TeacherController::class, 'ajaxAverages'])->name('ajax.averages');
 
     Route::get('/attendance/create', [TeacherAttendanceController::class, 'create'])->name('attendance.create');
     Route::post('/attendance/store', [TeacherAttendanceController::class, 'store'])->name('attendance.store');

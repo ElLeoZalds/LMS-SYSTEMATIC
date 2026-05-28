@@ -31,23 +31,34 @@ class TeacherController extends Controller
             ->take(10)
             ->get();
 
+        // Traemos los trainings del docente para poblar los modals de filtrado
+        $trainings = $user->trainings()->with('course')->get();
+
         return view('teacher.dashboard', compact(
             'totalStudents',
             'totalActiveTrainings',
             'totalTasks',
             'totalAttempts',
             'averageScore',
-            'recentActivities'
+            'recentActivities',
+            'trainings'
         ));
     }
 
-    public function courses()
+    public function courses(Request $request)
     {
         $user = auth()->user();
 
-        $trainings = Training::with('course')
-            ->where('teacher_id', $user->user_id)
-            ->get();
+        $query = Training::with('course')
+            ->where('teacher_id', $user->user_id);
+
+        // Soportar filtrado por estado: ?status=A para activos
+        if ($request->query('status')) {
+            $status = $request->query('status');
+            $query->where('status', $status);
+        }
+
+        $trainings = $query->get();
 
         return view('teacher.courses.index', compact('trainings'));
     }
@@ -115,6 +126,66 @@ class TeacherController extends Controller
         $students = $training->enrollments;
 
         return view('teacher.attendance', compact('training', 'students'));
+    }
+
+    /**
+     * Devuelve via JSON los estudiantes inscritos en un training (para modal AJAX).
+     */
+    public function ajaxStudents($id)
+    {
+        $user = auth()->user();
+
+        $training = Training::with(['enrollments.student.person'])
+            ->where('training_id', $id)
+            ->where('teacher_id', $user->user_id)
+            ->firstOrFail();
+
+        $students = $training->enrollments->map(function ($enrollment) {
+            $student = $enrollment->student;
+            $person = $student->person ?? null;
+
+            // Los campos en la tabla people son first_names y last_names
+            $first = $person->first_names ?? '';
+            $last = $person->last_names ?? '';
+            $name = trim($first . ' ' . $last);
+
+            return [
+                'enrollment_id' => $enrollment->enrollment_id ?? null,
+                'student_id' => $student->user_id ?? null,
+                'name' => $name !== '' ? $name : ($student->username ?? 'N/A'),
+                'email' => $person->email ?? null,
+            ];
+        });
+
+        return response()->json(['data' => $students]);
+    }
+
+    /**
+     * Devuelve via JSON los promedios de las evaluaciones del training (para modal AJAX).
+     */
+    public function ajaxAverages($id)
+    {
+        $user = auth()->user();
+
+        $training = Training::where('training_id', $id)
+            ->where('teacher_id', $user->user_id)
+            ->firstOrFail();
+
+        $assessments = Assessment::where('training_id', $id)
+            ->withCount(['attempts as attempts_count'])
+            ->get()
+            ->map(function ($a) use ($id) {
+                $avg = AssessmentAttempt::whereHas('assessment', fn($q) => $q->where('assessment_id', $a->assessment_id))->avg('score');
+                return [
+                    'assessment_id' => $a->assessment_id,
+                    'title' => $a->title,
+                    'attempts' => $a->attempts_count ?? 0,
+                    'average' => $avg !== null ? round($avg, 2) : null,
+                    'active' => (bool) $a->active,
+                ];
+            });
+
+        return response()->json(['data' => $assessments]);
     }
 
 
