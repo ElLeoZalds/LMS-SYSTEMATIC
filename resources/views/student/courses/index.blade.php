@@ -3,7 +3,7 @@
 @section('content')
 <div class="container-fluid px-4 py-1">
     <div class="mb-5">
-        <h1 class="h3 mb-2 text-gray-800 font-weight-bold">Mis Capacitaciones</h1>
+        <h1 class="h3 mb-2 text-gray-800 font-weight-bold">Mis Cursos</h1>
         <p class="text-muted">Accede a tus cursos activos y haz un seguimiento de tu progreso académico.</p>
     </div>
 
@@ -22,9 +22,16 @@
                     <a href="{{ url('/student/courses/' . ($enrollment->training?->training_id ?? 1)) }}" class="text-decoration-none">
                         <div class="card h-100 shadow-sm rounded-3 border-0 position-relative overflow-hidden transition-all">
 
-                            <div class="bg-primary bg-gradient p-4 text-white d-flex align-items-center justify-content-center position-relative"
-                                style="height: 120px; font-size: 2.5rem; font-weight: bold; opacity: 0.9;">
-                                {{ strtoupper(substr($enrollment->training?->course?->name ?? 'C', 0, 1)) }}
+                            <div class="course-banner position-relative">
+                                @if(!empty($enrollment->training?->course?->banner_path))
+                                    <div class="course-banner-image" style="background-image: url('{{ asset('storage/'.$enrollment->training->course->banner_path) }}?v={{ file_exists(storage_path('app/public/'.$enrollment->training->course->banner_path)) ? filemtime(storage_path('app/public/'.$enrollment->training->course->banner_path)) : time() }}'); height:120px;"></div>
+                                @else
+                                    <div class="course-banner-fallback d-flex align-items-center justify-content-center text-white"
+                                        style="height:120px; font-size: 2.5rem; font-weight: bold; opacity: 0.9;">
+                                        {{ strtoupper(substr($enrollment->training?->course?->name ?? 'C', 0, 1)) }}
+                                    </div>
+                                @endif
+                                <div class="course-banner-overlay"></div>
                             </div>
 
                             <div class="card-body d-flex flex-column">
@@ -96,5 +103,9 @@
     .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     a { color: inherit; text-decoration: none !important; }
     a:hover { color: inherit; }
+    .course-banner { height: 160px; position: relative; overflow: hidden; background: #e9ecef; }
+    .course-banner-image { background-size: cover; background-position: center; width: 100%; height: 100%; }
+    .course-banner-fallback { background: #0d6efd; width: 100%; height: 100%; font-size: 2.5rem; font-weight: bold; opacity: 0.9; }
+    .course-banner-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.06); }
 </style>
 @endsection

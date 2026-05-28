@@ -50,6 +50,11 @@
                 </div>
             </div>
         </div>
+    <style>
+        .course-banner-image { background-position: center center; background-size: cover; width: 100%; }
+        .course-banner-fallback { background: #0d6efd; }
+        .course-banner-overlay { position: absolute; inset: 0; pointer-events: none; }
+    </style>
 
         <div class="card shadow mb-4">
             <div class="card-header bg-white border-bottom">
@@ -95,6 +100,18 @@
             <div class="card-body">
 
                 @if(request('tab', 'inicio') === 'inicio')
+                        <div class="mb-4">
+                            <div class="course-banner mb-3">
+                                @if(!empty($training->course->banner_path))
+                                    <div class="course-banner-image" style="background-image: url('{{ asset('storage/'.$training->course->banner_path) }}?v={{ file_exists(storage_path('app/public/'.$training->course->banner_path)) ? filemtime(storage_path('app/public/'.$training->course->banner_path)) : time() }}'); height:200px;"></div>
+                                @else
+                                    <div class="course-banner-fallback d-flex align-items-center justify-content-center text-white" style="height:200px;">
+                                        {{ strtoupper(substr($training->course->title, 0, 1)) }}
+                                    </div>
+                                @endif
+                                <div class="course-banner-overlay"></div>
+                            </div>
+                        </div>
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <a href="{{ route('teacher.attendance.create', ['training_id' => $training->training_id]) }}" class="text-decoration-none">

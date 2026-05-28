@@ -18,24 +18,26 @@
                 @foreach($trainings as $training)
                     <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                         <div class="card h-100 shadow-sm rounded-3 border-0 position-relative overflow-hidden">
-                            <div class="course-banner position-relative">
-                                @if(!empty($training->course->banner_path))
-                                    <div class="course-banner-image" style="background-image: url('{{ asset('storage/'.$training->course->banner_path) }}');"></div>
-                                @else
-                                    <div class="course-banner-fallback d-flex align-items-center justify-content-center text-white">
-                                        {{ strtoupper(substr($training->course->title, 0, 1)) }}
-                                    </div>
-                                @endif
-                                <div class="course-banner-overlay"></div>
-                                <button type="button" class="course-banner-view btn btn-sm btn-light text-dark" data-toggle="modal" data-target="#bannerModal"
-                                    data-training-id="{{ $training->training_id }}"
-                                    data-course-title="{{ $training->course->title }}"
-                                    data-banner-url="{{ !empty($training->course->banner_path) ? asset('storage/'.$training->course->banner_path) : '' }}">
-                                    Subir banner
-                                </button>
-                            </div>
+                            <a href="{{ route('teacher.courses.show', $training->training_id) }}" class="text-decoration-none text-reset">
+                                <div class="course-banner position-relative">
+                                    @if(!empty($training->course->banner_path))
+                                        <div class="course-banner-image" style="background-image: url('{{ asset('storage/'.$training->course->banner_path) }}?v={{ file_exists(storage_path('app/public/'.$training->course->banner_path)) ? filemtime(storage_path('app/public/'.$training->course->banner_path)) : time() }}');"></div>
+                                    @else
+                                        <div class="course-banner-fallback d-flex align-items-center justify-content-center text-white">
+                                            {{ strtoupper(substr($training->course->title, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                    <div class="course-banner-overlay"></div>
+                                    <button type="button" class="course-banner-view btn btn-sm btn-light text-dark" data-toggle="modal" data-target="#bannerModal"
+                                        data-training-id="{{ $training->training_id }}"
+                                        data-course-title="{{ $training->course->title }}"
+                                        data-banner-url="{{ !empty($training->course->banner_path) ? asset('storage/'.$training->course->banner_path) . '?v=' . (file_exists(storage_path('app/public/'.$training->course->banner_path)) ? filemtime(storage_path('app/public/'.$training->course->banner_path)) : time()) : '' }}"
+                                        onclick="event.stopPropagation();" ontouchstart="event.stopPropagation();">
+                                        Subir banner
+                                    </button>
+                                </div>
 
-                            <div class="card-body d-flex flex-column">
+                                <div class="card-body d-flex flex-column">
                                 <div>
                                     <h5 class="card-title fw-bold text-dark mb-2 line-clamp-2" style="font-size: 1.1rem;">
                                         {{ $training->course->title }}
@@ -65,8 +67,8 @@
                                         ✓ Activo
                                     </span>
                                 </div>
-                            </div>
-
+                                </div>
+                            </a>
                         </div>
                     </div>
                 @endforeach

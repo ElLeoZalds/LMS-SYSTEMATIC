@@ -54,9 +54,16 @@
                     <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                         <div class="card h-100 shadow-sm rounded-3 border-0 position-relative overflow-hidden transition-all">
                             
-                            <div class="bg-primary bg-gradient p-4 text-white d-flex align-items-center justify-content-center"
-                                style="height: 120px; font-size: 2.5rem; font-weight: bold; opacity: 0.9;">
-                                {{ strtoupper(substr($enrollment->training->course->title, 0, 1)) }}
+                            <div class="course-banner position-relative">
+                                @if(!empty($enrollment->training->course->banner_path))
+                                    <div class="course-banner-image" style="background-image: url('{{ asset('storage/'.$enrollment->training->course->banner_path) }}?v={{ file_exists(storage_path('app/public/'.$enrollment->training->course->banner_path)) ? filemtime(storage_path('app/public/'.$enrollment->training->course->banner_path)) : time() }}'); height:120px;"></div>
+                                @else
+                                    <div class="course-banner-fallback d-flex align-items-center justify-content-center text-white"
+                                        style="height:120px; font-size: 2.5rem; font-weight: bold; opacity: 0.9;">
+                                        {{ strtoupper(substr($enrollment->training->course->title, 0, 1)) }}
+                                    </div>
+                                @endif
+                                <div class="course-banner-overlay"></div>
                             </div>
 
                             <div class="card-body d-flex flex-column p-4">
@@ -119,6 +126,10 @@
         .card { transition: box-shadow 0.3s ease, transform 0.3s ease; }
         .card:hover { box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.12) !important; transform: translateY(-4px); }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .course-banner-image { background-position: center center; background-size: cover; width: 100%; }
+        .course-banner-fallback { background: #0d6efd; }
+        .course-banner-overlay { position: absolute; inset: 0; pointer-events: none; }
     </style>
 
 @endsection
