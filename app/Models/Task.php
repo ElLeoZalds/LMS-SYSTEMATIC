@@ -13,7 +13,8 @@ class Task extends Model
         'training_id',
         'title',
         'description',
-        'due_date'
+        'due_date',
+        'file_path',
     ];
 
     protected $casts = [

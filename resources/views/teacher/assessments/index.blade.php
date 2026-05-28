@@ -11,7 +11,7 @@
             <div class="row g-4">
                 @foreach($trainings as $training)
                     <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                        <a href="{{ route('teacher.assessments.show', $training->training_id) }}" class="text-decoration-none">
+                        <a href="{{ route('teacher.assessments.manage', $training->training_id) }}" class="text-decoration-none">
                             <div class="card h-100 shadow-sm rounded-3 border-0 position-relative overflow-hidden transition-all">
 
                                 <div class="bg-info bg-gradient p-4 text-white d-flex align-items-center justify-content-center"

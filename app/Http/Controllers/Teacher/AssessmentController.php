@@ -38,15 +38,30 @@ class AssessmentController extends Controller
         return view('teacher.assessments.manage', compact('training'));
     }
 
+    public function showAssessment($assessment_id)
+    {
+        $user = auth()->user();
+
+        $assessment = Assessment::with(['questions.alternatives', 'training.course'])
+            ->where('assessment_id', $assessment_id)
+            ->firstOrFail();
+
+        if ($assessment->training->teacher_id !== $user->user_id) {
+            abort(403, 'No autorizado.');
+        }
+
+        return view('teacher.assessments.show_assessment', compact('assessment'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'training_id' => 'required|exists:trainings,training_id',
             'title' => 'required|string|max:150',
-            'start_date' => 'required|date',
+            'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'allowed_attempts' => 'required|integer|min:1',
-            'time_limit' => 'nullable|integer|min:0',
+            'allowed_attempts' => 'required|integer|min:1|max:3',
+            'time_limit' => 'nullable|integer|min:20|max:60',
             'active' => 'sometimes|boolean',
             'description' => 'nullable|string',
         ]);
@@ -63,7 +78,7 @@ class AssessmentController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'allowed_attempts' => $request->allowed_attempts,
-            'time_limit' => ($request->time_limit && $request->time_limit > 0) ? $request->time_limit : 60,
+            'time_limit' => $request->time_limit ?? 60,
             'active' => $request->has('active'),
         ]);
 
@@ -76,9 +91,10 @@ class AssessmentController extends Controller
         $request->validate([
             'question_text' => 'required|string',
             'score' => 'required|integer|min:0',
-            'alternatives' => 'required|array|min:2',
+            'alternatives' => 'required|array|min:2|max:5',
             'alternatives.*.text' => 'required|string',
             'correct_alternative' => 'required|integer|min:0',
+            'image' => 'nullable|image|max:2048',
         ]);
 
         $user = auth()->user();
@@ -94,11 +110,17 @@ class AssessmentController extends Controller
         }
 
         DB::transaction(function () use ($request, $assessment) {
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('question-images', 'public');
+            }
+
             $question = Question::create([
                 'assessment_id' => $assessment->assessment_id,
                 'question_text' => $request->question_text,
                 'score' => $request->score,
                 'order_index' => $assessment->questions()->count() + 1,
+                'image_path' => $imagePath,
             ]);
 
             foreach ($request->alternatives as $index => $alternativeData) {
@@ -110,7 +132,7 @@ class AssessmentController extends Controller
             }
         });
 
-        return redirect()->route('teacher.assessments.show', ['training_id' => $assessment->training_id])
+        return redirect()->route('teacher.assessments.manage', ['training_id' => $assessment->training_id])
             ->with('success', 'Pregunta agregada.');
     }
 
@@ -119,9 +141,10 @@ class AssessmentController extends Controller
         $request->validate([
             'question_text' => 'required|string',
             'score' => 'required|integer|min:0',
-            'alternatives' => 'required|array|min:2',
+            'alternatives' => 'required|array|min:2|max:5',
             'alternatives.*.text' => 'required|string',
             'correct_alternative' => 'required|integer|min:0',
+            'image' => 'nullable|image|max:2048',
         ]);
 
         $user = auth()->user();
@@ -137,7 +160,21 @@ class AssessmentController extends Controller
         }
 
         DB::transaction(function () use ($request, $question) {
-            $question->update(['question_text' => $request->question_text, 'score' => $request->score]);
+            // handle image replacement
+            if ($request->hasFile('image')) {
+                // delete old image if exists
+                try {
+                    if ($question->image_path) {
+                        \Storage::disk('public')->delete($question->image_path);
+                    }
+                } catch (\Exception $e) {
+                    // ignore deletion error
+                }
+                $imagePath = $request->file('image')->store('question-images', 'public');
+                $question->image_path = $imagePath;
+            }
+
+            $question->update(['question_text' => $request->question_text, 'score' => $request->score, 'image_path' => $question->image_path ?? null]);
             $question->alternatives()->delete();
 
             foreach ($request->alternatives as $index => $alternativeData) {
@@ -149,7 +186,7 @@ class AssessmentController extends Controller
             }
         });
 
-        return redirect()->route('teacher.assessments.show', ['training_id' => $question->assessment->training_id])
+        return redirect()->route('teacher.assessments.manage', ['training_id' => $question->assessment->training_id])
             ->with('success', 'Pregunta actualizada.');
     }
 
@@ -162,6 +199,12 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
+        // prevent deletion if resulting question count would be less than minimum
+        $remaining = $question->assessment->questions()->count() - 1;
+        if ($remaining < 5) {
+            return redirect()->back()->with('error', 'No se puede eliminar. Una evaluación debe tener al menos 5 preguntas.');
+        }
+
         if ($question->assessment->attempts()->exists()) {
             return redirect()->back()->with('error', 'La evaluación ya tiene intentos.');
         }
@@ -169,20 +212,26 @@ class AssessmentController extends Controller
         $trainingId = $question->assessment->training_id;
         DB::transaction(function () use ($question) {
             $question->alternatives()->delete();
+            // delete image file if exists
+            try {
+                if ($question->image_path) {
+                    \Storage::disk('public')->delete($question->image_path);
+                }
+            } catch (\Exception $e) {}
             $question->delete();
         });
 
-        return redirect()->route('teacher.assessments.show', ['training_id' => $trainingId]);
+        return redirect()->route('teacher.assessments.manage', ['training_id' => $trainingId]);
     }
 
     public function update(Request $request, $assessment_id)
     {
         $request->validate([
             'title' => 'required|string|max:150',
-            'start_date' => 'required|date',
+            'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'allowed_attempts' => 'required|integer|min:1',
-            'time_limit' => 'nullable|integer|min:1',
+            'allowed_attempts' => 'required|integer|min:1|max:3',
+            'time_limit' => 'nullable|integer|min:20|max:60',
             'active' => 'sometimes|boolean',
         ]);
 
@@ -198,7 +247,7 @@ class AssessmentController extends Controller
         }
 
         $assessment->update($request->all());
-        return redirect()->route('teacher.assessments.show', ['training_id' => $assessment->training_id]);
+        return redirect()->route('teacher.assessments.manage', ['training_id' => $assessment->training_id]);
     }
 
     public function destroy($assessment_id)
@@ -210,13 +259,15 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
-        if ($assessment->attempts()->exists()) {
-            return redirect()->back()->withErrors(['assessment' => 'No se puede eliminar.']);
-        }
-
         $trainingId = $assessment->training_id;
+        $hadAttempts = $assessment->attempts()->exists();
         $assessment->delete();
 
-        return redirect()->route('teacher.assessments.show', ['training_id' => $trainingId]);
+        $message = $hadAttempts
+            ? 'Evaluación eliminada. Los intentos existentes también fueron eliminados.'
+            : 'Evaluación eliminada correctamente.';
+
+        return redirect()->route('teacher.assessments.manage', ['training_id' => $trainingId])
+            ->with('success', $message);
     }
 }

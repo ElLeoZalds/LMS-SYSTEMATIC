@@ -266,9 +266,12 @@
                                                             <span class="badge @if($assessment->active) bg-success @else bg-secondary @endif">{{ $assessment->active ? 'Activo' : 'Inactivo' }}</span>
                                                         </td>
                                                         <td class="text-end">
-                                                            <a href="{{ route('teacher.assessments.show', ['training_id' => $training->training_id]) }}" class="btn btn-sm btn-info text-white">
+                                                            <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white">
                                                                 <i class="bi bi-pencil-square"></i> Gestionar Preguntas
                                                             </a>
+                                                            <button type="button" class="btn btn-sm btn-outline-primary ms-1 edit-assessment-btn" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
+                                                                <i class="bi bi-pencil"></i> Editar
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -302,6 +305,13 @@
                                                     <small class="text-secondary d-block mb-2">
                                                         <i class="bi bi-calendar-event me-1"></i>Vence: {{ $task->due_date ? $task->due_date->format('d/m/Y H:i') : 'Sin fecha' }}
                                                     </small>
+                                                    @if(!empty($task->file_path))
+                                                        <div class="mb-2">
+                                                            <a href="{{ asset('storage/'.$task->file_path) }}" target="_blank" class="text-decoration-none small">
+                                                                <i class="bi bi-download me-1"></i>Archivo adjunto
+                                                            </a>
+                                                        </div>
+                                                    @endif
                                                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
                                                         <div>
                                                             <span class="badge bg-light text-dark border" title="Total de entregas">
@@ -314,6 +324,9 @@
                                                         <a href="{{ route('teacher.tasks.submissions', $task->task_id) }}" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.8rem;">
                                                             <i class="bi bi-eye"></i> Revisar
                                                         </a>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 ms-1 edit-task-btn" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}' style="font-size: 0.8rem;">
+                                                            <i class="bi bi-pencil"></i> Editar
+                                                        </button>
                                                     </div>
                                                 </div>
                                             @endforeach
@@ -443,7 +456,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="{{ route('teacher.assessments.store') }}" method="POST">
+                <form action="{{ route('teacher.assessments.store') }}" method="POST" id="createAssessmentForm">
                     @csrf
                     <input type="hidden" name="training_id" value="{{ $training->training_id }}">
                     <div class="modal-body">
@@ -458,21 +471,22 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="assessment-start-date" class="form-label">Fecha de inicio</label>
-                                <input type="date" name="start_date" id="assessment-start-date" class="form-control" required>
+                                <input type="date" name="start_date" id="assessment-start-date" class="form-control" required min="{{ date('Y-m-d') }}">
                             </div>
                             <div class="col-md-6">
                                 <label for="assessment-end-date" class="form-label">Fecha de fin</label>
-                                <input type="date" name="end_date" id="assessment-end-date" class="form-control" required>
+                                <input type="date" name="end_date" id="assessment-end-date" class="form-control" required min="{{ date('Y-m-d') }}">
                             </div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="assessment-allowed-attempts" class="form-label">Intentos permitidos</label>
-                            <input type="number" name="allowed_attempts" id="assessment-allowed-attempts" class="form-control" min="1" value="1" required>
+                            <input type="number" name="allowed_attempts" id="assessment-allowed-attempts" class="form-control" min="1" max="3" value="1" required>
+                            <small class="form-text text-muted">Entre 1 y 3 intentos.</small>
                         </div>
                         <div class="form-group mb-3">
                             <label for="assessment-time-limit" class="form-label">Límite de Tiempo (Minutos)</label>
-                            <input type="number" name="time_limit" id="assessment-time-limit" class="form-control" min="0" value="0">
-                            <small class="form-text text-muted">Usa 0 o vacío para el tiempo estándar (60 min).</small>
+                            <input type="number" name="time_limit" id="assessment-time-limit" class="form-control" min="20" max="60" value="60" required>
+                            <small class="form-text text-muted">Entre 20 y 60 minutos.</small>
                         </div>
                         <div class="form-check mt-3">
                             <input type="checkbox" name="active" id="assessment-active" class="form-check-input" checked value="1">
@@ -497,7 +511,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="{{ route('teacher.tasks.store') }}" method="POST">
+                <form action="{{ route('teacher.tasks.store') }}" method="POST" enctype="multipart/form-data" id="createTaskForm">
                     @csrf
                     <input type="hidden" name="training_id" value="{{ $training->training_id }}">
                     <div class="modal-body">
@@ -512,11 +526,12 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="task-due-date" class="form-label">Fecha Límite</label>
-                                <input type="date" name="delivery_date" id="task-due-date" class="form-control" required>
+                                <input type="date" name="delivery_date" id="task-due-date" class="form-control" required min="{{ date('Y-m-d') }}">
                             </div>
                             <div class="col-md-6">
-                                <label for="task-max-score" class="form-label">Puntaje Máximo</label>
-                                <input type="number" name="max_score" id="task-max-score" class="form-control" min="0" value="20" required>
+                                <label for="task-attachment" class="form-label">Archivo adjunto</label>
+                                <input type="file" name="attachment" id="task-attachment" class="form-control" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.jpg,.jpeg,.png,.zip">
+                                <small class="form-text text-muted">Máx. 5 MB. Tipos permitidos: PDF, DOC, DOCX, TXT, PPT, PPTX, JPG, PNG, ZIP.</small>
                             </div>
                         </div>
                     </div>
@@ -528,4 +543,132 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.getElementById('assessment-start-date');
+            const endDateInput = document.getElementById('assessment-end-date');
+            const timeLimitInput = document.getElementById('assessment-time-limit');
+            const attemptsInput = document.getElementById('assessment-allowed-attempts');
+            const taskAttachmentInput = document.getElementById('task-attachment');
+            const taskForm = document.getElementById('createTaskForm');
+
+            if (startDateInput && endDateInput) {
+                startDateInput.addEventListener('change', function() {
+                    endDateInput.min = this.value || '{{ date('Y-m-d') }}';
+                    if (endDateInput.value && endDateInput.value < endDateInput.min) {
+                        endDateInput.value = endDateInput.min;
+                    }
+                });
+            }
+
+            if (taskAttachmentInput) {
+                taskAttachmentInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (!file) return;
+                    const maxSizeMB = 5;
+                    if (file.size > maxSizeMB * 1024 * 1024) {
+                        Swal.fire({ icon: 'error', title: 'Archivo demasiado grande', text: 'El archivo supera el máximo permitido de 5 MB.' });
+                        this.value = '';
+                    }
+                });
+            }
+
+            if (taskForm) {
+                taskForm.addEventListener('submit', function(event) {
+                    const file = taskAttachmentInput ? taskAttachmentInput.files[0] : null;
+                    if (file && file.size > 5 * 1024 * 1024) {
+                        event.preventDefault();
+                        Swal.fire({ icon: 'error', title: 'Archivo demasiado grande', text: 'El archivo supera el máximo permitido de 5 MB.' });
+                        return;
+                    }
+                });
+            }
+
+            if (attemptsInput) {
+                attemptsInput.addEventListener('input', function() {
+                    let value = Number(this.value);
+                    if (value < 1) this.value = 1;
+                    if (value > 3) this.value = 3;
+                });
+            }
+
+            if (timeLimitInput) {
+                timeLimitInput.addEventListener('input', function() {
+                    let value = Number(this.value);
+                    if (value < 20) this.value = 20;
+                    if (value > 60) this.value = 60;
+                });
+            }
+
+            // Edit assessment via modal
+            document.querySelectorAll('.edit-assessment-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const data = JSON.parse(this.getAttribute('data-assessment'));
+                    const form = document.getElementById('createAssessmentForm');
+                    form.action = '{{ route('teacher.assessments.store') }}'.replace('/assessments', '/assessments/' + data.id);
+                    // set method PUT
+                    let methodInput = form.querySelector('input[name="_method"]');
+                    if (!methodInput) {
+                        methodInput = document.createElement('input');
+                        methodInput.type = 'hidden';
+                        methodInput.name = '_method';
+                        form.appendChild(methodInput);
+                    }
+                    methodInput.value = 'PUT';
+                    document.getElementById('assessment-title').value = data.title || '';
+                    document.getElementById('assessment-description').value = data.description || '';
+                    document.getElementById('assessment-start-date').value = data.start_date || '';
+                    document.getElementById('assessment-end-date').value = data.end_date || '';
+                    document.getElementById('assessment-allowed-attempts').value = data.allowed_attempts || 1;
+                    document.getElementById('assessment-time-limit').value = data.time_limit || 60;
+                    $('#createAssessmentModal').modal('show');
+                });
+            });
+
+            // Reset assessment form when creating new
+            document.querySelectorAll('button[data-target="#createAssessmentModal"]').forEach(function(b){
+                b.addEventListener('click', function(){
+                    const form = document.getElementById('createAssessmentForm');
+                    form.action = '{{ route('teacher.assessments.store') }}';
+                    const methodInput = form.querySelector('input[name="_method"]');
+                    if (methodInput) methodInput.remove();
+                    form.reset();
+                });
+            });
+
+            // Edit task via modal
+            document.querySelectorAll('.edit-task-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const data = JSON.parse(this.getAttribute('data-task'));
+                    const form = document.getElementById('createTaskForm');
+                    form.action = '{{ route('teacher.tasks.store') }}'.replace('/tasks/store', '/tasks/' + data.id);
+                    // add method override
+                    let methodInput = form.querySelector('input[name="_method"]');
+                    if (!methodInput) {
+                        methodInput = document.createElement('input');
+                        methodInput.type = 'hidden';
+                        methodInput.name = '_method';
+                        form.appendChild(methodInput);
+                    }
+                    methodInput.value = 'PUT';
+                    document.getElementById('task-title').value = data.title || '';
+                    document.getElementById('task-description').value = data.description || '';
+                    document.getElementById('task-due-date').value = data.due_date || '';
+                    $('#createTaskModal').modal('show');
+                });
+            });
+
+            // Reset task form when creating new
+            document.querySelectorAll('button[data-target="#createTaskModal"]').forEach(function(b){
+                b.addEventListener('click', function(){
+                    const form = document.getElementById('createTaskForm');
+                    form.action = '{{ route('teacher.tasks.store') }}';
+                    const methodInput = form.querySelector('input[name="_method"]');
+                    if (methodInput) methodInput.remove();
+                    form.reset();
+                });
+            });
+        });
+    </script>
 @endsection

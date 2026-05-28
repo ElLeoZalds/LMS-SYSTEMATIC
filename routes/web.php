@@ -88,15 +88,19 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])
     Route::get('/attendance/list/{training_id}', [TeacherAttendanceController::class, 'listPrevious'])->name('attendance.list');
 
     Route::post('/tasks/store', [TaskController::class, 'store'])->name('tasks.store');
+    Route::put('/tasks/{task_id}', [TaskController::class, 'update'])->name('tasks.update');
     Route::get('/tasks/{task_id}/submissions', [TaskController::class, 'submissions'])->name('tasks.submissions');
     Route::post('/submissions/{submission_id}/grade', [TaskController::class, 'grade'])->name('submissions.grade');
 
     // Rutas de Assessments estandarizadas
     Route::get('/assessments', [AssessmentController::class, 'index'])->name('assessments.index');
     Route::post('/assessments', [AssessmentController::class, 'store'])->name('assessments.store');
-    
-    // Todas usan {training_id} para acceder al curso y {assessment_id} para la evaluación específica
-    Route::get('/assessments/{training_id}', [AssessmentController::class, 'show'])->name('assessments.show');
+
+    // Mostrar una evaluación individual por su ID (ej: /teacher/assessments/1)
+    Route::get('/assessments/{assessment_id}', [AssessmentController::class, 'showAssessment'])->name('assessments.show');
+
+    // Gestión de evaluaciones por training (antes /assessments/{training_id})
+    Route::get('/assessments/training/{training_id}', [AssessmentController::class, 'show'])->name('assessments.manage');
     Route::put('/assessments/{assessment_id}', [AssessmentController::class, 'update'])->name('assessments.update');
     Route::delete('/assessments/{assessment_id}', [AssessmentController::class, 'destroy'])->name('assessments.destroy');
     

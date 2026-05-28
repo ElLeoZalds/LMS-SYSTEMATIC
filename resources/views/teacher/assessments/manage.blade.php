@@ -83,6 +83,15 @@
                                         data-action="{{ route('teacher.assessments.questions.store', $assessment->assessment_id) }}">
                                         <i class="fas fa-plus-circle mr-1"></i> Nueva Pregunta
                                     </button>
+
+                                    {{-- Botón Eliminar Evaluación --}}
+                                    <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="d-inline-block mt-1 swal-confirm" data-message="¿Estás seguro de eliminar esta evaluación? Se eliminarán también los intentos asociados.">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
 
@@ -159,18 +168,18 @@
                                                             data-target="#questionModal"
                                                             data-mode="edit"
                                                             data-action="{{ route('teacher.questions.update', $question->question_id) }}"
-                                                            data-question="{{ json_encode([
+                                                                data-question="{{ json_encode([
                                                                 'text' => $question->question_text,
                                                                 'score' => $question->score,
                                                                 'alternatives' => $question->alternatives->map(function($alt) {
                                                                     return ['text' => $alt->option_text, 'is_correct' => $alt->is_correct];
                                                                 })
-                                                            ]) }}">
+                                                                ]) }}" data-image="{{ $question->image_path ? asset('storage/'.$question->image_path) : '' }}">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
 
                                                         {{-- BOTÓN PARA ELIMINAR PREGUNTA --}}
-                                                        <form action="{{ route('teacher.questions.destroy', $question->question_id) }}" method="POST" onsubmit="return confirm('¿Estás completamente seguro de eliminar esta pregunta? Esta acción no se puede deshacer.');" class="d-inline">
+                                                        <form action="{{ route('teacher.questions.destroy', $question->question_id) }}" method="POST" class="d-inline swal-confirm" data-message="¿Estás completamente seguro de eliminar esta pregunta? Esta acción no se puede deshacer.">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-sm btn-light text-danger" title="Eliminar Pregunta">
@@ -192,6 +201,11 @@
                                                         </div>
                                                     @endforeach
                                                 </div>
+                                                @if(!empty($question->image_path))
+                                                    <div class="mt-3 text-center">
+                                                        <img src="{{ asset('storage/'.$question->image_path) }}" alt="Imagen pregunta" style="max-width: 100%; max-height: 250px; object-fit: contain;" class="img-fluid rounded">
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     @endforeach
@@ -227,135 +241,5 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="questionForm" method="POST" action="">
-                    @csrf
-                    <div id="methodContainer"></div>
-                    <div class="modal-body">
-                        <div class="form-group mb-3">
-                            <label for="question_text" class="text-gray-700 font-weight-bold">Pregunta</label>
-                            <input type="text" class="form-control form-control-sm" id="question_text" name="question_text" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="score" class="text-gray-700 font-weight-bold">Puntos</label>
-                            <input type="number" class="form-control form-control-sm" id="score" name="score" min="0" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label class="text-gray-700 font-weight-bold mb-0">Alternativas</label>
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="addAlternativeBtn">+ Añadir Opción</button>
-                            </div>
-                            <div id="alternativesContainer"></div>
-                            <div class="text-muted small mt-2">Marca la alternativa correcta con el círculo.</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary btn-sm">Guardar Pregunta</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const questionForm = document.getElementById('questionForm');
-                const methodContainer = document.getElementById('methodContainer');
-                const modalTitle = document.getElementById('questionModalLabel');
-                const alternativesContainer = document.getElementById('alternativesContainer');
-                const addAlternativeBtn = document.getElementById('addAlternativeBtn');
-                let alternativeIndex = 0;
-
-                function createAlternativeRow(index, textValue = '', isChecked = false) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'd-flex align-items-center mb-2 alternative-row';
-                    
-                    let radioChecked = isChecked ? 'checked' : '';
-                    
-                    wrapper.innerHTML = `
-                        <div class="input-group input-group-sm flex-grow-1 mr-2">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <input type="radio" name="correct_alternative" value="` + index + `" aria-label="Correcta" ` + radioChecked + ` required>
-                                </div>
-                            </div>
-                            <input type="text" name="alternatives[` + index + `][text]" class="form-control form-control-sm" value="` + textValue.replace(/"/g, '&quot;') + `" placeholder="Opción ` + (index + 1) + `" required>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-alternative-btn">Eliminar</button>
-                    `;
-
-                    wrapper.querySelector('.remove-alternative-btn').addEventListener('click', function () {
-                        wrapper.remove();
-                        refreshAlternativeIndexes();
-                    });
-
-                    return wrapper;
-                }
-
-                function refreshAlternativeIndexes() {
-                    let tempIndex = 0;
-                    const rows = alternativesContainer.querySelectorAll('.alternative-row');
-                    rows.forEach((row) => {
-                        const radio = row.querySelector('input[type="radio"]');
-                        const textInput = row.querySelector('input[type="text"]');
-                        
-                        radio.value = tempIndex;
-                        textInput.name = 'alternatives[' + tempIndex + '][text]';
-                        textInput.placeholder = 'Opción ' + (tempIndex + 1);
-                        tempIndex++;
-                    });
-                    alternativeIndex = tempIndex;
-                }
-
-                function addAlternativeRow(textValue = '', isChecked = false) {
-                    const row = createAlternativeRow(alternativeIndex, textValue, isChecked);
-                    alternativesContainer.appendChild(row);
-                    alternativeIndex++;
-                }
-
-                if (addAlternativeBtn) {
-                    addAlternativeBtn.addEventListener('click', function () {
-                        addAlternativeRow();
-                    });
-                }
-
-                document.addEventListener('click', function (event) {
-                    const button = event.target.closest('.add-question-btn, .edit-question-btn');
-                    if (!button) return;
-
-                    const mode = button.getAttribute('data-mode');
-                    const action = button.getAttribute('data-action');
-                    
-                    questionForm.action = action;
-                    questionForm.reset();
-                    alternativesContainer.innerHTML = '';
-                    alternativeIndex = 0;
-
-                    if (mode === 'create') {
-                        modalTitle.textContent = 'Nueva Pregunta';
-                        methodContainer.innerHTML = ''; 
-                        addAlternativeRow('', true); 
-                        addAlternativeRow('', false);
-                    } else if (mode === 'edit') {
-                        modalTitle.textContent = 'Editar Pregunta';
-                        methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">'; 
-                        
-                        const questionData = JSON.parse(button.getAttribute('data-question'));
-                        document.getElementById('question_text').value = questionData.text;
-                        document.getElementById('score').value = questionData.score;
-
-                        if (questionData.alternatives && questionData.alternatives.length > 0) {
-                            questionData.alternatives.forEach((alt) => {
-                                addAlternativeRow(alt.text, alt.is_correct == 1);
-                            });
-                        } else {
-                            addAlternativeRow('', true);
-                            addAlternativeRow('', false);
-                        }
-                    }
-                });
-            });
-        </script>
-    @endpush
+                @include('teacher.assessments._question_modal')
 @endsection

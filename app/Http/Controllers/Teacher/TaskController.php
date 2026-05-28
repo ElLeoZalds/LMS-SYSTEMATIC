@@ -15,30 +15,33 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validar la petición utilizando 'delivery_date' que es el nombre que viene del HTML
         $request->validate([
             'training_id'   => 'required|exists:trainings,training_id',
             'title'         => 'required|string|max:150',
             'description'   => 'nullable|string',
-            'delivery_date' => 'required|date', 
+            'delivery_date' => 'required|date|after_or_equal:today',
+            'attachment'    => 'nullable|file|max:5120|mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
         ]);
 
         $user = auth()->user();
 
-        // 2. Verificar que el curso pertenece al profesor logueado
         $training = Training::where('training_id', $request->training_id)
             ->where('teacher_id', $user->user_id)
             ->firstOrFail();
 
-        // 3. Crear el registro de la tarea mapeando 'due_date' con 'delivery_date'
+        $filePath = null;
+        if ($request->hasFile('attachment')) {
+            $filePath = $request->file('attachment')->store('task-files', 'public');
+        }
+
         Task::create([
             'training_id' => $training->training_id,
             'title'       => $request->title,
             'description' => $request->description ?? null,
-            'due_date'    => $request->delivery_date, // Guardamos el valor en el campo de la BD
+            'due_date'    => $request->delivery_date,
+            'file_path'   => $filePath,
         ]);
 
-        // Redireccionar a la pestaña de contenido del curso con mensaje de éxito
         return redirect()->route('teacher.courses.show', ['id' => $training->training_id, 'tab' => 'contenido'])
             ->with('success', 'Tarea asignada correctamente.');
     }
@@ -89,5 +92,44 @@ class TaskController extends Controller
 
         return redirect()->route('teacher.tasks.submissions', ['task_id' => $submission->task_id])
             ->with('success', 'Entrega calificada correctamente.');
+    }
+
+    /**
+     * Update an existing task (allow editing title, description, due date and attachment).
+     */
+    public function update(Request $request, $task_id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'delivery_date' => 'required|date|after_or_equal:today',
+            'attachment' => 'nullable|file|max:5120|mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
+        ]);
+
+        $user = auth()->user();
+
+        $task = Task::where('task_id', $task_id)
+            ->whereHas('training', function ($q) use ($user) {
+                $q->where('teacher_id', $user->user_id);
+            })->firstOrFail();
+
+        // handle replacement of attachment
+        if ($request->hasFile('attachment')) {
+            try {
+                if ($task->file_path) {
+                    \Storage::disk('public')->delete($task->file_path);
+                }
+            } catch (\Exception $e) {}
+            $path = $request->file('attachment')->store('task-files', 'public');
+            $task->file_path = $path;
+        }
+
+        $task->title = $request->title;
+        $task->description = $request->description ?? null;
+        $task->due_date = $request->delivery_date;
+        $task->save();
+
+        return redirect()->route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])
+            ->with('success', 'Tarea actualizada correctamente.');
     }
 }

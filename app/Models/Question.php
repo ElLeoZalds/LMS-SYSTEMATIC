@@ -13,6 +13,7 @@ class Question extends Model
         'question_text',
         'score',
         'order_index',
+        'image_path',
     ];
 
     public function assessment()
