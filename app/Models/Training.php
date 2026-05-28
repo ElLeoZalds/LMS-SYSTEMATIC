@@ -72,5 +72,10 @@ class Training extends Model
     public function tasks()
     {
         return $this->hasMany(Task::class, 'training_id', 'training_id');
-    }   
+    }
+
+    public function announcements()
+    {
+        return $this->hasMany(Announcement::class, 'training_id', 'training_id');
+    }
 }

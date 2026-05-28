@@ -19,6 +19,10 @@
         <div class="sidebar-brand-text mx-3">Systematic LMS</div>
     </a>
 
+    <div class="text-center text-light small mb-3">
+        {{ optional(auth()->user())->name ?? 'Usuario' }}
+    </div>
+
     <hr class="sidebar-divider my-0">
 
     @if($role === 'Administrator')
@@ -84,10 +88,10 @@
             </a>
         </li>
 
-        <li class="nav-item {{ request()->routeIs('teacher.assessments.index') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('teacher.assessments.index') }}">
-                <i class="fas fa-fw fa-clipboard-check"></i>
-                <span>Evaluaciones</span>
+        <li class="nav-item {{ request()->routeIs('teacher.calendar') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('teacher.calendar') }}">
+                <i class="fas fa-fw fa-calendar-alt"></i>
+                <span>Calendario</span>
             </a>
         </li>
 
@@ -131,6 +135,13 @@
         <div class="sidebar-heading">
             Aprendizaje
         </div>
+
+        <li class="nav-item {{ request()->routeIs('student.calendar') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('student.calendar') }}">
+                <i class="fas fa-fw fa-calendar-alt"></i>
+                <span>Calendario</span>
+            </a>
+        </li>
 
         <li class="nav-item {{ request()->routeIs('student.courses.*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('student.courses.index') }}">

@@ -74,9 +74,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Administrator'
 Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])->group(function () {
 
     Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
+    Route::get('/calendar', [TeacherController::class, 'calendar'])->name('calendar');
     Route::get('/courses', [TeacherController::class, 'courses'])->name('courses');
     Route::get('/courses/{id}', [TeacherController::class, 'show'])->name('courses.show');
     Route::post('/courses/{id}/banner', [TeacherController::class, 'uploadBanner'])->name('courses.banner.upload');
+    Route::post('/courses/{id}/announcements', [TeacherController::class, 'storeAnnouncement'])->name('courses.announcements.store');
     Route::get('/students/{id}', [TeacherController::class, 'students'])->name('students');
     // AJAX endpoints for dashboard filtering
     Route::get('/ajax/students/{id}', [TeacherController::class, 'ajaxStudents'])->name('ajax.students');
@@ -117,6 +119,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])
 Route::prefix('student')->name('student.')->middleware(['auth', 'role:Student'])->group(function () {
 
     Route::get('/dashboard', [StudentController::class, 'index'])->name('dashboard');
+    Route::get('/calendar', [StudentCourseController::class, 'calendar'])->name('calendar');
 
     Route::get('/courses', [StudentController::class, 'courses'])->name('courses.index');
     Route::get('/courses/{id}', [StudentCourseController::class, 'show'])->name('courses.show');

@@ -162,6 +162,69 @@
                 @endif
             </div>
         </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="card-title fw-bold mb-1">Anuncios del curso</h5>
+                        <p class="text-muted small mb-0">Aquí aparecen los comunicados del docente.</p>
+                    </div>
+                </div>
+
+                @if($training->announcements->isEmpty())
+                    <div class="alert alert-secondary mb-0" role="alert">
+                        <i class="bi bi-inbox me-2"></i>No hay anuncios publicados todavía.
+                    </div>
+                @else
+                    @foreach($training->announcements->sortByDesc('created_at') as $announcement)
+                        <div class="border rounded-3 p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="mb-1">Anuncio</h6>
+                                    <small class="text-muted">{{ $announcement->created_at->format('d/m/Y H:i') }}</small>
+                                </div>
+                            </div>
+                            <div class="mb-3 text-break">
+                                {!! nl2br(e($announcement->content)) !!}
+                            </div>
+
+                            @if($announcement->link)
+                                <div class="mb-3">
+                                    <a href="{{ $announcement->link }}" target="_blank" class="text-decoration-none">
+                                        <i class="bi bi-link-45deg me-1"></i>{{ $announcement->link }}
+                                    </a>
+                                </div>
+                            @endif
+
+                            @if($announcement->attachments)
+                                <div class="row g-2">
+                                    @foreach($announcement->attachments as $attachment)
+                                        <div class="col-12 col-sm-6 col-xl-4">
+                                            <div class="card border">
+                                                <div class="card-body p-2">
+                                                    @if(strpos($attachment['mime'] ?? '', 'image') !== false)
+                                                        <a href="{{ asset('storage/'.$attachment['path']) }}" target="_blank">
+                                                            <img src="{{ asset('storage/'.$attachment['path']) }}" class="img-fluid rounded mb-2" alt="{{ $attachment['name'] }}">
+                                                        </a>
+                                                    @endif
+                                                    <div class="small mb-2">
+                                                        <strong>{{ $attachment['name'] }}</strong>
+                                                    </div>
+                                                    <a href="{{ asset('storage/'.$attachment['path']) }}" target="_blank" class="text-decoration-none small">
+                                                        <i class="bi bi-download me-1"></i>Descargar archivo
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+        </div>
     </div>
     <style>
         .course-banner-image { background-position: center center; background-size: cover; width: 100%; }

@@ -10,7 +10,10 @@ use App\Models\Attendance;
 use App\Models\Assessment;
 use App\Models\AssessmentAttempt;
 use App\Models\Enrollment;
+use App\Models\Announcement;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class TeacherController extends Controller
 {
@@ -93,6 +96,73 @@ class TeacherController extends Controller
         return back()->with('success', 'Banner subido correctamente.');
     }
 
+    public function calendar(Request $request)
+    {
+        $user = auth()->user();
+        $person = $user->person;
+        $fullName = trim(($person->last_names ?? '') . ' ' . ($person->first_names ?? '')) ?: ($user->username ?? 'Docente');
+
+        $monthKey = $request->query('month', Carbon::now()->format('Y-m'));
+        $selectedMonth = Carbon::createFromFormat('Y-m', $monthKey)->startOfMonth();
+
+        $startOfMonth = $selectedMonth->copy()->startOfMonth();
+        $endOfMonth = $selectedMonth->copy()->endOfMonth();
+        $startCalendar = $startOfMonth->copy()->startOfWeek(Carbon::MONDAY);
+        $endCalendar = $endOfMonth->copy()->endOfWeek(Carbon::SUNDAY);
+
+        $days = [];
+        for ($date = $startCalendar->copy(); $date->lte($endCalendar); $date->addDay()) {
+            $days[] = $date->copy();
+        }
+
+        $trainings = Training::with(['course', 'assessments', 'tasks'])
+            ->where('teacher_id', $user->user_id)
+            ->get();
+
+        $events = [];
+        foreach ($trainings as $training) {
+            foreach ($training->assessments as $assessment) {
+                $period = CarbonPeriod::create($assessment->start_date, $assessment->end_date);
+                foreach ($period as $day) {
+                    $dateKey = $day->format('Y-m-d');
+                    $events[$dateKey][] = [
+                        'type' => 'assessment',
+                        'title' => $assessment->title,
+                        'training' => $training->course->title,
+                        'range' => $assessment->start_date->format('d/m/Y') . ' → ' . $assessment->end_date->format('d/m/Y'),
+                        'status' => $day->isSameDay($assessment->end_date) ? 'Vence hoy' : 'En curso',
+                    ];
+                }
+            }
+
+            foreach ($training->tasks as $task) {
+                if (! $task->due_date) {
+                    continue;
+                }
+
+                $dateKey = $task->due_date->toDateString();
+                $events[$dateKey][] = [
+                    'type' => 'task',
+                    'title' => $task->title,
+                    'training' => $training->course->title,
+                    'range' => 'Entrega: ' . $task->due_date->format('d/m/Y H:i'),
+                    'status' => $task->due_date->isToday() ? 'Vence hoy' : ($task->due_date->isPast() ? 'Atrasada' : 'Pendiente'),
+                ];
+            }
+        }
+
+        $calendar = array_chunk($days, 7);
+        $today = Carbon::today();
+
+        return view('teacher.calendar', compact(
+            'fullName',
+            'selectedMonth',
+            'calendar',
+            'events',
+            'today'
+        ));
+    }
+
     public function show($id)
     {
         $user = auth()->user();
@@ -102,6 +172,7 @@ class TeacherController extends Controller
             'course',
             'assessments.attempts', // Trae los intentos globales de las evaluaciones de este curso
             'enrollments.student.person',
+            'announcements',
         ])
             ->where('training_id', $id)
             ->where('teacher_id', $user->user_id)
@@ -121,6 +192,49 @@ class TeacherController extends Controller
             'totalAttendanceRecords',
             'students' // Enviamos los estudiantes para mapear la matriz en la vista
         ));
+    }
+
+    public function storeAnnouncement(Request $request, $id)
+    {
+        $user = auth()->user();
+
+        $training = Training::where('training_id', $id)
+            ->where('teacher_id', $user->user_id)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'content' => 'required|string|max:3000',
+            'link' => 'nullable|url|max:255',
+            'attachments' => 'nullable|array|max:5',
+            'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt,ppt,pptx,zip',
+        ]);
+
+        $attachments = [];
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                if (! $file->isValid()) {
+                    continue;
+                }
+                $path = $file->store('course-announcements/'.$training->training_id, 'public');
+                $attachments[] = [
+                    'path' => $path,
+                    'name' => $file->getClientOriginalName(),
+                    'mime' => $file->getClientMimeType(),
+                    'size' => $file->getSize(),
+                ];
+            }
+        }
+
+        Announcement::create([
+            'training_id' => $training->training_id,
+            'teacher_id' => $user->user_id,
+            'content' => $validated['content'],
+            'link' => $validated['link'] ?? null,
+            'attachments' => $attachments ?: null,
+        ]);
+
+        return redirect()->route('teacher.courses.show', ['id' => $training->training_id, 'tab' => 'anuncios'])
+            ->with('success', 'Anuncio publicado correctamente.');
     }
 
     public function students($id)

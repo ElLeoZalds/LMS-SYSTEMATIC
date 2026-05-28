@@ -350,11 +350,118 @@
                     </div>
 
                 @elseif(request('tab') === 'anuncios')
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Anuncios</h5>
-                    </div>
-                    <div class="alert alert-info" role="alert">
-                        <i class="bi bi-megaphone-fill me-2"></i> Aquí se mostrarán los anuncios del curso. Puedes usar este espacio para comunicados, fechas importantes y recordatorios.
+                    <div class="row gy-4">
+                        <div class="col-lg-5">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white">
+                                    <h5 class="mb-0 fw-bold">Nuevo anuncio</h5>
+                                </div>
+                                <div class="card-body">
+                                    @if(session('success'))
+                                        <div class="alert alert-success small">
+                                            {{ session('success') }}
+                                        </div>
+                                    @endif
+
+                                    @if($errors->any())
+                                        <div class="alert alert-danger small">
+                                            <ul class="mb-0">
+                                                @foreach($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+
+                                    <form action="{{ route('teacher.courses.announcements.store', $training->training_id) }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+
+                                        <div class="mb-3">
+                                            <label for="announcement-content" class="form-label fw-bold">Mensaje</label>
+                                            <textarea id="announcement-content" name="content" rows="5" class="form-control" required placeholder="Escribe el anuncio aquí...">{{ old('content') }}</textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="announcement-link" class="form-label fw-bold">Enlace opcional</label>
+                                            <input id="announcement-link" name="link" type="url" value="{{ old('link') }}" class="form-control" placeholder="https://ejemplo.com/" />
+                                            <small class="text-muted">Puedes agregar un enlace a recursos externos, reuniones o documentos.</small>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="announcement-attachments" class="form-label fw-bold">Imágenes / Archivos</label>
+                                            <input id="announcement-attachments" name="attachments[]" type="file" class="form-control" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.ppt,.pptx,.zip" />
+                                            <small class="text-muted">Puedes subir varios archivos, 5 MB por archivo.</small>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">Publicar anuncio</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-7">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0 fw-bold">Anuncios publicados</h5>
+                                        <small class="text-muted">Los estudiantes verán estos mensajes en el curso.</small>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    @if($training->announcements->isEmpty())
+                                        <div class="alert alert-secondary mb-0">
+                                            <i class="bi bi-inbox me-2"></i>No hay anuncios registrados para este curso.
+                                        </div>
+                                    @else
+                                        @foreach($training->announcements->sortByDesc('created_at') as $announcement)
+                                            <div class="border rounded-3 p-3 mb-3">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div>
+                                                        <h6 class="mb-1">Anuncio publicado</h6>
+                                                        <small class="text-muted">{{ $announcement->created_at->format('d/m/Y H:i') }}</small>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3 text-break">
+                                                    {!! nl2br(e($announcement->content)) !!}
+                                                </div>
+
+                                                @if($announcement->link)
+                                                    <div class="mb-3">
+                                                        <a href="{{ $announcement->link }}" target="_blank" class="text-decoration-none">
+                                                            <i class="bi bi-link-45deg me-1"></i>{{ $announcement->link }}
+                                                        </a>
+                                                    </div>
+                                                @endif
+
+                                                @if($announcement->attachments)
+                                                    <div class="row g-2">
+                                                        @foreach($announcement->attachments as $attachment)
+                                                            <div class="col-12 col-sm-6 col-xl-4">
+                                                                <div class="card border">
+                                                                    <div class="card-body p-2">
+                                                                        @if(strpos($attachment['mime'] ?? '', 'image') !== false)
+                                                                            <a href="{{ asset('storage/'.$attachment['path']) }}" target="_blank">
+                                                                                <img src="{{ asset('storage/'.$attachment['path']) }}" class="img-fluid rounded mb-2" alt="{{ $attachment['name'] }}">
+                                                                            </a>
+                                                                        @endif
+                                                                        <div class="small">
+                                                                            <strong>{{ $attachment['name'] }}</strong>
+                                                                        </div>
+                                                                        <a href="{{ asset('storage/'.$attachment['path']) }}" target="_blank" class="text-decoration-none small">
+                                                                            <i class="bi bi-download me-1"></i>Descargar archivo
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                 @elseif(request('tab') === 'calificaciones')

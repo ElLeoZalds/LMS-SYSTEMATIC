@@ -9,6 +9,7 @@ use App\Models\Enrollment;
 use App\Models\Training;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class CourseController extends Controller
 {
@@ -24,7 +25,7 @@ class CourseController extends Controller
             abort(403, 'No estás inscrito en esta capacitación.');
         }
 
-        $training = Training::with(['course', 'teacher.person', 'assessments'])
+        $training = Training::with(['course', 'teacher.person', 'assessments', 'announcements'])
             ->where('training_id', $id)
             ->firstOrFail();
 
@@ -151,6 +152,73 @@ class CourseController extends Controller
         $attempt->load('assessment');
 
         return view('student.assessments.result', compact('attempt'));
+    }
+
+    public function calendar(Request $request)
+    {
+        $studentId = auth()->id();
+        $user = auth()->user();
+        $person = $user->person;
+        $fullName = trim(($person->last_names ?? '') . ' ' . ($person->first_names ?? '')) ?: ($user->username ?? 'Estudiante');
+
+        $monthKey = $request->query('month', Carbon::now()->format('Y-m'));
+        $selectedMonth = Carbon::createFromFormat('Y-m', $monthKey)->startOfMonth();
+
+        $startOfMonth = $selectedMonth->copy()->startOfMonth();
+        $endOfMonth = $selectedMonth->copy()->endOfMonth();
+        $startCalendar = $startOfMonth->copy()->startOfWeek(Carbon::MONDAY);
+        $endCalendar = $endOfMonth->copy()->endOfWeek(Carbon::SUNDAY);
+
+        $days = [];
+        for ($date = $startCalendar->copy(); $date->lte($endCalendar); $date->addDay()) {
+            $days[] = $date->copy();
+        }
+
+        $enrollments = Enrollment::with(['training.course', 'training.assessments', 'training.tasks'])
+            ->where('student_id', $studentId)
+            ->get();
+
+        $events = [];
+        foreach ($enrollments as $enrollment) {
+            $training = $enrollment->training;
+            if (! $training) {
+                continue;
+            }
+
+            foreach ($training->assessments as $assessment) {
+                $period = CarbonPeriod::create($assessment->start_date, $assessment->end_date);
+                foreach ($period as $day) {
+                    $dateKey = $day->format('Y-m-d');
+                    $events[$dateKey][] = [
+                        'type' => 'assessment',
+                        'title' => $assessment->title,
+                        'training' => $training->course->title,
+                        'range' => $assessment->start_date->format('d/m/Y') . ' → ' . $assessment->end_date->format('d/m/Y'),
+                        'status' => $day->isSameDay($assessment->end_date) ? 'Vence hoy' : 'En curso',
+                    ];
+                }
+            }
+
+            foreach ($training->tasks as $task) {
+                if (! $task->due_date) {
+                    continue;
+                }
+
+                $dateKey = $task->due_date->toDateString();
+                $events[$dateKey][] = [
+                    'type' => 'task',
+                    'title' => $task->title,
+                    'training' => $training->course->title,
+                    'range' => 'Entrega: ' . $task->due_date->format('d/m/Y H:i'),
+                    'status' => $task->due_date->isToday() ? 'Vence hoy' : ($task->due_date->isPast() ? 'Atrasada' : 'Pendiente'),
+                ];
+            }
+        }
+
+        $calendar = array_chunk($days, 7);
+        $today = Carbon::today();
+
+        return view('teacher.calendar', compact('fullName', 'selectedMonth', 'calendar', 'events', 'today'));
     }
 
     private function validateAssessmentAvailability(Assessment $assessment)
