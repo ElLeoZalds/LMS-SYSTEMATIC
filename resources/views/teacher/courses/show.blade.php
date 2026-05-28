@@ -94,6 +94,13 @@
                             <i class="bi bi-check-circle-fill me-2"></i>Calificaciones
                         </a>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=anuncios"
+                            class="nav-link @if(request('tab') === 'anuncios') active @endif" id="anuncios-tab"
+                            role="tab">
+                            <i class="bi bi-megaphone-fill me-2"></i>Anuncios
+                        </a>
+                    </li>
                 </ul>
             </div>
 
@@ -340,6 +347,14 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                @elseif(request('tab') === 'anuncios')
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0">Anuncios</h5>
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-megaphone-fill me-2"></i> Aquí se mostrarán los anuncios del curso. Puedes usar este espacio para comunicados, fechas importantes y recordatorios.
                     </div>
 
                 @elseif(request('tab') === 'calificaciones')
