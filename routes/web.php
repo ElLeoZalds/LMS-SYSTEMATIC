@@ -76,6 +76,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])
     Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
     Route::get('/courses', [TeacherController::class, 'courses'])->name('courses');
     Route::get('/courses/{id}', [TeacherController::class, 'show'])->name('courses.show');
+    Route::post('/courses/{id}/banner', [TeacherController::class, 'uploadBanner'])->name('courses.banner.upload');
     Route::get('/students/{id}', [TeacherController::class, 'students'])->name('students');
     // AJAX endpoints for dashboard filtering
     Route::get('/ajax/students/{id}', [TeacherController::class, 'ajaxStudents'])->name('ajax.students');

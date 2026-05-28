@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Training;
 use App\Models\Attendance;
 use App\Models\Assessment;
@@ -61,6 +62,35 @@ class TeacherController extends Controller
         $trainings = $query->get();
 
         return view('teacher.courses.index', compact('trainings'));
+    }
+
+    public function uploadBanner(Request $request, $training_id)
+    {
+        $request->validate([
+            'banner' => 'required|image|mimes:jpg,png|max:2048',
+        ]);
+
+        $user = auth()->user();
+
+        $training = Training::with('course')
+            ->where('training_id', $training_id)
+            ->where('teacher_id', $user->user_id)
+            ->firstOrFail();
+
+        $course = $training->course;
+
+        if (!$course) {
+            return back()->with('error', 'No se encontró el curso asociado.');
+        }
+
+        if ($course->banner_path) {
+            Storage::disk('public')->delete($course->banner_path);
+        }
+
+        $path = $request->file('banner')->store('course-banners', 'public');
+        $course->update(['banner_path' => $path]);
+
+        return back()->with('success', 'Banner subido correctamente.');
     }
 
     public function show($id)
