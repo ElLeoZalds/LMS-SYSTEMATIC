@@ -89,20 +89,24 @@
                     {{-- ALERTAS TOAST CON SWEETALERT --}}
                     @if(session('success'))
                         <script>
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'success',
-                                title: '{{ session('success') }}',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true,
-                                backdrop: false,
-                                didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                }
-                            });
+                            (function() {
+                                const short = {{ session('short_toast') ? 'true' : 'false' }};
+                                const timerValue = short ? 1400 : 3000;
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: '{{ session('success') }}',
+                                    showConfirmButton: false,
+                                    timer: timerValue,
+                                    timerProgressBar: true,
+                                    backdrop: false,
+                                    didOpen: (toast) => {
+                                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                    }
+                                });
+                            })();
                         </script>
                     @endif
 

@@ -29,13 +29,28 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label for="attendance_date" class="form-label fw-bold small text-muted">Fecha de Asistencia</label>
-                        <input type="date" id="attendance_date" name="date" class="form-control" value="{{ $date ?? date('Y-m-d') }}" required>
+                        <label for="schedule_select" class="form-label fw-bold small text-muted">Sesión (fecha · horario)</label>
+                        @if(isset($training) && $training->schedules->count() > 0)
+                            <select id="schedule_select" name="schedule_id" class="form-select">
+                                <option value="">Seleccione una sesión</option>
+                                @foreach($training->schedules as $s)
+                                    <option value="{{ $s->schedule_id }}" data-date="{{ $s->date }}">{{ $s->date }} {{ $s->start_time ? ' · ' . $s->start_time : '' }}</option>
+                                @endforeach
+                                <option value="other">Otra fecha...</option>
+                            </select>
+                        @else
+                            <select id="schedule_select" name="schedule_id" class="form-select">
+                                <option value="">No hay sesiones programadas</option>
+                                <option value="other">Otra fecha...</option>
+                            </select>
+                        @endif
+
+                        <div id="customDateWrapper" class="mt-2" style="display:none;">
+                            <label for="custom_date" class="form-label fw-bold small text-muted">Selecciona fecha</label>
+                            <input type="date" id="custom_date" name="date_custom" class="form-control">
+                        </div>
                     </div>
 
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Buscar Alumnos</button>
-                    </div>
                 </form>
 
                 @if(!isset($training))
@@ -48,16 +63,20 @@
                     <form action="{{ route('teacher.attendance.store') }}" method="POST" class="row g-3">
                         @csrf
                         <input type="hidden" name="training_id" value="{{ $training->training_id }}">
-                        <input type="hidden" name="date" value="{{ $date ?? date('Y-m-d') }}">
+                        <input type="hidden" id="post_schedule_id" name="schedule_id" value="{{ request('schedule_id') ?? '' }}">
+                        <input type="hidden" id="post_date" name="date" value="{{ request('date') ?? $date ?? date('Y-m-d') }}">
 
                         <div class="row align-items-center mb-4">
                             <div class="col-md-8">
                                 <h2 class="h5 mb-0">{{ $training->course->title }}</h2>
                                 <p class="text-muted small mb-0">Fecha de asistencia: {{ $date ?? date('Y-m-d') }}</p>
                             </div>
-                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0 d-flex justify-content-end gap-2">
                                 <button type="button" class="btn btn-outline-success" onclick="markAllPresent()">
                                     <i class="bi bi-check2-all me-1"></i> Marcar Todos como Presentes
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="previousAttendancesBtn" data-training-id="{{ $training->training_id }}">
+                                    <i class="bi bi-list-ul me-1"></i> Asistencias anteriores
                                 </button>
                             </div>
                         </div>
@@ -103,6 +122,26 @@
                             </button>
                         </div>
                     </form>
+                    
+                    <!-- Modal: Asistencias anteriores -->
+                    <div class="modal fade" id="previousAttendancesModal" tabindex="-1" aria-labelledby="previousAttendancesLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="previousAttendancesLabel">Asistencias anteriores</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="previousAttendancesList">Cargando...</div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endif
             </div>
         </div>
@@ -114,5 +153,218 @@
                     radio.checked = true;
                 });
             }
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const scheduleSelect = document.getElementById('schedule_select');
+                const customDateWrapper = document.getElementById('customDateWrapper');
+                const customDate = document.getElementById('custom_date');
+                const postScheduleId = document.getElementById('post_schedule_id');
+                const postDate = document.getElementById('post_date');
+
+                // set max for custom date (no future dates)
+                if (customDate) {
+                    customDate.max = new Date().toISOString().split('T')[0];
+                }
+
+                if (scheduleSelect) {
+                    scheduleSelect.addEventListener('change', async function() {
+                        const val = this.value;
+                        if (val === 'other') {
+                            customDateWrapper.style.display = 'block';
+                            postScheduleId.value = '';
+                            postDate.value = '';
+                            return;
+                        }
+
+                        customDateWrapper.style.display = 'none';
+                        postScheduleId.value = val || '';
+                        postDate.value = this.options[this.selectedIndex].dataset.date || '';
+
+                        if (!val) return;
+
+                        // Check if attendance already exists for this schedule
+                        const url = '{{ route('teacher.attendance.check') }}?schedule_id=' + val;
+                        try {
+                            const resp = await fetch(url);
+                            const json = await resp.json();
+                            if (json.exists) {
+                                const res = await Swal.fire({
+                                    title: 'Asistencia registrada',
+                                    text: 'Ya se registró asistencia para esta sesión. ¿Deseas actualizarla?',
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Sí, actualizar',
+                                    cancelButtonText: 'No, cancelar'
+                                });
+
+                                if (res.isConfirmed) {
+                                    // Prefill statuses
+                                    if (json.attendances && json.attendances.length) {
+                                        const map = {};
+                                        json.attendances.forEach(a => { map[a.student_id] = a.attendance; });
+
+                                        document.querySelectorAll('input[type="hidden"][name$="[student_id]"]').forEach(function(h) {
+                                            const studentId = h.value;
+                                            const rowPrefix = h.name.replace('[student_id]', '');
+                                            const status = map[studentId] || null;
+                                            if (status) {
+                                                const short = status === 'present' ? 'P' : (status === 'absent' ? 'A' : 'J');
+                                                const radio = document.querySelector('input[name="' + rowPrefix + '[status]"][value="' + short + '"]');
+                                                if (radio) radio.checked = true;
+                                            } else {
+                                                const radioDefault = document.querySelector('input[name="' + rowPrefix + '[status]"][value="P"]');
+                                                if (radioDefault) radioDefault.checked = true;
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    // reset selection
+                                    scheduleSelect.value = '';
+                                    postScheduleId.value = '';
+                                    postDate.value = '';
+                                }
+                            } else {
+                                // no previous attendance -> default present
+                                document.querySelectorAll('input[type="radio"][value="P"]').forEach(r => r.checked = true);
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+                }
+
+                if (customDate) {
+                    customDate.addEventListener('change', async function() {
+                        const selected = this.value;
+                        if (!selected) return;
+                        if (selected > new Date().toISOString().split('T')[0]) {
+                            Swal.fire({ icon: 'error', title: 'Fecha inválida', text: 'No se puede seleccionar una fecha futura.' });
+                            this.value = '';
+                            return;
+                        }
+                        postDate.value = selected;
+                        postScheduleId.value = '';
+
+                        // Check if schedule exists for this training & date
+                        const url = '{{ route('teacher.attendance.check') }}?training_id=' + {{ $training->training_id }} + '&date=' + selected;
+                        try {
+                            const resp = await fetch(url);
+                            const json = await resp.json();
+                            if (json.exists) {
+                                const res = await Swal.fire({
+                                    title: 'Asistencia registrada',
+                                    text: 'Ya se registró asistencia para esta fecha. ¿Deseas actualizarla?',
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Sí, actualizar',
+                                    cancelButtonText: 'No, cancelar'
+                                });
+
+                                if (res.isConfirmed) {
+                                    if (json.attendances && json.attendances.length) {
+                                        const map = {};
+                                        json.attendances.forEach(a => { map[a.student_id] = a.attendance; });
+
+                                        document.querySelectorAll('input[type="hidden"][name$="[student_id]"]').forEach(function(h) {
+                                            const studentId = h.value;
+                                            const rowPrefix = h.name.replace('[student_id]', '');
+                                            const status = map[studentId] || null;
+                                            if (status) {
+                                                const short = status === 'present' ? 'P' : (status === 'absent' ? 'A' : 'J');
+                                                const radio = document.querySelector('input[name="' + rowPrefix + '[status]"][value="' + short + '"]');
+                                                if (radio) radio.checked = true;
+                                            } else {
+                                                const radioDefault = document.querySelector('input[name="' + rowPrefix + '[status]"][value="P"]');
+                                                if (radioDefault) radioDefault.checked = true;
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    this.value = '';
+                                    postDate.value = '';
+                                }
+                            } else {
+                                document.querySelectorAll('input[type="radio"][value="P"]').forEach(r => r.checked = true);
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+                }
+
+                // Previous attendances modal
+                const prevBtn = document.getElementById('previousAttendancesBtn');
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', async function() {
+                        const trainingId = this.dataset.trainingId;
+                        const url = '{{ url('teacher/attendance/list') }}' + '/' + trainingId;
+                        $('#previousAttendancesModal').modal('show');
+                        const container = document.getElementById('previousAttendancesList');
+                        container.innerHTML = 'Cargando...';
+                        try {
+                            const resp = await fetch(url);
+                            const json = await resp.json();
+                            if (json.schedules && json.schedules.length) {
+                                let html = '<div class="list-group">';
+                                json.schedules.forEach(s => {
+                                    html += '<div class="list-group-item d-flex justify-content-between align-items-center">';
+                                    html += '<div>';
+                                    html += '<div><strong>' + s.date + '</strong></div>';
+                                    html += '<small class="text-muted">Horario: ' + (s.start_time && s.end_time ? s.start_time + ' - ' + s.end_time : s.start_time || 'N/A') + '</small>';
+                                    html += '</div>';
+                                    html += '<div><span class="badge bg-primary me-2">' + s.count + ' registros</span>';
+                                    html += '<button class="btn btn-sm btn-outline-primary" onclick="showAttendances(' + s.schedule_id + ')">Mostrar</button>';
+                                    html += '</div></div>';
+                                });
+                                html += '</div>';
+                                container.innerHTML = html;
+                            } else {
+                                container.innerHTML = '<div class="alert alert-info">No hay registros de asistencia anteriores.</div>';
+                            }
+                        } catch (e) {
+                            container.innerHTML = '<div class="alert alert-danger">Error al cargar.</div>';
+                        }
+                    });
+                }
+
+                // Show attendances for a schedule
+                window.showAttendances = async function(scheduleId) {
+                    const container = document.getElementById('previousAttendancesList');
+                    container.innerHTML = 'Cargando...';
+                    try {
+                        const url = '{{ route('teacher.attendance.check') }}?schedule_id=' + scheduleId;
+                        const resp = await fetch(url);
+                        const json = await resp.json();
+                        
+                        if (json.attendances && json.attendances.length) {
+                            let html = '<button class="btn btn-sm btn-link mb-3" onclick="location.reload()"><i class="bi bi-arrow-left"></i> Volver a sesiones</button>';
+                            html += '<div class="table-responsive">';
+                            html += '<table class="table table-sm table-bordered">';
+                            html += '<thead class="table-light"><tr>';
+                            html += '<th>Estudiante</th>';
+                            html += '<th class="text-center">Estado</th>';
+                            html += '</tr></thead>';
+                            html += '<tbody>';
+                            json.attendances.forEach(a => {
+                                const statusMap = { 'present': '✓ Presente', 'absent': '✕ Ausente', 'justified': '⊘ Justificado' };
+                                const status = statusMap[a.attendance] || a.attendance;
+                                html += '<tr>';
+                                html += '<td>' + a.student_name + '</td>';
+                                html += '<td class="text-center">' + status + '</td>';
+                                html += '</tr>';
+                            });
+                            html += '</tbody></table></div>';
+                            container.innerHTML = html;
+                        } else {
+                            container.innerHTML = '<button class="btn btn-sm btn-link mb-3" onclick="location.reload()"><i class="bi bi-arrow-left"></i> Volver a sesiones</button>';
+                            container.innerHTML += '<div class="alert alert-info">No hay asistencias registradas.</div>';
+                        }
+                    } catch (e) {
+                        container.innerHTML = '<button class="btn btn-sm btn-link mb-3" onclick="location.reload()"><i class="bi bi-arrow-left"></i> Volver a sesiones</button>';
+                        container.innerHTML += '<div class="alert alert-danger">Error al cargar.</div>';
+                    }
+                };
+            });
         </script>
 @endsection

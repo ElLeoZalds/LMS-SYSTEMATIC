@@ -84,6 +84,8 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])
 
     Route::get('/attendance/create', [TeacherAttendanceController::class, 'create'])->name('attendance.create');
     Route::post('/attendance/store', [TeacherAttendanceController::class, 'store'])->name('attendance.store');
+    Route::get('/attendance/check', [TeacherAttendanceController::class, 'check'])->name('attendance.check');
+    Route::get('/attendance/list/{training_id}', [TeacherAttendanceController::class, 'listPrevious'])->name('attendance.list');
 
     Route::post('/tasks/store', [TaskController::class, 'store'])->name('tasks.store');
     Route::get('/tasks/{task_id}/submissions', [TaskController::class, 'submissions'])->name('tasks.submissions');
