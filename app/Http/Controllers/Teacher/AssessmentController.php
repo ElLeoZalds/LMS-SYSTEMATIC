@@ -132,7 +132,7 @@ class AssessmentController extends Controller
             }
         });
 
-        return redirect()->route('teacher.assessments.manage', ['training_id' => $assessment->training_id])
+        return redirect()->route('teacher.assessments.show', ['assessment_id' => $assessment->assessment_id])
             ->with('success', 'Pregunta agregada.');
     }
 
@@ -186,7 +186,7 @@ class AssessmentController extends Controller
             }
         });
 
-        return redirect()->route('teacher.assessments.manage', ['training_id' => $question->assessment->training_id])
+        return redirect()->route('teacher.assessments.show', ['assessment_id' => $question->assessment->assessment_id])
             ->with('success', 'Pregunta actualizada.');
     }
 
@@ -199,17 +199,12 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
-        // prevent deletion if resulting question count would be less than minimum
-        $remaining = $question->assessment->questions()->count() - 1;
-        if ($remaining < 5) {
-            return redirect()->back()->with('error', 'No se puede eliminar. Una evaluación debe tener al menos 5 preguntas.');
-        }
-
         if ($question->assessment->attempts()->exists()) {
             return redirect()->back()->with('error', 'La evaluación ya tiene intentos.');
         }
 
         $trainingId = $question->assessment->training_id;
+        $assessmentId = $question->assessment->assessment_id;
         DB::transaction(function () use ($question) {
             $question->alternatives()->delete();
             // delete image file if exists
@@ -221,7 +216,7 @@ class AssessmentController extends Controller
             $question->delete();
         });
 
-        return redirect()->route('teacher.assessments.manage', ['training_id' => $trainingId]);
+        return redirect()->route('teacher.assessments.show', ['assessment_id' => $assessmentId]);
     }
 
     public function update(Request $request, $assessment_id)
@@ -267,7 +262,7 @@ class AssessmentController extends Controller
             ? 'Evaluación eliminada. Los intentos existentes también fueron eliminados.'
             : 'Evaluación eliminada correctamente.';
 
-        return redirect()->route('teacher.assessments.manage', ['training_id' => $trainingId])
+        return redirect()->route('teacher.courses.show', ['id' => $trainingId, 'tab' => 'contenido'])
             ->with('success', $message);
     }
 }

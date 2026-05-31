@@ -91,6 +91,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])
 
     Route::post('/tasks/store', [TaskController::class, 'store'])->name('tasks.store');
     Route::put('/tasks/{task_id}', [TaskController::class, 'update'])->name('tasks.update');
+    Route::delete('/tasks/{task_id}', [TaskController::class, 'destroy'])->name('tasks.destroy');
     Route::get('/tasks/{task_id}/submissions', [TaskController::class, 'submissions'])->name('tasks.submissions');
     Route::post('/submissions/{submission_id}/grade', [TaskController::class, 'grade'])->name('submissions.grade');
 

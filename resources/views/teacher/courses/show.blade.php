@@ -279,6 +279,13 @@
                                                             <button type="button" class="btn btn-sm btn-outline-primary ms-1 edit-assessment-btn" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
                                                                 <i class="bi bi-pencil"></i> Editar
                                                             </button>
+                                                            <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="d-inline-block swal-confirm ms-1" data-message="¿Estás seguro de eliminar esta evaluación? Se eliminarán también los intentos asociados.">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                                    <i class="bi bi-trash"></i> Eliminar
+                                                                </button>
+                                                            </form>
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -334,6 +341,13 @@
                                                         <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 ms-1 edit-task-btn" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}' style="font-size: 0.8rem;">
                                                             <i class="bi bi-pencil"></i> Editar
                                                         </button>
+                                                        <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="d-inline swal-confirm ms-1" data-message="¿Deseas eliminar esta tarea? Las entregas asociadas también se eliminarán automáticamente.">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-danger py-0 px-2" style="font-size: 0.8rem;">
+                                                                <i class="bi bi-trash"></i> Eliminar
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             @endforeach
@@ -791,6 +805,26 @@
                     const methodInput = form.querySelector('input[name="_method"]');
                     if (methodInput) methodInput.remove();
                     form.reset();
+                });
+            });
+
+            // SweetAlert confirmation for delete forms
+            document.querySelectorAll('form.swal-confirm').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const msg = form.getAttribute('data-message') || '¿Deseas continuar con esta acción?';
+                    Swal.fire({
+                        title: 'Confirmar eliminación',
+                        text: msg,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
                 });
             });
         });

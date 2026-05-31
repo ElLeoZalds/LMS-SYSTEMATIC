@@ -132,4 +132,31 @@ class TaskController extends Controller
         return redirect()->route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])
             ->with('success', 'Tarea actualizada correctamente.');
     }
+
+    /**
+     * Elimina una tarea y su archivo adjunto si existe.
+     */
+    public function destroy($task_id)
+    {
+        $user = auth()->user();
+
+        $task = Task::where('task_id', $task_id)
+            ->whereHas('training', function ($q) use ($user) {
+                $q->where('teacher_id', $user->user_id);
+            })->firstOrFail();
+
+        if ($task->file_path) {
+            try {
+                \Storage::disk('public')->delete($task->file_path);
+            } catch (\Exception $e) {
+                // ignore deletion error
+            }
+        }
+
+        $trainingId = $task->training_id;
+        $task->delete();
+
+        return redirect()->route('teacher.courses.show', ['id' => $trainingId, 'tab' => 'contenido'])
+            ->with('success', 'Tarea eliminada correctamente.');
+    }
 }
