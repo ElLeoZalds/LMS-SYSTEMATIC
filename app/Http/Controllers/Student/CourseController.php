@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
 use App\Models\AssessmentAttempt;
+use App\Models\Attendance;
 use App\Models\Enrollment;
 use App\Models\Training;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class CourseController extends Controller
             abort(403, 'No estás inscrito en esta capacitación.');
         }
 
-        $training = Training::with(['course', 'teacher.person', 'assessments', 'announcements'])
+        $training = Training::with(['course', 'teacher.person', 'assessments', 'tasks', 'announcements'])
             ->where('training_id', $id)
             ->firstOrFail();
 
@@ -38,7 +39,12 @@ class CourseController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('student.courses.show', compact('training', 'attempts'));
+        $attendances = Attendance::with('schedule')
+            ->where('enrollment_id', $enrollment->enrollment_id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('student.courses.show', compact('training', 'attempts', 'attendances'));
     }
 
     public function takeExam($assessment_id)
@@ -65,7 +71,13 @@ class CourseController extends Controller
         if ($pendingAttempt) {
             $attempt = $pendingAttempt;
         } else {
-            $this->ensureAttemptAllowed($assessment, $enrollment);
+            try {
+                $this->ensureAttemptAllowed($assessment, $enrollment);
+            } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+                // Mostrar mensaje con SweetAlert via session error
+                return redirect()->route('student.courses.show', $assessment->training_id)
+                    ->with('error', $e->getMessage());
+            }
 
             $attemptNumber = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
                 ->where('assessment_id', $assessment_id)
@@ -80,10 +92,12 @@ class CourseController extends Controller
             ]);
         }
 
-        $elapsedMinutes = Carbon::now()->diffInMinutes($attempt->created_at);
-        $timeLimit = max(1, $assessment->time_limit - $elapsedMinutes);
+        // Calcular y pasar datos para que el cliente calcule el tiempo restante de forma consistente
+        $totalSeconds = max(0, ($assessment->time_limit ?: 60) * 60);
+        $attemptCreatedTs = $attempt->created_at->timestamp;
+        $serverNowTs = Carbon::now()->timestamp;
 
-        return view('student.courses.take', compact('assessment', 'timeLimit', 'enrollment', 'attempt'));
+        return view('student.courses.take', compact('assessment', 'totalSeconds', 'attemptCreatedTs', 'serverNowTs', 'enrollment', 'attempt'));
     }
 
     public function submitExam(Request $request, $assessment_id)
@@ -101,10 +115,10 @@ class CourseController extends Controller
 
         $this->validateAssessmentAvailability($assessment);
 
-        // Actualizado: Cambiado 'exists:options,option_id' a 'exists:alternatives,option_id'
+        // Permitir que 'answers' sea nulo (enviar sin responder) y validar alternativas si las hay
         $validated = $request->validate([
             'attempt_id' => 'required|integer|exists:assessment_attempts,attempt_id',
-            'answers' => 'required|array',
+            'answers' => 'nullable|array',
             'answers.*' => 'nullable|integer|exists:alternatives,option_id',
         ]);
 
@@ -117,7 +131,11 @@ class CourseController extends Controller
             abort(403, 'Este intento ya fue enviado.');
         }
 
-        $this->ensureAttemptAllowed($assessment, $enrollment, $attempt);
+        try {
+            $this->ensureAttemptAllowed($assessment, $enrollment, $attempt);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         $timeLimit = $assessment->time_limit;
         $elapsedSeconds = Carbon::now()->diffInSeconds($attempt->created_at);
@@ -227,8 +245,13 @@ class CourseController extends Controller
             abort(403, 'Esta evaluación no está disponible.');
         }
 
-        $today = Carbon::now()->toDateString();
-        if ($today < $assessment->start_date || $today > $assessment->end_date) {
+        $today = Carbon::today();
+
+        // Asegurarse de comparar objetos Carbon para evitar comparaciones tipo cadena
+        $start = $assessment->start_date instanceof Carbon ? $assessment->start_date->copy()->startOfDay() : Carbon::createFromFormat('Y-m-d', $assessment->start_date)->startOfDay();
+        $end = $assessment->end_date instanceof Carbon ? $assessment->end_date->copy()->endOfDay() : Carbon::createFromFormat('Y-m-d', $assessment->end_date)->endOfDay();
+
+        if ($today->lt($start) || $today->gt($end)) {
             abort(403, 'Esta evaluación está fuera de las fechas permitidas.');
         }
     }

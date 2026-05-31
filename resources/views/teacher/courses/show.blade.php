@@ -520,7 +520,7 @@
                                             @if($training->tasks)
                                                 @foreach($training->tasks as $task)
                                                     @php
-                                                        $submission = $task->submissions->where('student_id', $student->student_id)->first();
+                                                        $submission = $task->submissions->where('student_id', $student->user_id)->first();
                                                         $grade = $submission ? $submission->grade : null;
                                                         if(!is_null($grade)) {
                                                             $totalNotes += $grade;
@@ -536,7 +536,9 @@
                                             {{-- Buscar notas de Evaluaciones --}}
                                             @foreach($training->assessments as $assessment)
                                                 @php
-                                                    $attempt = $assessment->attempts->where('student_id', $student->student_id)->max('score');
+                                                    $attempt = $assessment->attempts->filter(function($a) use($student) {
+                                                        return optional($a->enrollment)->student_id == $student->user_id;
+                                                    })->max('score');
                                                     if(!is_null($attempt)) {
                                                         $totalNotes += $attempt;
                                                         $notesCount++;

@@ -170,7 +170,7 @@ class TeacherController extends Controller
         // Cargamos el training con sus evaluaciones y las relaciones necesarias para las notas
         $training = Training::with([
             'course',
-            'assessments.attempts', // Trae los intentos globales de las evaluaciones de este curso
+            'assessments.attempts.enrollment', // Trae los intentos globales de las evaluaciones de este curso y su enrollment
             'enrollments.student.person',
             'announcements',
         ])

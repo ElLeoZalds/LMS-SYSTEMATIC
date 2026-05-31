@@ -12,7 +12,20 @@
                     <div class="text-center">
                         <small class="d-block text-muted mb-1">Tiempo restante</small>
                         <div id="timer" class="h4 fw-bold text-primary mb-0">
-                            <span id="minutes">60</span>:<span id="seconds">00</span>
+                            @php
+                                // Calcular remainingSeconds desde los valores enviados por el servidor
+                                $serverNowTs = $serverNowTs ?? null;
+                                $attemptCreatedTs = $attemptCreatedTs ?? null;
+                                $totalSeconds = $totalSeconds ?? 3600;
+                                if ($serverNowTs && $attemptCreatedTs) {
+                                    $computed = max(0, intval($totalSeconds) - (intval($serverNowTs) - intval($attemptCreatedTs)));
+                                } else {
+                                    $computed = intval($totalSeconds);
+                                }
+                                $initMin = floor($computed / 60);
+                                $initSec = $computed % 60;
+                            @endphp
+                            <span id="minutes">{{ str_pad($initMin, 2, '0', STR_PAD_LEFT) }}</span>:<span id="seconds">{{ str_pad($initSec, 2, '0', STR_PAD_LEFT) }}</span>
                         </div>
                     </div>
                 </div>
@@ -84,12 +97,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Tiempo límite en minutos (por defecto 60)
-            let timeLimit = {{ $timeLimit }};
-            let totalSeconds = timeLimit * 60;
-            let remainingSeconds = totalSeconds;
-            let isSubmitting = false;
+            // Datos para cálculo del temporizador sin depender del reloj del servidor
+            const totalSeconds = {{ $totalSeconds }};
+            const attemptCreatedTs = {{ $attemptCreatedTs }}; // en segundos epoch
+            const serverNowTs = {{ $serverNowTs }}; // en segundos epoch
 
+            let isSubmitting = false;
             const minutesSpan = document.getElementById('minutes');
             const secondsSpan = document.getElementById('seconds');
             const timerDiv = document.getElementById('timer');
@@ -99,47 +112,78 @@
                 isSubmitting = true;
             });
 
-            function updateTimer() {
-                const minutes = Math.floor(remainingSeconds / 60);
-                const seconds = remainingSeconds % 60;
+            // Calcular offset entre servidor y cliente para obtener tiempo del servidor en el cliente
+            const clientNow = Date.now() / 1000;
+            const offset = serverNowTs - clientNow; // serverTime = Date.now()/1000 + offset
 
+            function computeRemaining() {
+                const nowServer = Date.now() / 1000 + offset;
+                const elapsed = Math.floor(nowServer - attemptCreatedTs);
+                return Math.max(0, totalSeconds - elapsed);
+            }
+
+            function renderTimer(remaining) {
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
                 minutesSpan.textContent = String(minutes).padStart(2, '0');
                 secondsSpan.textContent = String(seconds).padStart(2, '0');
 
-                // Cambiar color según tiempo restante
-                if (remainingSeconds <= 300) { // Menos de 5 minutos
+                if (remaining <= 300) { // Menos de 5 minutos
                     timerDiv.classList.remove('text-primary');
                     timerDiv.classList.add('text-danger');
                 } else {
                     timerDiv.classList.remove('text-danger');
                     timerDiv.classList.add('text-primary');
                 }
-
-                // Si el tiempo se agota, enviar el formulario
-                if (remainingSeconds <= 0) {
-                    clearInterval(timerInterval);
-                    alert('¡El tiempo ha terminado! Tu evaluación será enviada automáticamente.');
-                    isSubmitting = true;
-                    examForm.submit();
-                } else {
-                    remainingSeconds--;
-                }
             }
 
-            // Actualizar cada segundo
-            const timerInterval = setInterval(updateTimer, 1000);
+            // Evitar diálogo nativo beforeunload (el usuario pidió quitarlo)
+            // No añadimos listener a beforeunload.
 
-            // Actualizar una vez al cargar
-            updateTimer();
+            // Inicializar mostrando el tiempo calculado
+            let remainingSeconds = computeRemaining();
+            renderTimer(remainingSeconds);
 
-            // Prevenir que el usuario cierre la pestaña sin advertencia
-            window.addEventListener('beforeunload', function(e) {
-                if (isSubmitting) {
-                    return;
+            // Iniciar contador que recalcula cada segundo usando el offset (esto evita saltos)
+            const timerInterval = setInterval(() => {
+                remainingSeconds = computeRemaining();
+                renderTimer(remainingSeconds);
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    if (!isSubmitting) {
+                        isSubmitting = true;
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Tiempo agotado',
+                            text: 'El tiempo ha terminado. Tu evaluación será enviada automáticamente.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                examForm.submit();
+                            }
+                        });
+                    }
                 }
-                e.preventDefault();
-                e.returnValue = '';
-            });
+            }, 1000);
+
+            // Cuando el usuario hace clic en el enlace 'Cancelar', mostrar SweetAlert informando que el tiempo sigue corriendo
+            const cancelLink = document.querySelector('a[href="{{ route('student.courses.show', $assessment->training_id) }}"]');
+            if (cancelLink) {
+                cancelLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Salir del examen',
+                        text: 'Si sales, el tiempo seguirá corriendo. ¿Deseas continuar?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Salir',
+                        cancelButtonText: 'Permanecer'
+                    }).then((res) => {
+                        if (res.isConfirmed) {
+                            window.location.href = cancelLink.href;
+                        }
+                    });
+                });
+            }
         });
     </script>
 @endsection
