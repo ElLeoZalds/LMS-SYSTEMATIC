@@ -436,19 +436,21 @@
                                                         <i class="bi bi-clock-history me-1"></i>{{ $task->submissions->whereNull('grade')->count() }} por revisar
                                                     </span>
                                                 </div>
-                                                <a href="{{ route('teacher.tasks.submissions', $task->task_id) }}" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.8rem;">
-                                                    <i class="bi bi-eye"></i> Revisar
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 ms-1 edit-task-btn" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}' style="font-size: 0.8rem;">
-                                                    <i class="bi bi-pencil"></i> Editar
-                                                </button>
-                                                <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="d-inline swal-confirm ms-1" data-message="¿Deseas eliminar esta tarea? Las entregas asociadas también se eliminarán automáticamente.">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger py-0 px-2" style="font-size: 0.8rem;">
-                                                        <i class="bi bi-trash"></i> Eliminar
+                                                <div class="d-flex gap-2 flex-wrap justify-content-end">
+                                                    <a href="{{ route('teacher.tasks.submissions', $task->task_id) }}" class="btn btn-sm btn-outline-success btn-no-hover">
+                                                        <i class="bi bi-eye"></i> Revisar
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary btn-no-hover edit-task-btn" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}'>
+                                                        <i class="bi bi-pencil"></i> Editar
                                                     </button>
-                                                </form>
+                                                    <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="d-inline swal-confirm" data-message="¿Deseas eliminar esta tarea? Las entregas asociadas también se eliminarán automáticamente.">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-danger btn-no-hover">
+                                                            <i class="bi bi-trash"></i> Eliminar
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
