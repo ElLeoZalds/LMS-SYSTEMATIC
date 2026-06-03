@@ -172,7 +172,14 @@
                         <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=contenido"
                             class="nav-link @if(request('tab') === 'contenido') active @endif" id="contenido-tab"
                             role="tab">
-                            <i class="bi bi-book-fill me-2"></i>Contenido/Tareas
+                            <i class="bi bi-book-fill me-2"></i>Evaluaciones
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=tareas"
+                            class="nav-link @if(request('tab') === 'tareas') active @endif" id="tareas-tab"
+                            role="tab">
+                            <i class="bi bi-list-task me-2"></i>Tareas
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -315,138 +322,142 @@
                 @elseif(request('tab') === 'contenido')
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
                         <div>
-                            <h5 class="fw-bold text-dark mb-2">Contenido y Tareas</h5>
+                            <h5 class="fw-bold text-dark mb-2">Evaluaciones del curso</h5>
                             <p class="text-muted small mb-0">
                                 Inicio: <strong>{{ $training->start_date ? \Carbon\Carbon::parse($training->start_date)->format('d/m/Y') : 'Sin fecha' }}</strong>
                                 · Fin: <strong>{{ $training->end_date ? \Carbon\Carbon::parse($training->end_date)->format('d/m/Y') : 'Sin fecha' }}</strong>
                             </p>
                         </div>
-                        <div class="d-flex gap-2 flex-wrap">
+                        <div>
                             <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#createAssessmentModal">
                                 <i class="bi bi-plus-lg me-1"></i>Nueva Evaluación
                             </button>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light py-3">
+                            <h6 class="mb-0 fw-bold">Evaluaciones creadas</h6>
+                        </div>
+                        @if($training->assessments->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Título</th>
+                                            <th class="text-center">Inicio</th>
+                                            <th class="text-center">Fin</th>
+                                            <th class="text-center">Intentos</th>
+                                            <th class="text-center">Estado</th>
+                                            <th class="text-end">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($training->assessments as $assessment)
+                                            <tr>
+                                                <td>{{ $assessment->title }}</td>
+                                                <td class="text-center">{{ $assessment->start_date ? \Carbon\Carbon::parse($assessment->start_date)->format('d/m/Y') : 'Sin fecha' }}</td>
+                                                <td class="text-center">{{ $assessment->end_date ? \Carbon\Carbon::parse($assessment->end_date)->format('d/m/Y') : 'Sin fecha' }}</td>
+                                                <td class="text-center">{{ $assessment->allowed_attempts }}</td>
+                                                <td class="text-center">
+                                                    <span class="badge @if($assessment->active) bg-success @else bg-secondary @endif">{{ $assessment->active ? 'Activo' : 'Inactivo' }}</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white">
+                                                        <i class="bi bi-pencil-square"></i> Gestionar Preguntas
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary ms-1 edit-assessment-btn" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
+                                                        <i class="bi bi-pencil"></i> Editar
+                                                    </button>
+                                                    <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="d-inline-block swal-confirm ms-1" data-message="¿Estás seguro de eliminar esta evaluación? Se eliminarán también los intentos asociados.">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                            <i class="bi bi-trash"></i> Eliminar
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="card-body text-center text-muted py-4">
+                                <i class="bi bi-inbox h3 d-block text-secondary mb-2"></i>
+                                <p class="mb-0 small">No hay evaluaciones creadas aún para este curso.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                @elseif(request('tab') === 'tareas')
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-2">Tareas entregables</h5>
+                            <p class="text-muted small mb-0">Aquí puedes revisar y administrar las tareas creadas para tus estudiantes.</p>
+                        </div>
+                        <div>
                             <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#createTaskModal">
                                 <i class="bi bi-plus-lg me-1"></i>Nueva Tarea
                             </button>
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-4">
-                        <div class="col-lg-8">
-                            <div class="card shadow-sm border-0">
-                                <div class="card-header bg-light py-3">
-                                    <h6 class="mb-0 fw-bold">Evaluaciones creadas</h6>
-                                </div>
-                                @if($training->assessments->count() > 0)
-                                    <div class="table-responsive">
-                                        <table class="table table-hover mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Título</th>
-                                                    <th class="text-center">Inicio</th>
-                                                    <th class="text-center">Fin</th>
-                                                    <th class="text-center">Intentos</th>
-                                                    <th class="text-center">Estado</th>
-                                                    <th class="text-end">Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($training->assessments as $assessment)
-                                                    <tr>
-                                                        <td>{{ $assessment->title }}</td>
-                                                        <td class="text-center">{{ $assessment->start_date ? \Carbon\Carbon::parse($assessment->start_date)->format('d/m/Y') : 'Sin fecha' }}</td>
-                                                        <td class="text-center">{{ $assessment->end_date ? \Carbon\Carbon::parse($assessment->end_date)->format('d/m/Y') : 'Sin fecha' }}</td>
-                                                        <td class="text-center">{{ $assessment->allowed_attempts }}</td>
-                                                        <td class="text-center">
-                                                            <span class="badge @if($assessment->active) bg-success @else bg-secondary @endif">{{ $assessment->active ? 'Activo' : 'Inactivo' }}</span>
-                                                        </td>
-                                                        <td class="text-end">
-                                                            <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white">
-                                                                <i class="bi bi-pencil-square"></i> Gestionar Preguntas
-                                                            </a>
-                                                            <button type="button" class="btn btn-sm btn-outline-primary ms-1 edit-assessment-btn" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
-                                                                <i class="bi bi-pencil"></i> Editar
-                                                            </button>
-                                                            <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="d-inline-block swal-confirm ms-1" data-message="¿Estás seguro de eliminar esta evaluación? Se eliminarán también los intentos asociados.">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                                    <i class="bi bi-trash"></i> Eliminar
-                                                                </button>
-                                                            </form>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light py-3">
+                            <h6 class="mb-0 fw-bold">Tareas creadas</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-3">Las tareas entregables asignadas se listan a continuación.</p>
+                            <div class="list-group list-group-flush">
+                                @if($training->tasks && $training->tasks->count() > 0)
+                                    @foreach($training->tasks as $task)
+                                        <div class="list-group-item px-0 py-3">
+                                            <div class="d-flex w-100 justify-content-between mb-1">
+                                                <h6 class="fw-bold text-dark mb-0">{{ $task->title }}</h6>
+                                            </div>
+                                            <p class="text-muted small mb-2 text-truncate" style="max-width: 250px;">{{ $task->description }}</p>
+                                            <small class="text-secondary d-block mb-2">
+                                                <i class="bi bi-calendar-event me-1"></i>Vence: {{ $task->due_date ? $task->due_date->format('d/m/Y H:i') : 'Sin fecha' }}
+                                            </small>
+                                            @if(!empty($task->file_path))
+                                                <div class="mb-2">
+                                                    <a href="{{ asset('storage/'.$task->file_path) }}" target="_blank" class="text-decoration-none small">
+                                                        <i class="bi bi-download me-1"></i>Archivo adjunto
+                                                    </a>
+                                                </div>
+                                            @endif
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+                                                <div>
+                                                    <span class="badge bg-light text-dark border" title="Total de entregas">
+                                                        <i class="bi bi-file-earmark-arrow-up text-primary me-1"></i>{{ $task->submissions->count() }}
+                                                    </span>
+                                                    <span class="badge bg-warning text-dark" title="Pendientes de calificar">
+                                                        <i class="bi bi-clock-history me-1"></i>{{ $task->submissions->whereNull('grade')->count() }} por revisar
+                                                    </span>
+                                                </div>
+                                                <a href="{{ route('teacher.tasks.submissions', $task->task_id) }}" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.8rem;">
+                                                    <i class="bi bi-eye"></i> Revisar
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 ms-1 edit-task-btn" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}' style="font-size: 0.8rem;">
+                                                    <i class="bi bi-pencil"></i> Editar
+                                                </button>
+                                                <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="d-inline swal-confirm ms-1" data-message="¿Deseas eliminar esta tarea? Las entregas asociadas también se eliminarán automáticamente.">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger py-0 px-2" style="font-size: 0.8rem;">
+                                                        <i class="bi bi-trash"></i> Eliminar
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 @else
-                                    <div class="card-body text-center text-muted py-4">
-                                        <i class="bi bi-inbox h3 d-block text-secondary mb-2"></i>
-                                        <p class="mb-0 small">No hay evaluaciones creadas aún para este curso.</p>
+                                    <div class="text-center text-muted py-3 small">
+                                        <i class="bi bi-journal-text h4 d-block text-secondary mb-2"></i>
+                                        No hay tareas independientes registradas.
                                     </div>
                                 @endif
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4">
-                            <div class="card shadow-sm border-0 h-100">
-                                <div class="card-header bg-light py-3">
-                                    <h6 class="mb-0 fw-bold">Tareas creadas</h6>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted small mb-3">Las tareas entregables asignadas se listan a continuación.</p>
-                                    <div class="list-group list-group-flush">
-                                        @if($training->tasks && $training->tasks->count() > 0)
-                                            @foreach($training->tasks as $task)
-                                                <div class="list-group-item px-0 py-3">
-                                                    <div class="d-flex w-100 justify-content-between mb-1">
-                                                        <h6 class="fw-bold text-dark mb-0">{{ $task->title }}</h6>
-                                                    </div>
-                                                    <p class="text-muted small mb-2 text-truncate" style="max-width: 250px;">{{ $task->description }}</p>
-                                                    <small class="text-secondary d-block mb-2">
-                                                        <i class="bi bi-calendar-event me-1"></i>Vence: {{ $task->due_date ? $task->due_date->format('d/m/Y H:i') : 'Sin fecha' }}
-                                                    </small>
-                                                    @if(!empty($task->file_path))
-                                                        <div class="mb-2">
-                                                            <a href="{{ asset('storage/'.$task->file_path) }}" target="_blank" class="text-decoration-none small">
-                                                                <i class="bi bi-download me-1"></i>Archivo adjunto
-                                                            </a>
-                                                        </div>
-                                                    @endif
-                                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
-                                                        <div>
-                                                            <span class="badge bg-light text-dark border" title="Total de entregas">
-                                                                <i class="bi bi-file-earmark-arrow-up text-primary me-1"></i>{{ $task->submissions->count() }}
-                                                            </span>
-                                                            <span class="badge bg-warning text-dark" title="Pendientes de calificar">
-                                                                <i class="bi bi-clock-history me-1"></i>{{ $task->submissions->whereNull('grade')->count() }} por revisar
-                                                            </span>
-                                                        </div>
-                                                        <a href="{{ route('teacher.tasks.submissions', $task->task_id) }}" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.8rem;">
-                                                            <i class="bi bi-eye"></i> Revisar
-                                                        </a>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 ms-1 edit-task-btn" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}' style="font-size: 0.8rem;">
-                                                            <i class="bi bi-pencil"></i> Editar
-                                                        </button>
-                                                        <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="d-inline swal-confirm ms-1" data-message="¿Deseas eliminar esta tarea? Las entregas asociadas también se eliminarán automáticamente.">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger py-0 px-2" style="font-size: 0.8rem;">
-                                                                <i class="bi bi-trash"></i> Eliminar
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        @else
-                                            <div class="text-center text-muted py-3 small">
-                                                <i class="bi bi-journal-text h4 d-block text-secondary mb-2"></i> 
-                                                No hay tareas independientes registradas.
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

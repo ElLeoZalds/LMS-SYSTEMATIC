@@ -7,8 +7,11 @@ use App\Models\Assessment;
 use App\Models\AssessmentAttempt;
 use App\Models\Attendance;
 use App\Models\Enrollment;
+use App\Models\Task;
+use App\Models\TaskSubmission;
 use App\Models\Training;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
@@ -44,7 +47,13 @@ class CourseController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('student.courses.show', compact('training', 'attempts', 'attendances'));
+        $taskIds = $training->tasks->pluck('task_id')->toArray();
+        $submissions = TaskSubmission::whereIn('task_id', $taskIds)
+            ->where('student_id', $studentId)
+            ->get()
+            ->keyBy('task_id');
+
+        return view('student.courses.show', compact('training', 'attempts', 'attendances', 'submissions'));
     }
 
     public function takeExam($assessment_id)
@@ -170,6 +179,50 @@ class CourseController extends Controller
         $attempt->load('assessment');
 
         return view('student.assessments.result', compact('attempt'));
+    }
+
+    public function submitTask(Request $request, $task_id)
+    {
+        $studentId = auth()->id();
+
+        $task = Task::with('training')
+            ->where('task_id', $task_id)
+            ->firstOrFail();
+
+        $enrollment = Enrollment::where('student_id', $studentId)
+            ->where('training_id', $task->training_id)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'submission_text' => 'nullable|string',
+            'attachment' => 'nullable|file|max:5120|mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
+        ]);
+
+        $submission = TaskSubmission::firstOrNew([
+            'task_id' => $task_id,
+            'student_id' => $studentId,
+        ]);
+
+        if ($request->hasFile('attachment')) {
+            try {
+                if ($submission->file_path) {
+                    Storage::disk('public')->delete($submission->file_path);
+                }
+            } catch (\Exception $e) {
+                // ignore deletion errors
+            }
+
+            $submission->file_path = $request->file('attachment')->store('task-submissions', 'public');
+        }
+
+        $submission->submission_text = $validated['submission_text'] ?? null;
+        $submission->submitted_at = now();
+        $submission->grade = null;
+        $submission->teacher_feedback = null;
+        $submission->save();
+
+        return redirect()->route('student.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])
+            ->with('success', 'Tu tarea ha sido entregada correctamente.');
     }
 
     public function calendar(Request $request)

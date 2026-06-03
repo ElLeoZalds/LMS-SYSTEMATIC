@@ -136,17 +136,17 @@
             Aprendizaje
         </div>
 
-        <li class="nav-item {{ request()->routeIs('student.calendar') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('student.calendar') }}">
-                <i class="fas fa-fw fa-calendar-alt"></i>
-                <span>Calendario</span>
-            </a>
-        </li>
-
         <li class="nav-item {{ request()->routeIs('student.courses.*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('student.courses.index') }}">
                 <i class="fas fa-fw fa-book"></i>
                 <span>Mis Cursos</span>
+            </a>
+        </li>
+
+        <li class="nav-item {{ request()->routeIs('student.calendar') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('student.calendar') }}">
+                <i class="fas fa-fw fa-calendar-alt"></i>
+                <span>Calendario</span>
             </a>
         </li>
     @endif

@@ -171,6 +171,7 @@ class TeacherController extends Controller
         $training = Training::with([
             'course',
             'assessments.attempts.enrollment', // Trae los intentos globales de las evaluaciones de este curso y su enrollment
+            'tasks',
             'enrollments.student.person',
             'announcements',
         ])

@@ -42,7 +42,14 @@
                         <a href="{{ route('student.courses.show', $training->training_id) }}?tab=contenido"
                             class="nav-link @if(request('tab') === 'contenido') active @endif" id="contenido-tab"
                             role="tab">
-                            <i class="bi bi-book-fill me-2"></i>Contenido/Tareas
+                            <i class="bi bi-book-fill me-2"></i>Evaluaciones
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a href="{{ route('student.courses.show', $training->training_id) }}?tab=tareas"
+                            class="nav-link @if(request('tab') === 'tareas') active @endif" id="tareas-tab"
+                            role="tab">
+                            <i class="bi bi-list-task me-2"></i>Tareas
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -188,83 +195,121 @@
                         </div>
                     @endif
 
-                @elseif(request('tab') === 'contenido')
-                    <div class="row g-3">
-                        <div class="col-lg-6">
-                            <div class="card shadow-sm border-0">
-                                <div class="card-header bg-light py-3">
-                                    <h6 class="mb-0 fw-bold">Evaluaciones disponibles</h6>
-                                </div>
-                                <div class="card-body">
-                                    @if($training->assessments->isEmpty())
-                                        <div class="alert alert-info mb-0" role="alert">
-                                            <i class="bi bi-inbox me-2"></i>No hay evaluaciones disponibles.
-                                        </div>
-                                    @else
-                                        <div class="list-group">
-                                            @foreach($training->assessments as $assessment)
-                                                <div class="list-group-item mb-2 rounded-3 shadow-sm">
-                                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                                                        <div>
-                                                            <h6 class="mb-1">{{ $assessment->title }}</h6>
-                                                            <p class="text-muted small mb-1">{{ $assessment->description ?? 'Sin descripción' }}</p>
-                                                            <small class="text-muted">
-                                                                Inicio: {{ optional($assessment->start_date)->format('d/m/Y') ?? 'Sin fecha' }} · Fin: {{ optional($assessment->end_date)->format('d/m/Y') ?? 'Sin fecha' }}
-                                                            </small>
-                                                        </div>
-                                                        <div class="text-end">
-                                                            <span class="badge bg-{{ $assessment->active ? 'success' : 'secondary' }} mb-2">
-                                                                {{ $assessment->active ? 'Activo' : 'Inactivo' }}
-                                                            </span>
-                                                            @if($assessment->active)
-                                                                <a href="{{ route('student.assessment.take', $assessment->assessment_id) }}" class="btn btn-sm btn-primary">
-                                                                    Tomar examen
-                                                                </a>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
+                @elseif(request('tab', 'contenido') === 'contenido')
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light py-3">
+                            <h6 class="mb-0 fw-bold">Evaluaciones disponibles</h6>
                         </div>
-
-                        <div class="col-lg-6">
-                            <div class="card shadow-sm border-0">
-                                <div class="card-header bg-light py-3">
-                                    <h6 class="mb-0 fw-bold">Tareas del curso</h6>
+                        <div class="card-body">
+                            @if($training->assessments->isEmpty())
+                                <div class="alert alert-info mb-0" role="alert">
+                                    <i class="bi bi-inbox me-2"></i>No hay evaluaciones disponibles.
                                 </div>
-                                <div class="card-body">
-                                    @if($training->tasks->isEmpty())
-                                        <div class="alert alert-info mb-0" role="alert">
-                                            <i class="bi bi-inbox me-2"></i>No hay tareas registradas.
+                            @else
+                                <div class="list-group">
+                                    @foreach($training->assessments as $assessment)
+                                        <div class="list-group-item mb-2 rounded-3 shadow-sm">
+                                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                                                <div>
+                                                    <h6 class="mb-1">{{ $assessment->title }}</h6>
+                                                    <p class="text-muted small mb-1">{{ $assessment->description ?? 'Sin descripción' }}</p>
+                                                    <small class="text-muted">
+                                                        Inicio: {{ optional($assessment->start_date)->format('d/m/Y') ?? 'Sin fecha' }} · Fin: {{ optional($assessment->end_date)->format('d/m/Y') ?? 'Sin fecha' }}
+                                                    </small>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="badge bg-{{ $assessment->active ? 'success' : 'secondary' }} mb-2">
+                                                        {{ $assessment->active ? 'Activo' : 'Inactivo' }}
+                                                    </span>
+                                                    @if($assessment->active)
+                                                        <a href="{{ route('student.assessment.take', $assessment->assessment_id) }}" class="btn btn-sm btn-primary">
+                                                            Tomar examen
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </div>
-                                    @else
-                                        <div class="list-group">
-                                            @foreach($training->tasks as $task)
-                                                <div class="list-group-item mb-2 rounded-3 shadow-sm">
-                                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                                                        <div>
-                                                            <h6 class="mb-1">{{ $task->title }}</h6>
-                                                            <p class="text-muted small mb-1">{{ $task->description }}</p>
-                                                            <small class="text-muted">Vence: {{ $task->due_date ? $task->due_date->format('d/m/Y H:i') : 'Sin fecha' }}</small>
-                                                        </div>
-                                                        <div>
-                                                            @if($task->file_path)
-                                                                <a href="{{ asset('storage/'.$task->file_path) }}" class="btn btn-sm btn-outline-secondary" target="_blank">
-                                                                    <i class="bi bi-download me-1"></i>Archivo
-                                                                </a>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                @elseif(request('tab') === 'tareas')
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light py-3">
+                            <h6 class="mb-0 fw-bold">Tareas del curso</h6>
+                        </div>
+                        <div class="card-body">
+                            @if($training->tasks->isEmpty())
+                                <div class="alert alert-info mb-0" role="alert">
+                                    <i class="bi bi-inbox me-2"></i>No hay tareas registradas.
+                                </div>
+                            @else
+                                <div class="list-group">
+                                    @foreach($training->tasks as $task)
+                                        @php
+                                            $submission = $submissions->get($task->task_id);
+                                            $taskDueClass = $task->due_date && $task->due_date->isPast() ? 'danger' : 'warning';
+                                        @endphp
+                                        <div class="list-group-item mb-2 rounded-3 shadow-sm">
+                                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                                                <div>
+                                                    <h6 class="mb-1">{{ $task->title }}</h6>
+                                                    <p class="text-muted small mb-1">{{ $task->description }}</p>
+                                                    <small class="text-muted d-block mb-2">Vence: {{ $task->due_date ? $task->due_date->format('d/m/Y H:i') : 'Sin fecha' }}</small>
+                                                    @if($submission)
+                                                        <div class="small mb-1">
+                                                            <span class="badge bg-success">Entregado</span>
+                                                            @if($submission->grade !== null)
+                                                                <span class="badge bg-primary">Calificación: {{ $submission->grade }}</span>
                                                             @endif
                                                         </div>
+                                                        <div class="small text-muted mb-1">Última entrega: {{ optional($submission->submitted_at)->format('d/m/Y H:i') }}</div>
+                                                    @else
+                                                        <span class="badge bg-{{ $taskDueClass }} text-dark">{{ $task->due_date && $task->due_date->isPast() ? 'Atrasada' : 'Pendiente' }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="text-end">
+                                                    @if($task->file_path)
+                                                        <a href="{{ asset('storage/'.$task->file_path) }}" class="btn btn-sm btn-outline-secondary mb-2" target="_blank">
+                                                            <i class="bi bi-download me-1"></i>Archivo
+                                                        </a>
+                                                    @endif
+                                                    @if($submission && $submission->file_path)
+                                                        <a href="{{ asset('storage/'.$submission->file_path) }}" class="btn btn-sm btn-outline-success" target="_blank">
+                                                            <i class="bi bi-cloud-download me-1"></i>Mi entrega
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            @if($submission && $submission->teacher_feedback)
+                                                <div class="mt-2 small text-muted">Feedback del profesor: {{ $submission->teacher_feedback }}</div>
+                                            @endif
+
+                                            <form action="{{ route('student.tasks.submit', $task->task_id) }}" method="POST" enctype="multipart/form-data" class="mt-3">
+                                                @csrf
+                                                <div class="mb-2">
+                                                    <label class="form-label small fw-semibold">Comentarios de la entrega</label>
+                                                    <textarea name="submission_text" rows="3" class="form-control form-control-sm">{{ old('submission_text', $submission->submission_text ?? '') }}</textarea>
+                                                </div>
+                                                <div class="row g-2 align-items-end">
+                                                    <div class="col-sm-8">
+                                                        <label class="form-label small fw-semibold">Archivo adjunto (opcional)</label>
+                                                        <input type="file" name="attachment" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.jpg,.jpeg,.png,.zip">
+                                                    </div>
+                                                    <div class="col-sm-4 text-sm-end">
+                                                        <button class="btn btn-sm btn-{{ $submission ? 'outline-primary' : 'primary' }}" type="submit">
+                                                            {{ $submission ? 'Actualizar entrega' : 'Entregar tarea' }}
+                                                        </button>
                                                     </div>
                                                 </div>
-                                            @endforeach
+                                            </form>
                                         </div>
-                                    @endif
+                                    @endforeach
                                 </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
 
