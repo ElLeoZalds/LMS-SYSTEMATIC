@@ -98,19 +98,33 @@
         }
     </style>
 
-    <div class="container-fluid py-4 report-content">
-        <div class="mb-4">
-            <h1 class="h4 mb-1">Reporte de Calificaciones</h1>
-            <p class="mb-1">Curso: <strong>{{ $training->course->title }}</strong></p>
-            <p class="mb-1">Código: <strong>{{ $training->course->code ?? 'N/A' }}</strong> | Modalidad: <strong>{{ ucfirst($training->modality) }}</strong></p>
-            <p class="text-muted mb-0">Fecha de impresión: {{ now()->format('d/m/Y H:i') }}</p>
-            <div class="mt-3">
+    <div class="container-fluid py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-3">
+            <div>
+                <a href="{{ route('teacher.courses.show', $training->training_id) }}" class="btn btn-sm btn-outline-secondary mb-2 mb-md-0">
+                    <i class="bi bi-arrow-left me-1"></i> Volver
+                </a>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
                 <button id="downloadReportPdf" class="btn btn-sm btn-outline-success">
                     <i class="bi bi-file-earmark-pdf me-1"></i> Imprimir
                 </button>
             </div>
         </div>
+
         <div id="report-content" class="report-content">
+            <div class="mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-3">
+                    <div>
+                        <h1 class="h4 mb-1">Reporte de Calificaciones</h1>
+                        <p class="mb-1">Curso: <strong>{{ $training->course->title }}</strong></p>
+                        <p class="mb-1">Docente: <strong>{{ $training->teacher->person->first_names ?? '' }} {{ $training->teacher->person->last_names ?? '' }}</strong></p>
+                        <p class="mb-1">Código: <strong>{{ $training->course->code ?? 'N/A' }}</strong> | Modalidad: <strong>{{ ucfirst($training->modality) }}</strong></p>
+                        <p class="mb-1">Estudiantes registrados: <strong>{{ $students->count() }}</strong></p>
+                        <p class="text-muted mb-0">Fecha de emisión: {{ now()->format('d/m/Y H:i') }}</p>
+                    </div>
+                </div>
+            </div>
 
         @if($students->count() > 0)
             <div class="table-responsive">
