@@ -14,6 +14,19 @@ class Attendance extends Model
         'attendance'
     ];
 
+    protected $casts = [
+        'attendance' => 'array',
+    ];
+
+    public function getAttendanceStatusAttribute()
+    {
+        if (is_array($this->attendance)) {
+            return $this->attendance['status'] ?? null;
+        }
+
+        return $this->attendance;
+    }
+
     public function schedule()
     {
         return $this->belongsTo(Schedule::class, 'schedule_id', 'schedule_id');

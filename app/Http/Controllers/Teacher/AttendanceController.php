@@ -8,6 +8,8 @@ use App\Models\Enrollment;
 use App\Models\Training;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AttendanceController extends Controller
 {
@@ -21,6 +23,7 @@ class AttendanceController extends Controller
     {
         $request->validate([
             'training_id' => 'nullable|exists:trainings,training_id',
+            'schedule_id' => 'nullable|exists:schedules,schedule_id',
             'date' => 'nullable|date',
         ]);
 
@@ -32,6 +35,8 @@ class AttendanceController extends Controller
         $training = null;
         $date = $request->date ?? date('Y-m-d');
 
+        $selectedScheduleId = null;
+
         if ($request->filled('training_id')) {
             $training = $trainings->firstWhere('training_id', $request->training_id);
 
@@ -42,17 +47,27 @@ class AttendanceController extends Controller
             // Load enrollments and schedules for the selected training
             $training->load(['enrollments.student.person', 'schedules']);
 
-            // If a specific schedule_id was provided, load its attendances to prefill and set date
+            // If a specific schedule_id was provided, verify it belongs to the training
             if ($request->filled('schedule_id')) {
                 $scheduleId = $request->schedule_id;
-                $attendances = Attendance::where('schedule_id', $scheduleId)->with('enrollment')->get();
-                $date = DB::table('schedules')->where('schedule_id', $scheduleId)->value('date') ?? $date;
+                $schedule = DB::table('schedules')
+                    ->where('schedule_id', $scheduleId)
+                    ->where('training_id', $training->training_id)
+                    ->first();
+
+                if ($schedule) {
+                    $selectedScheduleId = $schedule->schedule_id;
+                    $attendances = Attendance::where('schedule_id', $selectedScheduleId)->with('enrollment')->get();
+                    $date = $schedule->date ?? $date;
+                } else {
+                    $attendances = collect();
+                }
             } else {
                 $attendances = collect();
             }
         }
 
-        return view('teacher.attendance', compact('trainings', 'training', 'date', 'attendances'));
+        return view('teacher.attendance', compact('trainings', 'training', 'date', 'attendances', 'selectedScheduleId'));
     }
 
     /**
@@ -66,7 +81,14 @@ class AttendanceController extends Controller
         // Validate training_id, date and attendance array
         $request->validate([
             'training_id' => 'required|exists:trainings,training_id',
-            'schedule_id' => 'nullable|exists:schedules,schedule_id',
+            'schedule_id' => [
+                'nullable',
+                Rule::exists('schedules', 'schedule_id')->where(function ($query) use ($request) {
+                    if ($request->filled('training_id')) {
+                        $query->where('training_id', $request->training_id);
+                    }
+                }),
+            ],
             'date' => 'required_without:schedule_id|nullable|date',
             'attendances' => 'required|array',
             'attendances.*.student_id' => 'required|exists:users,user_id',
@@ -137,11 +159,21 @@ class AttendanceController extends Controller
                         'enrollment_id' => $enrollmentId ?? $attendanceData['student_id'],
                     ],
                     [
-                        'attendance'    => $statusValue,
+                        'attendance'    => ['status' => $statusValue],
                     ]
                 );
             }
         });
+
+        $redirectUrl = route('teacher.attendance.create', ['training_id' => $training->training_id, 'schedule_id' => $scheduleId]);
+
+        if ($request->wantsJson() || $request->isJson()) {
+            return response()->json([
+                'success' => true,
+                'redirect_url' => $redirectUrl,
+                'message' => 'Asistencias guardadas correctamente.',
+            ]);
+        }
 
         return redirect()
             ->route('teacher.attendance.create', ['training_id' => $training->training_id, 'schedule_id' => $scheduleId])
@@ -180,12 +212,16 @@ class AttendanceController extends Controller
             $student = optional($a->enrollment)->student;
             $person = optional($student)->person;
             $studentName = optional($person)->first_names . ' ' . optional($person)->last_names;
-            
+            $status = $a->attendance;
+            if (is_array($status)) {
+                $status = $status['status'] ?? null;
+            }
+
             return [
                 'enrollment_id' => $a->enrollment_id,
                 'student_id' => optional($a->enrollment)->student_id,
                 'student_name' => trim($studentName),
-                'attendance' => $a->attendance,
+                'attendance' => $status,
             ];
         });
 

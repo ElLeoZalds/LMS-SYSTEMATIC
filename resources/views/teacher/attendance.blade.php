@@ -60,10 +60,10 @@
                 @endif
 
                 @if(isset($training))
-                    <form action="{{ route('teacher.attendance.store') }}" method="POST" class="row g-3">
+                    <form id="attendance_form" action="{{ route('teacher.attendance.store') }}" method="POST" class="row g-3">
                         @csrf
                         <input type="hidden" name="training_id" value="{{ $training->training_id }}">
-                        <input type="hidden" id="post_schedule_id" name="schedule_id" value="{{ request('schedule_id') ?? '' }}">
+                        <input type="hidden" id="post_schedule_id" name="schedule_id" value="{{ $selectedScheduleId ?? request('schedule_id') ?? '' }}">
                         <input type="hidden" id="post_date" name="date" value="{{ request('date') ?? $date ?? date('Y-m-d') }}">
 
                         <div class="row align-items-center mb-4">
@@ -206,7 +206,7 @@
 
                                         document.querySelectorAll('input[type="hidden"][name$="[student_id]"]').forEach(function(h) {
                                             const studentId = h.value;
-                                            const rowPrefix = h.name.replace('[student_id]', '');
+                                            const rowPrefix = h.name.replace(/\[student_id\]$/, '');
                                             const status = map[studentId] || null;
                                             if (status) {
                                                 const short = status === 'present' ? 'P' : (status === 'absent' ? 'A' : 'J');
@@ -268,7 +268,7 @@
 
                                         document.querySelectorAll('input[type="hidden"][name$="[student_id]"]').forEach(function(h) {
                                             const studentId = h.value;
-                                            const rowPrefix = h.name.replace('[student_id]', '');
+                                            const rowPrefix = h.name.replace(/\[student_id\]$/, '');
                                             const status = map[studentId] || null;
                                             if (status) {
                                                 const short = status === 'present' ? 'P' : (status === 'absent' ? 'A' : 'J');
@@ -289,6 +289,87 @@
                             }
                         } catch (e) {
                             console.error(e);
+                        }
+                    });
+                }
+
+                const attendanceForm = document.getElementById('attendance_form');
+                if (attendanceForm) {
+                    attendanceForm.addEventListener('submit', async function(event) {
+                        event.preventDefault();
+
+                        const submitButton = attendanceForm.querySelector('button[type="submit"]');
+                        if (submitButton) {
+                            submitButton.disabled = true;
+                        }
+
+                        const trainingId = attendanceForm.querySelector('input[name="training_id"]').value;
+                        const scheduleId = postScheduleId.value || null;
+                        const dateValue = postDate.value || null;
+
+                        const attendances = Array.from(attendanceForm.querySelectorAll('input[type="hidden"][name$="[student_id]"]')).map(function(hiddenInput) {
+                            const rowPrefix = hiddenInput.name.replace(/\[student_id\]$/, '');
+                            const studentId = hiddenInput.value;
+                            const statusInput = attendanceForm.querySelector('input[name="' + rowPrefix + '[status]"]:checked');
+                            return {
+                                student_id: studentId,
+                                status: statusInput ? statusInput.value : 'P'
+                            };
+                        });
+
+                        const payload = {
+                            training_id: trainingId,
+                            schedule_id: scheduleId,
+                            date: dateValue,
+                            attendances: attendances,
+                        };
+
+                        console.log('Attendance payload:', payload);
+
+                        try {
+                            const response = await fetch('{{ route('teacher.attendance.store') }}', {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify(payload),
+                            });
+
+                            const json = await response.json();
+
+                            console.log('Attendance store response', response.status, json);
+
+                            if (!response.ok) {
+                                console.error('Attendance store response', response.status, json);
+                            }
+
+                            if (json.message) {
+                                Swal.fire({
+                                    icon: response.ok ? 'success' : 'error',
+                                    title: response.ok ? 'Listo' : 'Error',
+                                    text: json.message,
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Hubo un error al procesar la asistencia.',
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error sending attendance JSON:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo guardar la asistencia. Revisa la consola de desarrollador.',
+                            });
+                        } finally {
+                            if (submitButton) {
+                                submitButton.disabled = false;
+                            }
                         }
                     });
                 }
@@ -347,7 +428,7 @@
                             html += '</tr></thead>';
                             html += '<tbody>';
                             json.attendances.forEach(a => {
-                                const statusMap = { 'present': '✓ Presente', 'absent': '✕ Ausente', 'justified': '⊘ Justificado' };
+                                const statusMap = { 'present': '✓ Presente', 'absent': '✕ Ausente', 'late': '⊘ Justificado', 'justified': '⊘ Justificado' };
                                 const status = statusMap[a.attendance] || a.attendance;
                                 html += '<tr>';
                                 html += '<td>' + a.student_name + '</td>';

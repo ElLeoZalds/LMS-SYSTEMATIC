@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('enrollment_id');
             $table->foreign('schedule_id')->references('schedule_id')->on('schedules')->onDelete('cascade');
             $table->foreign('enrollment_id')->references('enrollment_id')->on('enrollments')->onDelete('cascade');
-            $table->enum('attendance', ['present', 'absent', 'late']);
+            $table->json('attendance');
             $table->timestamps();
         });
     }

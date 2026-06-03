@@ -166,10 +166,15 @@
                                             <td>{{ optional($attendance->schedule->date)->format('d/m/Y') ?? 'Sin fecha' }}</td>
                                             <td>{{ $attendance->schedule->topic ?? 'Sesión' }}</td>
                                             <td>
-                                                @if($attendance->attendance)
+                                                @php $status = $attendance->attendance_status ?? $attendance->attendance; @endphp
+                                                @if($status === 'present')
                                                     <span class="badge bg-success">Presente</span>
-                                                @else
+                                                @elseif($status === 'absent')
                                                     <span class="badge bg-danger">Ausente</span>
+                                                @elseif($status === 'late')
+                                                    <span class="badge bg-warning text-dark">Tarde</span>
+                                                @else
+                                                    <span class="badge bg-secondary">{{ ucfirst($status ?? 'Desconocido') }}</span>
                                                 @endif
                                             </td>
                                         </tr>
