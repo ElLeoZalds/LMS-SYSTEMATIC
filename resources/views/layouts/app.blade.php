@@ -57,6 +57,82 @@
         .table-borderless .border-bottom {
             border-bottom: 1px solid #dee2e6 !important;
         }
+
+        @media print {
+            html, body {
+                background: #fff !important;
+                color: #000 !important;
+            }
+
+            #wrapper,
+            .sidebar,
+            .topbar,
+            .sticky-footer,
+            .scroll-to-top,
+            .navbar-nav,
+            .nav-tabs,
+            .nav-link,
+            .dropdown,
+            .dropdown-menu,
+            .btn,
+            .btn-outline-secondary,
+            .btn-outline-success,
+            .btn-outline-primary,
+            .badge,
+            .card .btn,
+            .alert,
+            .pagination,
+            .modal,
+            .modal-backdrop {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            .card,
+            .card-header,
+            .card-body,
+            .container-fluid,
+            #content,
+            #content-wrapper {
+                box-shadow: none !important;
+                border: none !important;
+                background: transparent !important;
+            }
+
+            .container-fluid {
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 11pt !important;
+            }
+
+            table th,
+            table td {
+                border: 1px solid #000 !important;
+                padding: 0.5rem !important;
+            }
+
+            thead {
+                display: table-header-group !important;
+            }
+
+            tfoot {
+                display: table-footer-group !important;
+            }
+
+            tr {
+                page-break-inside: avoid !important;
+            }
+        }
     </style>
 </head>
 

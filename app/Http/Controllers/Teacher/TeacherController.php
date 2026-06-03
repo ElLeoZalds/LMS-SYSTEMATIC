@@ -194,6 +194,35 @@ class TeacherController extends Controller
         ));
     }
 
+    public function report($id)
+    {
+        $user = auth()->user();
+
+        $training = Training::with([
+            'course',
+            'teacher.person',
+            'enrollments.student.person',
+            'assessments.attempts.enrollment',
+            'tasks.submissions'
+        ])
+            ->where('training_id', $id)
+            ->where('teacher_id', $user->user_id)
+            ->firstOrFail();
+
+        $totalStudents = $training->enrollments->count();
+        $totalAssessments = $training->assessments->count();
+        $totalAttendanceRecords = Attendance::whereHas('schedule', fn($q) => $q->where('training_id', $id))->count();
+        $students = $training->enrollments;
+
+        return view('teacher.courses.report', compact(
+            'training',
+            'students',
+            'totalStudents',
+            'totalAssessments',
+            'totalAttendanceRecords'
+        ));
+    }
+
     public function storeAnnouncement(Request $request, $id)
     {
         $user = auth()->user();

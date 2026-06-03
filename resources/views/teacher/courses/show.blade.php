@@ -54,6 +54,94 @@
         .course-banner-image { background-position: center center; background-size: cover; width: 100%; }
         .course-banner-fallback { background: #0d6efd; }
         .course-banner-overlay { position: absolute; inset: 0; pointer-events: none; }
+
+        @page {
+            size: A4 portrait;
+            margin: 1.5cm;
+        }
+
+        @media print {
+            html, body {
+                background: #fff !important;
+                color: #000 !important;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                min-height: auto !important;
+                padding: 0 !important;
+            }
+
+            #wrapper,
+            .sidebar,
+            .topbar,
+            .sticky-footer,
+            .scroll-to-top,
+            .navbar-nav,
+            .nav-tabs,
+            .nav-link,
+            .dropdown,
+            .dropdown-menu,
+            .btn,
+            .alert,
+            .pagination,
+            .modal,
+            .modal-backdrop {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            .card,
+            .card-header,
+            .card-body,
+            .container-fluid,
+            #content,
+            #content-wrapper {
+                box-shadow: none !important;
+                border: none !important;
+                background: transparent !important;
+            }
+
+            .container-fluid {
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 11pt !important;
+            }
+
+            table th,
+            table td {
+                border: 1px solid #000 !important;
+                padding: 0.5rem !important;
+            }
+
+            thead {
+                display: table-header-group !important;
+            }
+
+            tfoot {
+                display: table-footer-group !important;
+            }
+
+            tr {
+                page-break-inside: avoid !important;
+            }
+
+            .print-report-header {
+                display: block !important;
+                margin-bottom: 1rem !important;
+            }
+        }
     </style>
 
         <div class="card shadow mb-4">
@@ -479,11 +567,14 @@
                     </div>
 
                 @elseif(request('tab') === 'calificaciones')
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Consolidado de Calificaciones</h5>
-                        <button class="btn btn-sm btn-outline-success" onclick="window.print();">
+                    <div class="d-flex justify-content-between align-items-center mb-3 print-report-header">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-1">Consolidado de Calificaciones</h5>
+                            <p class="text-muted mb-0">Curso: {{ $training->course->title }} | Código: {{ $training->course->code ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
+                        </div>
+                        <a href="{{ route('teacher.courses.report', $training->training_id) }}" class="btn btn-sm btn-outline-success">
                             <i class="bi bi-printer me-1"></i> Imprimir Registro
-                        </button>
+                        </a>
                     </div>
 
                     @if($students->count() > 0)
