@@ -2,6 +2,25 @@
 
 @section('content')
     <div class="container-fluid px-4 py-4">
+        <style>
+            .calendar-table {
+                table-layout: fixed;
+                width: 100%;
+            }
+            .calendar-table th {
+                white-space: nowrap;
+                font-size: .8rem;
+            }
+            .calendar-table td {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                hyphens: auto;
+                padding: .55rem .45rem;
+            }
+            .calendar-event-card {
+                line-height: 1.1;
+            }
+        </style>
         @php
         $calendarRoute = request()->routeIs('student.*') ? 'student.calendar' : 'teacher.calendar';
     @endphp
@@ -12,33 +31,26 @@
                 <p class="text-muted small mb-0">{{ $fullName }}</p>
                 <p class="text-muted small">Vista cuadricular con tareas y evaluaciones de tus cursos.</p>
             </div>
-            <div class="d-flex gap-2">
-                <a href="{{ route($calendarRoute, ['month' => $selectedMonth->copy()->subMonth()->format('Y-m')]) }}" class="btn btn-outline-secondary btn-sm">Mes anterior</a>
-                <a href="{{ route($calendarRoute, ['month' => $selectedMonth->copy()->addMonth()->format('Y-m')]) }}" class="btn btn-outline-secondary btn-sm">Próximo mes</a>
-            </div>
         </div>
 
         <div class="row mb-3">
-            <div class="col-12 col-lg-8">
+            <div class="col-12">
                 <div class="card shadow-sm rounded-3 border-0">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h5 class="mb-0">{{ $selectedMonth->translatedFormat('F Y') }}</h5>
-                                <small class="text-muted">Calendario por días</small>
+                            <a href="{{ route($calendarRoute, ['month' => $selectedMonth->copy()->subMonth()->format('Y-m')]) }}" class="btn btn-outline-secondary btn-sm">Mes anterior</a>
+                            <div class="text-center">
+                                <h5 class="mb-0">{{ ucfirst($selectedMonth->locale('es')->translatedFormat('F Y')) }}</h5>
                             </div>
-                            <div class="text-end">
-                                <span class="badge bg-warning text-dark">Evaluación</span>
-                                <span class="badge bg-info text-white">Tarea</span>
-                            </div>
+                            <a href="{{ route($calendarRoute, ['month' => $selectedMonth->copy()->addMonth()->format('Y-m')]) }}" class="btn btn-outline-secondary btn-sm">Próximo mes</a>
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-bordered calendar-table mb-0">
+                            <table class="table table-bordered table-sm calendar-table mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        @foreach(['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'] as $weekday)
-                                            <th class="text-center py-2">{{ $weekday }}</th>
+                                        @foreach(['lun.','mar.','mié.','jue.','vie.','sáb.','dom.'] as $weekday)
+                                            <th class="text-center py-2 small">{{ $weekday }}</th>
                                         @endforeach
                                     </tr>
                                 </thead>
@@ -51,6 +63,8 @@
                                                     $dayEvents = $events[$dayKey] ?? [];
                                                     $isCurrentMonth = $day->month === $selectedMonth->month;
                                                     $isToday = $day->isSameDay($today);
+                                                    $eventsToShow = array_slice($dayEvents, 0, 3);
+                                                    $moreCount = max(count($dayEvents) - 3, 0);
                                                 @endphp
                                                 <td class="align-top" style="min-height: 120px; vertical-align: top; background-color: {{ $isCurrentMonth ? '#fff' : '#f8f9fa' }};">
                                                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -61,17 +75,17 @@
                                                     </div>
 
                                                     @if(count($dayEvents))
-                                                        @foreach($dayEvents as $event)
+                                                        @foreach($eventsToShow as $event)
                                                             @php
-                                                                $compactTitle = \Illuminate\Support\Str::limit($event['title'], 24);
-                                                                $compactTraining = \Illuminate\Support\Str::limit($event['training'], 20);
+                                                                $compactTitle = \Illuminate\Support\Str::limit($event['title'], 26);
                                                             @endphp
-                                                            <div class="mb-2 p-2 rounded text-wrap" style="font-size: .78rem; background: {{ $event['type'] === 'task' ? '#0dcaf0' : '#ffc107' }}; color: #000;">
-                                                                <div class="fw-bold text-truncate">{{ $compactTitle }}</div>
-                                                                <div class="text-muted small text-truncate">{{ $compactTraining }}</div>
-                                                                <div class="small fst-italic text-end">{{ $event['status'] }}</div>
+                                                            <div class="mb-1 p-2 rounded-3 text-wrap" style="font-size: .78rem; line-height: 1.1; background: {{ $event['type'] === 'task' ? '#0dcaf0' : '#ffc107' }}; color: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);">
+                                                                <div class="fw-bold text-truncate">Vencimiento: {{ $compactTitle }}</div>
                                                             </div>
                                                         @endforeach
+                                                        @if($moreCount)
+                                                            <div class="mt-1 small text-muted">+{{ $moreCount }} más</div>
+                                                        @endif
                                                     @else
                                                         <div class="text-muted small">Sin eventos</div>
                                                     @endif
@@ -85,8 +99,10 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-12 col-lg-4">
+        <div class="row">
+            <div class="col-12 col-lg-6 mb-3">
                 <div class="card shadow-sm rounded-3 border-0">
                     <div class="card-body">
                         <h5 class="card-title">Leyenda</h5>
@@ -97,7 +113,9 @@
                         </ul>
                     </div>
                 </div>
-                <div class="card shadow-sm rounded-3 border-0 mt-3">
+            </div>
+            <div class="col-12 col-lg-6 mb-3">
+                <div class="card shadow-sm rounded-3 border-0">
                     <div class="card-body">
                         <h5 class="card-title">Consejos</h5>
                         <p class="small text-muted mb-2">- Si el evento aparece en gris, pertenece a otro mes.</p>
