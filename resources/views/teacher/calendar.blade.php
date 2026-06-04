@@ -102,7 +102,7 @@
                                                             <div class="mt-1 small text-muted">+{{ $moreCount }} más</div>
                                                         @endif
                                                     @else
-                                                        <div class="text-muted small">Sin eventos</div>
+                                                        {{-- No event content when day is empty --}}
                                                     @endif
                                                 </td>
                                             @endforeach

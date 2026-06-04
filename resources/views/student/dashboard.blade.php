@@ -52,7 +52,7 @@
                 @foreach($enrollments as $enrollment)
 
                     <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                        <div class="card h-100 shadow-sm rounded-3 border-0 position-relative overflow-hidden transition-all">
+                        <div class="card h-100 shadow-sm rounded-3 border-0 position-relative overflow-hidden transition-all course-card-clickable" data-url="{{ route('student.courses.show', $enrollment->training->training_id) }}">
                             
                             <div class="course-banner position-relative">
                                 @if(!empty($enrollment->training->course->banner_path))
@@ -130,6 +130,26 @@
         .course-banner-image { background-position: center center; background-size: cover; width: 100%; }
         .course-banner-fallback { background: #0d6efd; }
         .course-banner-overlay { position: absolute; inset: 0; pointer-events: none; }
+        .course-card-clickable { cursor: pointer; }
+        .course-card-clickable .card-body { pointer-events: none; }
+        .course-card-clickable button { pointer-events: auto; }
+        .course-card-clickable a { pointer-events: auto; }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.course-card-clickable').forEach(function (card) {
+                card.addEventListener('click', function (event) {
+                    if (event.target.closest('a, button')) {
+                        return;
+                    }
+                    var url = card.getAttribute('data-url');
+                    if (url) {
+                        window.location.href = url;
+                    }
+                });
+            });
+        });
+    </script>
 
 @endsection
