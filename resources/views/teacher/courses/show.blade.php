@@ -719,13 +719,19 @@
                             <textarea name="description" id="assessment-description" class="form-control" rows="3" placeholder="Instrucciones breves..."></textarea>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            @php
+                            $courseMin = now()->toDateString();
+                            if ($training->start_date && $training->start_date->gt(now())) {
+                                $courseMin = $training->start_date->format('Y-m-d');
+                            }
+                        @endphp
+                        <div class="col-md-6">
                                 <label for="assessment-start-date" class="form-label">Fecha de inicio</label>
-                                <input type="date" name="start_date" id="assessment-start-date" class="form-control" required min="{{ now()->toDateString() }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
+                                <input type="date" name="start_date" id="assessment-start-date" class="form-control" required min="{{ $courseMin }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
                             </div>
                             <div class="col-md-6">
                                 <label for="assessment-end-date" class="form-label">Fecha de fin</label>
-                                <input type="date" name="end_date" id="assessment-end-date" class="form-control" required min="{{ now()->toDateString() }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
+                                <input type="date" name="end_date" id="assessment-end-date" class="form-control" required min="{{ $courseMin }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
                             </div>
                         </div>
                         <div class="form-group mb-3">
@@ -776,7 +782,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="task-due-date" class="form-label">Fecha de fin</label>
-                                <input type="date" name="delivery_date" id="task-due-date" class="form-control" required min="{{ now()->toDateString() }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
+                                <input type="date" name="delivery_date" id="task-due-date" class="form-control" required min="{{ $courseMin }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
                             </div>
                             <div class="col-md-6">
                                 <label for="task-attachment" class="form-label">Archivo adjunto</label>
@@ -813,11 +819,13 @@
 
             const todayDate = getLocalToday();
             if (startDateInput && endDateInput) {
-                startDateInput.min = todayDate;
-                endDateInput.min = todayDate;
+                const assessmentMin = startDateInput.getAttribute('min') || todayDate;
+                startDateInput.min = assessmentMin;
+                endDateInput.min = assessmentMin;
 
                 startDateInput.addEventListener('change', function() {
-                    endDateInput.min = this.value || todayDate;
+                    const minDate = this.value || assessmentMin;
+                    endDateInput.min = minDate;
                     if (endDateInput.value && endDateInput.value < endDateInput.min) {
                         endDateInput.value = endDateInput.min;
                     }
@@ -826,9 +834,10 @@
 
             const taskDueDateInput = document.getElementById('task-due-date');
             if (taskDueDateInput) {
-                taskDueDateInput.min = todayDate;
-                if (taskDueDateInput.value && taskDueDateInput.value < todayDate) {
-                    taskDueDateInput.value = todayDate;
+                const taskMin = taskDueDateInput.getAttribute('min') || todayDate;
+                taskDueDateInput.min = taskMin;
+                if (taskDueDateInput.value && taskDueDateInput.value < taskMin) {
+                    taskDueDateInput.value = taskMin;
                 }
             }
 

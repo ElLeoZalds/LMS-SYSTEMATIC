@@ -23,6 +23,11 @@ class Training extends Model
         'price'         => 'decimal:2',
     ];
 
+    protected $appends = [
+        'start_date',
+        'end_date',
+    ];
+
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id', 'course_id');
@@ -49,6 +54,28 @@ class Training extends Model
     public function schedules()
     {
         return $this->hasMany(Schedule::class, 'training_id', 'training_id');
+    }
+
+    public function getStartDateAttribute()
+    {
+        if ($this->relationLoaded('schedules')) {
+            $schedule = $this->schedules->sortBy('date')->first();
+        } else {
+            $schedule = $this->schedules()->orderBy('date')->first();
+        }
+
+        return $schedule ? $schedule->date : null;
+    }
+
+    public function getEndDateAttribute()
+    {
+        if ($this->relationLoaded('schedules')) {
+            $schedule = $this->schedules->sortByDesc('date')->first();
+        } else {
+            $schedule = $this->schedules()->orderByDesc('date')->first();
+        }
+
+        return $schedule ? $schedule->date : null;
     }
 
     public function attendances()

@@ -72,11 +72,18 @@ class AssessmentController extends Controller
             ->where('teacher_id', $user->user_id)
             ->firstOrFail();
 
+        $startDate = Carbon::parse($request->start_date);
+        $endDate = Carbon::parse($request->end_date)->endOfDay();
+
+        if ($training->start_date) {
+            $courseStart = Carbon::parse($training->start_date)->startOfDay();
+            if ($startDate->lt($courseStart)) {
+                return redirect()->back()->withInput()->withErrors(['start_date' => 'La fecha de inicio no puede ser anterior al inicio del curso.']);
+            }
+        }
+
         if ($training->end_date) {
             $courseEnd = Carbon::parse($training->end_date)->endOfDay();
-            $startDate = Carbon::parse($request->start_date);
-            $endDate = Carbon::parse($request->end_date)->endOfDay();
-
             if ($startDate->gt($courseEnd)) {
                 return redirect()->back()->withInput()->withErrors(['start_date' => 'La fecha de inicio no puede ser posterior a la fecha de cierre del curso.']);
             }

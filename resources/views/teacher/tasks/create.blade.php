@@ -28,17 +28,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="start_date" class="form-label small fw-bold">Fecha de Inicio (Opcional)</label>
-                            <input type="date" class="form-control form-control-sm" id="start_date" name="start_date"
-                                value="{{ old('start_date', now()->toDateString()) }}">
-                            @error('start_date') <div class="text-danger small">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="end_date" class="form-label small fw-bold">Fecha de Entrega</label>
-                            <input type="date" class="form-control form-control-sm" id="end_date" name="end_date"
-                                value="{{ old('end_date') }}" required>
-                            @error('end_date') <div class="text-danger small">{{ $message }}</div> @enderror
+                            <label for="delivery_date" class="form-label small fw-bold">Fecha de Entrega</label>
+                            <input type="date" class="form-control form-control-sm" id="delivery_date" name="delivery_date"
+                                value="{{ old('delivery_date') }}" required min="{{ now()->toDateString() }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
+                            @error('delivery_date') <div class="text-danger small">{{ $message }}</div> @enderror
                         </div>
                     </div>
 

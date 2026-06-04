@@ -21,10 +21,14 @@ class SchedulesSeeder extends Seeder
 
         $schedules = [];
 
-        foreach ([1, 2, 3, 4, 5] as $index => $trainingId) {
-            $openDate = now()->addDays(rand(1, 10))->toDateString();
-            $closeDate = now()->addMonths(2)->addDays(rand(0, 14))->toDateString();
-            $slot = $timeSlots[$index];
+        foreach ([1, 2, 3, 4, 5, 6] as $index => $trainingId) {
+            $startDay = rand(1, 31);
+            $openDate = 
+                \Carbon\Carbon::create(2026, 5, $startDay)->toDateString();
+            $closeDate = \Carbon\Carbon::create(2026, 5, $startDay)
+                ->addMonths(rand(2, 3))
+                ->toDateString();
+            $slot = $timeSlots[$index % count($timeSlots)];
 
             $schedules[] = [
                 'training_id' => $trainingId,

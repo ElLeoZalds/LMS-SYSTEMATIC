@@ -30,10 +30,17 @@ class TaskController extends Controller
             ->where('teacher_id', $user->user_id)
             ->firstOrFail();
 
+        $dueDate = Carbon::parse($request->delivery_date)->endOfDay();
+
+        if ($training->start_date) {
+            $courseStart = Carbon::parse($training->start_date)->startOfDay();
+            if ($dueDate->lt($courseStart)) {
+                return redirect()->back()->withInput()->withErrors(['delivery_date' => 'La fecha de entrega no puede ser anterior al inicio del curso.']);
+            }
+        }
+
         if ($training->end_date) {
             $courseEnd = Carbon::parse($training->end_date)->endOfDay();
-            $dueDate = Carbon::parse($request->delivery_date)->endOfDay();
-
             if ($dueDate->gt($courseEnd)) {
                 return redirect()->back()->withInput()->withErrors(['delivery_date' => 'La fecha de entrega no puede ser posterior a la fecha de cierre del curso.']);
             }
