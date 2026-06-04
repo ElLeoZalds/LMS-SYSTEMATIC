@@ -72,6 +72,20 @@ class AssessmentController extends Controller
             ->where('teacher_id', $user->user_id)
             ->firstOrFail();
 
+        if ($training->end_date) {
+            $courseEnd = Carbon::parse($training->end_date)->endOfDay();
+            $startDate = Carbon::parse($request->start_date);
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+
+            if ($startDate->gt($courseEnd)) {
+                return redirect()->back()->withInput()->withErrors(['start_date' => 'La fecha de inicio no puede ser posterior a la fecha de cierre del curso.']);
+            }
+
+            if ($endDate->gt($courseEnd)) {
+                return redirect()->back()->withInput()->withErrors(['end_date' => 'La fecha de fin no puede ser posterior a la fecha de cierre del curso.']);
+            }
+        }
+
         Assessment::create([
             'training_id' => $training->training_id,
             'title' => $request->title,
@@ -236,6 +250,20 @@ class AssessmentController extends Controller
 
         if ($assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
+        }
+
+        if ($assessment->training->end_date) {
+            $courseEnd = Carbon::parse($assessment->training->end_date)->endOfDay();
+            $startDate = Carbon::parse($request->start_date);
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+
+            if ($startDate->gt($courseEnd)) {
+                return redirect()->back()->withInput()->withErrors(['start_date' => 'La fecha de inicio no puede ser posterior a la fecha de cierre del curso.']);
+            }
+
+            if ($endDate->gt($courseEnd)) {
+                return redirect()->back()->withInput()->withErrors(['end_date' => 'La fecha de fin no puede ser posterior a la fecha de cierre del curso.']);
+            }
         }
 
         if ($assessment->attempts()->exists()) {

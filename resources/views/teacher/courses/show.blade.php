@@ -14,8 +14,8 @@
         </div>
 
         <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0">
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0 h-100">
                     <div class="card-body text-center">
                         <i class="bi bi-people-fill text-primary h4 mb-2"></i>
                         <h5 class="h6 fw-bold">{{ $totalStudents }}</h5>
@@ -23,17 +23,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <i class="bi bi-check-circle-fill text-success h4 mb-2"></i>
-                        <h5 class="h6 fw-bold">{{ $totalAssessments }}</h5>
-                        <small class="text-muted">Tareas/Evaluaciones</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0">
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0 h-100">
                     <div class="card-body text-center">
                         <i class="bi bi-calendar-check text-info h4 mb-2"></i>
                         <h5 class="h6 fw-bold">{{ $totalAttendanceRecords }}</h5>
@@ -41,8 +32,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0">
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0 h-100">
                     <div class="card-body text-center">
                         <span class="badge bg-success p-2 mb-2">Activo</span>
                         <small class="text-muted d-block">Estado del Curso</small>
@@ -730,11 +721,11 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="assessment-start-date" class="form-label">Fecha de inicio</label>
-                                <input type="date" name="start_date" id="assessment-start-date" class="form-control" required min="{{ now()->toDateString() }}">
+                                <input type="date" name="start_date" id="assessment-start-date" class="form-control" required min="{{ now()->toDateString() }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
                             </div>
                             <div class="col-md-6">
                                 <label for="assessment-end-date" class="form-label">Fecha de fin</label>
-                                <input type="date" name="end_date" id="assessment-end-date" class="form-control" required min="{{ now()->toDateString() }}">
+                                <input type="date" name="end_date" id="assessment-end-date" class="form-control" required min="{{ now()->toDateString() }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
                             </div>
                         </div>
                         <div class="form-group mb-3">
@@ -785,7 +776,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="task-due-date" class="form-label">Fecha de fin</label>
-                                <input type="date" name="delivery_date" id="task-due-date" class="form-control" required min="{{ now()->toDateString() }}">
+                                <input type="date" name="delivery_date" id="task-due-date" class="form-control" required min="{{ now()->toDateString() }}" @if($training->end_date) max="{{ $training->end_date->format('Y-m-d') }}" @endif>
                             </div>
                             <div class="col-md-6">
                                 <label for="task-attachment" class="form-label">Archivo adjunto</label>

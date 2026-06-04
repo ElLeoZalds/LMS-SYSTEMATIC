@@ -26,7 +26,7 @@
 
             <div class="col-md-3">
                 <div class="card p-3 shadow-sm text-center">
-                    <h5>Trainings</h5>
+                    <h5>Capacitaciones</h5>
                     <h2>{{ $totalTrainings }}</h2>
                 </div>
             </div>

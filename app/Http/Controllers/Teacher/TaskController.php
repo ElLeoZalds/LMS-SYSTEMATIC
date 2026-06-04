@@ -30,6 +30,15 @@ class TaskController extends Controller
             ->where('teacher_id', $user->user_id)
             ->firstOrFail();
 
+        if ($training->end_date) {
+            $courseEnd = Carbon::parse($training->end_date)->endOfDay();
+            $dueDate = Carbon::parse($request->delivery_date)->endOfDay();
+
+            if ($dueDate->gt($courseEnd)) {
+                return redirect()->back()->withInput()->withErrors(['delivery_date' => 'La fecha de entrega no puede ser posterior a la fecha de cierre del curso.']);
+            }
+        }
+
         $filePath = null;
         if ($request->hasFile('attachment')) {
             $filePath = $request->file('attachment')->store('task-files', 'public');
@@ -113,6 +122,15 @@ class TaskController extends Controller
             ->whereHas('training', function ($q) use ($user) {
                 $q->where('teacher_id', $user->user_id);
             })->firstOrFail();
+
+        if ($task->training->end_date) {
+            $courseEnd = Carbon::parse($task->training->end_date)->endOfDay();
+            $dueDate = Carbon::parse($request->delivery_date)->endOfDay();
+
+            if ($dueDate->gt($courseEnd)) {
+                return redirect()->back()->withInput()->withErrors(['delivery_date' => 'La fecha de entrega no puede ser posterior a la fecha de cierre del curso.']);
+            }
+        }
 
         // handle replacement of attachment
         if ($request->hasFile('attachment')) {

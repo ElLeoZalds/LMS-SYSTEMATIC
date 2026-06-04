@@ -1,5 +1,17 @@
 @php
     $role = optional(auth()->user()->roles->first())->name;
+    $person = optional(auth()->user()->person);
+    $fullName = trim(($person->last_names ? $person->last_names . ' ' : '') . ($person->first_names ?? ''));
+    $displayRole = 'Usuario';
+    if ($role === 'Administrator') {
+        $displayRole = 'Administrador';
+    } elseif ($role === 'Teacher') {
+        $displayRole = 'Profesor';
+    } elseif ($role === 'Student') {
+        $displayRole = 'Estudiante';
+    } elseif ($role) {
+        $displayRole = $role;
+    }
 @endphp
 
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
@@ -20,7 +32,8 @@
     </a>
 
     <div class="text-center text-light small mb-3">
-        {{ optional(auth()->user())->name ?? 'Usuario' }}
+        <div>{{ $fullName ?: 'Usuario' }}</div>
+        <div class="small">{{ $displayRole }}</div>
     </div>
 
     <hr class="sidebar-divider my-0">

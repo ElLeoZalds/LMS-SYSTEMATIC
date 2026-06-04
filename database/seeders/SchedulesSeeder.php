@@ -9,37 +9,42 @@ class SchedulesSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('schedules')->insert([
-            [
-                'training_id' => 1,
-                'date' => now()->addDays(1)->toDateString(),
-                'start_time' => '09:00:00',
-                'end_time' => '11:00:00'
-            ],
-            [
-                'training_id' => 2,
-                'date' => now()->addDays(2)->toDateString(),
-                'start_time' => '14:00:00',
-                'end_time' => '16:00:00'
-            ],
-            [
-                'training_id' => 3,
-                'date' => now()->addDays(3)->toDateString(),
-                'start_time' => '10:00:00',
-                'end_time' => '12:00:00'
-            ],
-            [
-                'training_id' => 4,
-                'date' => now()->addDays(4)->toDateString(),
-                'start_time' => '16:00:00',
-                'end_time' => '18:00:00'    
-            ],
-            [
-                'training_id' => 5,
-                'date' => now()->addDays(5)->toDateString(),
-                'start_time' => '08:30:00',
-                'end_time' => '10:30:00'
-            ]
-        ]);
+        DB::table('schedules')->delete();
+
+        $timeSlots = [
+            ['start' => '09:00:00', 'end' => '11:00:00'],
+            ['start' => '14:00:00', 'end' => '16:00:00'],
+            ['start' => '10:00:00', 'end' => '12:00:00'],
+            ['start' => '16:00:00', 'end' => '18:00:00'],
+            ['start' => '08:30:00', 'end' => '10:30:00'],
+        ];
+
+        $schedules = [];
+
+        foreach ([1, 2, 3, 4, 5] as $index => $trainingId) {
+            $openDate = now()->addDays(rand(1, 10))->toDateString();
+            $closeDate = now()->addMonths(2)->addDays(rand(0, 14))->toDateString();
+            $slot = $timeSlots[$index];
+
+            $schedules[] = [
+                'training_id' => $trainingId,
+                'date' => $openDate,
+                'start_time' => $slot['start'],
+                'end_time' => $slot['end'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            $schedules[] = [
+                'training_id' => $trainingId,
+                'date' => $closeDate,
+                'start_time' => $slot['start'],
+                'end_time' => $slot['end'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        DB::table('schedules')->insert($schedules);
     }
 }
