@@ -9,7 +9,7 @@
             </div>
             <div class="text-end">
                 <a href="{{ route('student.courses.index') }}" class="btn btn-secondary btn-sm">
-                    <i class="bi bi-arrow-left-circle me-1"></i>Volver a mis cursos
+                    <i class="bi bi-arrow-left-circle me-1"></i>Volver al Curso
                 </a>
             </div>
         </div>

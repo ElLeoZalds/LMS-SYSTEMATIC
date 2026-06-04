@@ -62,11 +62,14 @@
 
                                                     @if(count($dayEvents))
                                                         @foreach($dayEvents as $event)
-                                                            <div class="mb-2 p-2 rounded text-wrap" style="font-size: .82rem; background: {{ $event['type'] === 'task' ? '#0dcaf0' : '#ffc107' }}; color: {{ $event['type'] === 'task' ? '#000' : '#000' }};">
-                                                                <div class="fw-bold">{{ $event['title'] }}</div>
-                                                                <div class="text-truncate" style="max-width: 100%;">{{ $event['training'] }}</div>
-                                                                <div class="small">{{ $event['range'] }}</div>
-                                                                <div class="small fst-italic">{{ $event['status'] }}</div>
+                                                            @php
+                                                                $compactTitle = \Illuminate\Support\Str::limit($event['title'], 24);
+                                                                $compactTraining = \Illuminate\Support\Str::limit($event['training'], 20);
+                                                            @endphp
+                                                            <div class="mb-2 p-2 rounded text-wrap" style="font-size: .78rem; background: {{ $event['type'] === 'task' ? '#0dcaf0' : '#ffc107' }}; color: #000;">
+                                                                <div class="fw-bold text-truncate">{{ $compactTitle }}</div>
+                                                                <div class="text-muted small text-truncate">{{ $compactTraining }}</div>
+                                                                <div class="small fst-italic text-end">{{ $event['status'] }}</div>
                                                             </div>
                                                         @endforeach
                                                     @else

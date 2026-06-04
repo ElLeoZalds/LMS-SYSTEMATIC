@@ -31,7 +31,7 @@
 
                         <div class="d-grid gap-2">
                             <a href="{{ route('student.courses.show', $attempt->assessment->training_id) }}" class="btn btn-primary btn-lg">
-                                Volver al curso
+                                Volver al Curso
                             </a>
                         </div>
                     </div>

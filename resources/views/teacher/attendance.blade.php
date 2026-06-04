@@ -2,9 +2,9 @@
 
 @section('content')
     <div class="container-fluid px-4 py-1">
-        <div class="mb-4">
-            <a href="{{ route('teacher.courses') }}" class="text-decoration-none">
-                <i class="bi bi-arrow-left me-2"></i>Volver a mis cursos
+        <div class="mb-4 d-flex justify-content-end">
+            <a href="{{ route('teacher.courses') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Volver al Curso
             </a>
         </div>
 

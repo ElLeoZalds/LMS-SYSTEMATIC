@@ -9,7 +9,7 @@
                     <strong>{{ ucfirst($training->modality) }}</strong></small>
             </div>
             <a href="{{ route('teacher.courses') }}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-left me-2"></i>Volver a Cursos
+                <i class="bi bi-arrow-left me-2"></i>Volver al Curso
             </a>
         </div>
 
