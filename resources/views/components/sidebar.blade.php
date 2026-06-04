@@ -94,7 +94,7 @@
             Gestión
         </div>
 
-        <li class="nav-item {{ request()->routeIs('teacher.courses.*') ? 'active' : '' }}">
+        <li class="nav-item {{ request()->routeIs('teacher.courses', 'teacher.courses.*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('teacher.courses') }}">
                 <i class="fas fa-fw fa-book-open"></i>
                 <span>Mis Cursos</span>
