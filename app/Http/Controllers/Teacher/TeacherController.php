@@ -122,17 +122,15 @@ class TeacherController extends Controller
         $events = [];
         foreach ($trainings as $training) {
             foreach ($training->assessments as $assessment) {
-                $period = CarbonPeriod::create($assessment->start_date, $assessment->end_date);
-                foreach ($period as $day) {
-                    $dateKey = $day->format('Y-m-d');
-                    $events[$dateKey][] = [
-                        'type' => 'assessment',
-                        'title' => $assessment->title,
-                        'training' => $training->course->title,
-                        'range' => $assessment->start_date->format('d/m/Y') . ' → ' . $assessment->end_date->format('d/m/Y'),
-                        'status' => $day->isSameDay($assessment->end_date) ? 'Vence hoy' : 'En curso',
-                    ];
-                }
+                $dateKey = $assessment->end_date->format('Y-m-d');
+                $events[$dateKey][] = [
+                    'type' => 'assessment',
+                    'title' => $assessment->title,
+                    'training' => $training->course->title,
+                    'range' => $assessment->start_date->format('d/m/Y') . ' → ' . $assessment->end_date->format('d/m/Y'),
+                    'status' => $assessment->end_date->isToday() ? 'Vence hoy' : 'En curso',
+                    'url' => route('teacher.assessments.show', $assessment->assessment_id),
+                ];
             }
 
             foreach ($training->tasks as $task) {
@@ -147,6 +145,7 @@ class TeacherController extends Controller
                     'training' => $training->course->title,
                     'range' => 'Entrega: ' . $task->due_date->format('d/m/Y H:i'),
                     'status' => $task->due_date->isToday() ? 'Vence hoy' : ($task->due_date->isPast() ? 'Atrasada' : 'Pendiente'),
+                    'url' => route('teacher.tasks.submissions', $task->task_id),
                 ];
             }
         }

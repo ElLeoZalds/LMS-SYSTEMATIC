@@ -252,7 +252,7 @@
                                             $submission = $submissions->get($task->task_id);
                                             $taskDueClass = $task->due_date && $task->due_date->isPast() ? 'danger' : 'warning';
                                         @endphp
-                                        <div class="list-group-item mb-2 rounded-3 shadow-sm">
+                                        <div id="task-{{ $task->task_id }}" class="list-group-item mb-2 rounded-3 shadow-sm">
                                             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                                                 <div>
                                                     <h6 class="mb-1">{{ $task->title }}</h6>

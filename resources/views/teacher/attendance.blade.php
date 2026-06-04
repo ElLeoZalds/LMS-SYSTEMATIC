@@ -2,8 +2,11 @@
 
 @section('content')
     <div class="container-fluid px-4 py-1">
+        @php
+            $attendanceBackUrl = request('training_id') ? route('teacher.courses.show', request('training_id')) . '?tab=asistencias' : route('teacher.courses');
+        @endphp
         <div class="mb-4 d-flex justify-content-end">
-            <a href="{{ route('teacher.courses') }}" class="btn btn-sm btn-outline-secondary">
+            <a href="{{ $attendanceBackUrl }}" class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-arrow-left me-2"></i>Volver al Curso
             </a>
         </div>

@@ -13,12 +13,8 @@
             </p>
         </div>
         
-        <a href="{{ route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido']) }}" 
-           style="display: inline-flex; align-items: center; padding: 8px 16px; bg-color: #f3f4f6; background: #e5e7eb; color: #374151; text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 8px; transition: background 0.2s;">
-            <svg style="width: 16px; height: 16px; margin-right: 8px; display: inline-block; vertical-align: middle;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Volver al Curso
+        <a href="{{ route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'tareas']) }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Volver al Curso
         </a>
     </div>
 

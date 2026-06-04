@@ -20,6 +20,15 @@
             .calendar-event-card {
                 line-height: 1.1;
             }
+            .calendar-event-link {
+                display: block;
+                color: inherit;
+                text-decoration: none;
+            }
+            .calendar-event-link:hover {
+                text-decoration: none;
+                opacity: .92;
+            }
         </style>
         @php
         $calendarRoute = request()->routeIs('student.*') ? 'student.calendar' : 'teacher.calendar';
@@ -79,9 +88,15 @@
                                                             @php
                                                                 $compactTitle = \Illuminate\Support\Str::limit($event['title'], 26);
                                                             @endphp
-                                                            <div class="mb-1 p-2 rounded-3 text-wrap" style="font-size: .78rem; line-height: 1.1; background: {{ $event['type'] === 'task' ? '#0dcaf0' : '#ffc107' }}; color: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);">
-                                                                <div class="fw-bold text-truncate">Vencimiento: {{ $compactTitle }}</div>
-                                                            </div>
+                                                            @if(!empty($event['url']))
+                                                                <a href="{{ $event['url'] }}" class="calendar-event-link mb-1 p-2 rounded-3 text-wrap d-block" style="font-size: .78rem; line-height: 1.1; background: {{ $event['type'] === 'task' ? '#0dcaf0' : '#ffc107' }}; color: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);">
+                                                                    <div class="fw-bold text-truncate">Vencimiento: {{ $compactTitle }}</div>
+                                                                </a>
+                                                            @else
+                                                                <div class="calendar-event-card mb-1 p-2 rounded-3 text-wrap" style="font-size: .78rem; line-height: 1.1; background: {{ $event['type'] === 'task' ? '#0dcaf0' : '#ffc107' }}; color: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);">
+                                                                    <div class="fw-bold text-truncate">Vencimiento: {{ $compactTitle }}</div>
+                                                                </div>
+                                                            @endif
                                                         @endforeach
                                                         @if($moreCount)
                                                             <div class="mt-1 small text-muted">+{{ $moreCount }} más</div>
