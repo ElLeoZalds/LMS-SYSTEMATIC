@@ -730,11 +730,11 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="assessment-start-date" class="form-label">Fecha de inicio</label>
-                                <input type="date" name="start_date" id="assessment-start-date" class="form-control" required min="{{ date('Y-m-d') }}">
+                                <input type="date" name="start_date" id="assessment-start-date" class="form-control" required min="{{ now()->toDateString() }}">
                             </div>
                             <div class="col-md-6">
                                 <label for="assessment-end-date" class="form-label">Fecha de fin</label>
-                                <input type="date" name="end_date" id="assessment-end-date" class="form-control" required min="{{ date('Y-m-d') }}">
+                                <input type="date" name="end_date" id="assessment-end-date" class="form-control" required min="{{ now()->toDateString() }}">
                             </div>
                         </div>
                         <div class="form-group mb-3">
@@ -785,7 +785,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="task-due-date" class="form-label">Fecha de fin</label>
-                                <input type="date" name="delivery_date" id="task-due-date" class="form-control" required min="{{ date('Y-m-d') }}">
+                                <input type="date" name="delivery_date" id="task-due-date" class="form-control" required min="{{ now()->toDateString() }}">
                             </div>
                             <div class="col-md-6">
                                 <label for="task-attachment" class="form-label">Archivo adjunto</label>
@@ -812,13 +812,33 @@
             const taskAttachmentInput = document.getElementById('task-attachment');
             const taskForm = document.getElementById('createTaskForm');
 
+            const getLocalToday = function() {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            const todayDate = getLocalToday();
             if (startDateInput && endDateInput) {
+                startDateInput.min = todayDate;
+                endDateInput.min = todayDate;
+
                 startDateInput.addEventListener('change', function() {
-                    endDateInput.min = this.value || '{{ date('Y-m-d') }}';
+                    endDateInput.min = this.value || todayDate;
                     if (endDateInput.value && endDateInput.value < endDateInput.min) {
                         endDateInput.value = endDateInput.min;
                     }
                 });
+            }
+
+            const taskDueDateInput = document.getElementById('task-due-date');
+            if (taskDueDateInput) {
+                taskDueDateInput.min = todayDate;
+                if (taskDueDateInput.value && taskDueDateInput.value < todayDate) {
+                    taskDueDateInput.value = todayDate;
+                }
             }
 
             if (taskAttachmentInput) {
