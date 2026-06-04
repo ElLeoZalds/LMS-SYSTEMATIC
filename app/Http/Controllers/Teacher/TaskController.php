@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Training;
-use App\Models\Task; 
+use App\Models\Task;
 use App\Models\TaskSubmission;
+use Carbon\Carbon;
 
 class TaskController extends Controller
 {
@@ -38,7 +39,7 @@ class TaskController extends Controller
             'training_id' => $training->training_id,
             'title'       => $request->title,
             'description' => $request->description ?? null,
-            'due_date'    => $request->delivery_date,
+            'due_date'    => Carbon::parse($request->delivery_date)->endOfDay(),
             'file_path'   => $filePath,
         ]);
 
@@ -126,7 +127,7 @@ class TaskController extends Controller
 
         $task->title = $request->title;
         $task->description = $request->description ?? null;
-        $task->due_date = $request->delivery_date;
+        $task->due_date = Carbon::parse($request->delivery_date)->endOfDay();
         $task->save();
 
         return redirect()->route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])

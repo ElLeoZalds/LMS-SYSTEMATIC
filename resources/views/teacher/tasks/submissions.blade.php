@@ -9,7 +9,7 @@
             <h1 style="font-size: 24px; font-weight: bold; color: #1f2937; margin: 5px 0 0 0;">{{ $task->title }}</h1>
             <p style="font-size: 14px; color: #6b7280; margin: 5px 0 0 0;">
                 Curso: <span style="font-weight: 500; color: #374151;">{{ $task->training->name ?? 'Curso' }}</span> 
-                | Fecha límite: <span style="font-weight: 500; color: #ef4444;">{{ $task->due_date->format('d/m/Y H:i') }}</span>
+                | Fecha de fin: <span style="font-weight: 500; color: #ef4444;">{{ $task->due_date->format('d/m/Y H:i') }}</span>
             </p>
         </div>
         

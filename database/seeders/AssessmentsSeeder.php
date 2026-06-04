@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AssessmentsSeeder extends Seeder
 {
@@ -15,7 +16,7 @@ class AssessmentsSeeder extends Seeder
                 'title' => 'Evaluación básica de Excel',
                 'description' => 'Evaluación de conocimientos básicos de Excel',
                 'start_date' => now(),
-                'end_date' => now()->addDays(7),
+                'end_date' => Carbon::now()->addDays(7)->endOfDay()->toDateString(),
                 'allowed_attempts' => 3,
                 'active' => true,
                 'created_at' => now(),
@@ -26,7 +27,7 @@ class AssessmentsSeeder extends Seeder
                 'title' => 'Evaluación de suite ofimática',
                 'description' => 'Evaluación de herramientas ofimáticas',
                 'start_date' => now(),
-                'end_date' => now()->addDays(7),
+                'end_date' => Carbon::now()->addDays(7)->endOfDay()->toDateString(),
                 'allowed_attempts' => 2,
                 'active' => true,
                 'created_at' => now(),
@@ -37,7 +38,7 @@ class AssessmentsSeeder extends Seeder
                 'title' => 'Evaluación de AutoCAD',
                 'description' => 'Evaluación de diseño técnico en AutoCAD',
                 'start_date' => now(),
-                'end_date' => now()->addDays(7),
+                'end_date' => Carbon::now()->addDays(7)->endOfDay()->toDateString(),
                 'allowed_attempts' => 2,
                 'active' => true,
                 'created_at' => now(),
@@ -48,7 +49,7 @@ class AssessmentsSeeder extends Seeder
                 'title' => 'Evaluación de Revit',
                 'description' => 'Evaluación de modelado BIM en Revit',
                 'start_date' => now(),
-                'end_date' => now()->addDays(7),
+                'end_date' => Carbon::now()->addDays(7)->endOfDay()->toDateString(),
                 'allowed_attempts' => 2,
                 'active' => true,
                 'created_at' => now(),
@@ -59,7 +60,7 @@ class AssessmentsSeeder extends Seeder
                 'title' => 'Evaluación de oratoria',
                 'description' => 'Evaluación de habilidades de comunicación oral',
                 'start_date' => now(),
-                'end_date' => now()->addDays(7),
+                'end_date' => Carbon::now()->addDays(7)->endOfDay()->toDateString(),
                 'allowed_attempts' => 3,
                 'active' => true,
                 'created_at' => now(),

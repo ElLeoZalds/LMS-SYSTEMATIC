@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\Training;
 use App\Models\Assessment;
 use App\Models\Question;
-use App\Models\Alternative; 
+use App\Models\Alternative;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AssessmentController extends Controller
 {
@@ -76,7 +77,7 @@ class AssessmentController extends Controller
             'title' => $request->title,
             'description' => $request->description ?? null,
             'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
+            'end_date' => Carbon::parse($request->end_date)->endOfDay()->toDateString(),
             'allowed_attempts' => $request->allowed_attempts,
             'time_limit' => $request->time_limit ?? 60,
             'active' => $request->has('active'),
@@ -241,7 +242,15 @@ class AssessmentController extends Controller
             return redirect()->back()->withErrors(['assessment' => 'No se puede modificar.']);
         }
 
-        $assessment->update($request->all());
+        $assessment->update([
+            'title' => $request->title,
+            'start_date' => $request->start_date,
+            'end_date' => Carbon::parse($request->end_date)->endOfDay()->toDateString(),
+            'allowed_attempts' => $request->allowed_attempts,
+            'time_limit' => $request->time_limit,
+            'active' => $request->has('active'),
+        ]);
+
         return redirect()->route('teacher.assessments.manage', ['training_id' => $assessment->training_id]);
     }
 
