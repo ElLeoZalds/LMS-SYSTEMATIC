@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid px-4 py-1">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="teacher-course-view">
+        <div class="container-fluid px-4 py-1">
+            <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="h3 mb-2 text-gray-800">{{ $training->course->title }}</h1>
                 <small class="text-muted">Código: {{ $training->course->code ?? 'N/A' }} | Modalidad:
@@ -45,6 +46,23 @@
         .course-banner-image { background-position: center center; background-size: cover; width: 100%; }
         .course-banner-fallback { background: #0d6efd; }
         .course-banner-overlay { position: absolute; inset: 0; pointer-events: none; }
+
+        .nav-tabs .nav-item {
+            margin-right: 0.75rem;
+        }
+
+        .nav-tabs .nav-item:last-child {
+            margin-right: 0;
+        }
+
+        .teacher-course-view .btn {
+            margin-right: 0.3rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .teacher-course-view .btn:last-child {
+            margin-right: 0;
+        }
 
         @page {
             size: A4 portrait;
@@ -138,49 +156,49 @@
         <div class="card shadow mb-4">
             <div class="card-header bg-white border-bottom">
                 <ul class="nav nav-tabs card-header-tabs" role="tablist">
-                    <li class="nav-item" role="presentation">
+                    <li class="nav-item me-3" role="presentation">
                         <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=inicio"
                             class="nav-link @if(request('tab', 'inicio') === 'inicio') active @endif" id="inicio-tab"
                             role="tab">
                             <i class="bi bi-house-fill me-2"></i>Inicio
                         </a>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <li class="nav-item me-3" role="presentation">
                         <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=estudiantes"
                             class="nav-link @if(request('tab') === 'estudiantes') active @endif" id="estudiantes-tab"
                             role="tab">
                             <i class="bi bi-people-fill me-2"></i>Estudiantes
                         </a>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <li class="nav-item me-3" role="presentation">
                         <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=asistencias"
                             class="nav-link @if(request('tab') === 'asistencias') active @endif" id="asistencias-tab"
                             role="tab">
                             <i class="bi bi-clipboard-check me-2"></i>Asistencias
                         </a>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <li class="nav-item me-3" role="presentation">
                         <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=contenido"
                             class="nav-link @if(request('tab') === 'contenido') active @endif" id="contenido-tab"
                             role="tab">
                             <i class="bi bi-book-fill me-2"></i>Evaluaciones
                         </a>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <li class="nav-item me-3" role="presentation">
                         <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=tareas"
                             class="nav-link @if(request('tab') === 'tareas') active @endif" id="tareas-tab"
                             role="tab">
                             <i class="bi bi-list-task me-2"></i>Tareas
                         </a>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <li class="nav-item me-3" role="presentation">
                         <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=calificaciones"
                             class="nav-link @if(request('tab') === 'calificaciones') active @endif" id="calificaciones-tab"
                             role="tab">
                             <i class="bi bi-check-circle-fill me-2"></i>Calificaciones
                         </a>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <li class="nav-item me-3" role="presentation">
                         <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=anuncios"
                             class="nav-link @if(request('tab') === 'anuncios') active @endif" id="anuncios-tab"
                             role="tab">
@@ -366,14 +384,14 @@
                                                     <span class="badge @if($assessment->active) bg-success @else bg-secondary @endif">{{ $assessment->active ? 'Activo' : 'Inactivo' }}</span>
                                                 </td>
                                                 <td class="text-end">
-                                                    <div class="d-flex flex-column align-items-end gap-1">
-                                                        <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white">
+                                                    <div class="d-flex flex-column align-items-end gap-3">
+                                                        <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white mb-2">
                                                             <i class="bi bi-pencil-square"></i> Gestionar Preguntas
                                                         </a>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary edit-assessment-btn" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary edit-assessment-btn mb-2" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
                                                             <i class="bi bi-pencil"></i> Editar
                                                         </button>
-                                                        <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm" data-message="¿Estás seguro de eliminar esta evaluación? Se eliminarán también los intentos asociados.">
+                                                        <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm mb-2" data-message="¿Estás seguro de eliminar esta evaluación? Se eliminarán también los intentos asociados.">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-sm btn-danger">
@@ -449,14 +467,14 @@
                                                         <span class="badge bg-warning text-dark px-2 py-1">{{ $task->submissions->whereNull('grade')->count() }} por revisar</span>
                                                     </td>
                                                     <td class="text-end">
-                                                        <div class="d-flex flex-column align-items-end gap-1">
-                                                            <a href="{{ route('teacher.tasks.submissions', $task->task_id) }}" class="btn btn-sm btn-success">
+                                                        <div class="d-flex flex-column align-items-end gap-3">
+                                                            <a href="{{ route('teacher.tasks.submissions', $task->task_id) }}" class="btn btn-sm btn-success mb-2">
                                                                 <i class="bi bi-eye"></i> Revisar
                                                             </a>
-                                                            <button type="button" class="btn btn-sm btn-primary edit-task-btn" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}'>
+                                                            <button type="button" class="btn btn-sm btn-primary edit-task-btn mb-2" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}'>
                                                                 <i class="bi bi-pencil"></i> Editar
                                                             </button>
-                                                            <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="swal-confirm" data-message="¿Deseas eliminar esta tarea? Las entregas asociadas también se eliminarán automáticamente.">
+                                                            <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="swal-confirm mb-2" data-message="¿Deseas eliminar esta tarea? Las entregas asociadas también se eliminarán automáticamente.">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit" class="btn btn-sm btn-danger">
@@ -977,4 +995,5 @@
             });
         });
     </script>
+    </div>
 @endsection

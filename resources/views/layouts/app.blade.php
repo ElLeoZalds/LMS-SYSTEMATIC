@@ -52,6 +52,10 @@
 
         .btn {
             transition: none !important;
+            margin: 0.125rem 0.125rem 0.125rem 0 !important;
+        }
+        .btn:last-child {
+            margin-right: 0 !important;
         }
         .btn:focus,
         .btn:active,
