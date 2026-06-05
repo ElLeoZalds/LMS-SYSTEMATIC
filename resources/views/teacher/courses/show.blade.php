@@ -303,12 +303,19 @@
 
                 @elseif(request('tab') === 'asistencias')
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Registro de Asistencias</h5>
-                        <a href="{{ route('teacher.attendance.create', ['training_id' => $training->training_id]) }}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-arrow-right me-1"></i>Registrar Asistencia
-                        </a>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Registro de Asistencias</h5>
+                            <p class="text-muted mb-0">Total de registros: <strong>{{ $totalAttendanceRecords }}</strong></p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('teacher.attendance.create', ['training_id' => $training->training_id]) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-arrow-right me-1"></i>Registrar Asistencia
+                            </a>
+                            <a href="{{ route('teacher.courses.report.attendance', $training->training_id) }}" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-printer me-1"></i> Imprimir Asistencia
+                            </a>
+                        </div>
                     </div>
-                    <p class="text-muted">Total de registros: <strong>{{ $totalAttendanceRecords }}</strong></p>
 
                 @elseif(request('tab') === 'contenido')
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">

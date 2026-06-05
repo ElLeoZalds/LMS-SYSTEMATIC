@@ -11,6 +11,7 @@ use App\Models\Assessment;
 use App\Models\AssessmentAttempt;
 use App\Models\Enrollment;
 use App\Models\Announcement;
+use App\Models\Schedule;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -220,6 +221,41 @@ class TeacherController extends Controller
             'students',
             'totalStudents',
             'totalAssessments',
+            'totalAttendanceRecords'
+        ));
+    }
+
+    public function reportAttendance($id)
+    {
+        $user = auth()->user();
+
+        $training = Training::with([
+            'course',
+            'teacher.person',
+            'enrollments.student.person'
+        ])
+            ->where('training_id', $id)
+            ->where('teacher_id', $user->user_id)
+            ->firstOrFail();
+
+        $schedules = Schedule::where('training_id', $training->training_id)
+            ->orderBy('date')
+            ->with(['attendances.enrollment.student.person'])
+            ->get();
+
+        $attendanceMap = [];
+        foreach ($schedules as $schedule) {
+            foreach ($schedule->attendances as $attendance) {
+                $attendanceMap[$attendance->enrollment_id][$schedule->schedule_id] = $attendance;
+            }
+        }
+
+        $totalAttendanceRecords = $training->attendances()->count();
+
+        return view('teacher.courses.report-attendance', compact(
+            'training',
+            'schedules',
+            'attendanceMap',
             'totalAttendanceRecords'
         ));
     }

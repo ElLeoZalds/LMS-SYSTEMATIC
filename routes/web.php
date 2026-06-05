@@ -78,6 +78,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])
     Route::get('/courses', [TeacherController::class, 'courses'])->name('courses');
     Route::get('/courses/{id}', [TeacherController::class, 'show'])->name('courses.show');
     Route::get('/courses/{id}/report', [TeacherController::class, 'report'])->name('courses.report');
+    Route::get('/courses/{id}/report/asistencias', [TeacherController::class, 'reportAttendance'])->name('courses.report.attendance');
     Route::post('/courses/{id}/banner', [TeacherController::class, 'uploadBanner'])->name('courses.banner.upload');
     Route::post('/courses/{id}/announcements', [TeacherController::class, 'storeAnnouncement'])->name('courses.announcements.store');
     Route::get('/students/{id}', [TeacherController::class, 'students'])->name('students');
