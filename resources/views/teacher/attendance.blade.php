@@ -50,7 +50,7 @@
 
                         <div id="customDateWrapper" class="mt-2" style="display:none;">
                             <label for="custom_date" class="form-label fw-bold small text-muted">Selecciona fecha</label>
-                            <input type="date" id="custom_date" name="date_custom" class="form-control">
+                            <input type="date" id="custom_date" name="date_custom" class="form-control" @if(isset($training) && $training->start_date) min="{{ $training->start_date->format('Y-m-d') }}" @endif>
                         </div>
                     </div>
 
@@ -242,8 +242,16 @@
                     customDate.addEventListener('change', async function() {
                         const selected = this.value;
                         if (!selected) return;
-                        if (selected > new Date().toISOString().split('T')[0]) {
+                        const today = new Date().toISOString().split('T')[0];
+                        const minDate = this.min || '0000-01-01';
+
+                        if (selected > today) {
                             Swal.fire({ icon: 'error', title: 'Fecha inválida', text: 'No se puede seleccionar una fecha futura.' });
+                            this.value = '';
+                            return;
+                        }
+                        if (selected < minDate) {
+                            Swal.fire({ icon: 'error', title: 'Fecha inválida', text: 'No se puede seleccionar una fecha anterior al inicio del curso.' });
                             this.value = '';
                             return;
                         }

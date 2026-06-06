@@ -4,7 +4,7 @@
 
     <div class="container-fluid px-4 py-1">
 
-        <h1 class="h3 mb-4 text-gray-800 fw-bold"><i class="bi bi-mortarboard-fill me-2"></i>Mi Dashboard</h1>
+        <h1 class="h3 mb-4 text-gray-800 fw-bold"><i class="bi bi-mortarboard-fill me-2"></i>Resumen de Actividad</h1>
 
         <div class="row g-3 mb-4">
 
