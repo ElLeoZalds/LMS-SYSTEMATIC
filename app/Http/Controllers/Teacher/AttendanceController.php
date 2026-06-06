@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
@@ -90,6 +91,7 @@ class AttendanceController extends Controller
                 }),
             ],
             'date' => 'required_without:schedule_id|nullable|date',
+            'local_time' => 'nullable|date_format:H:i:s',
             'attendances' => 'required|array',
             'attendances.*.student_id' => 'required|exists:users,user_id',
             'attendances.*.status' => 'required|in:P,A,J',
@@ -116,12 +118,15 @@ class AttendanceController extends Controller
             if ($existing) {
                 $scheduleId = $existing->schedule_id;
             } else {
+                $localTime = $request->input('local_time');
+                $timeValue = $localTime ?: date('H:i:s');
+
                 // Create a lightweight schedule record so attendances can be linked
                 $scheduleId = DB::table('schedules')->insertGetId([
                     'training_id' => $training->training_id,
                     'date' => $selectedDate,
-                    'start_time' => '00:00:00',
-                    'end_time' => '00:00:00',
+                    'start_time' => $timeValue,
+                    'end_time' => $timeValue,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -238,12 +243,14 @@ class AttendanceController extends Controller
         $list = collect($training->schedules)->map(function ($s) {
             return [
                 'schedule_id' => $s->schedule_id,
-                'date' => $s->date,
+                'date' => $s->date ? Carbon::parse($s->date)->format('d/m/Y') : null,
                 'start_time' => $s->start_time,
                 'end_time' => $s->end_time,
                 'count' => $s->attendances()->count(),
             ];
-        })->sortByDesc('date')->values();
+        })->sortByDesc(function ($item) {
+            return Carbon::createFromFormat('d/m/Y', $item['date'])->timestamp;
+        })->values();
 
         return response()->json(['schedules' => $list]);
     }

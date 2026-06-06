@@ -68,6 +68,7 @@
                         <input type="hidden" name="training_id" value="{{ $training->training_id }}">
                         <input type="hidden" id="post_schedule_id" name="schedule_id" value="{{ $selectedScheduleId ?? request('schedule_id') ?? '' }}">
                         <input type="hidden" id="post_date" name="date" value="{{ request('date') ?? $date ?? date('Y-m-d') }}">
+                        <input type="hidden" id="local_time" name="local_time" value="">
 
                         <div class="row align-items-center mb-4">
                             <div class="col-md-8">
@@ -310,6 +311,11 @@
                         const scheduleId = postScheduleId.value || null;
                         const dateValue = postDate.value || null;
 
+                        const localTimeInput = document.getElementById('local_time');
+                        if (localTimeInput) {
+                            localTimeInput.value = new Date().toTimeString().slice(0, 8);
+                        }
+
                         const attendances = Array.from(attendanceForm.querySelectorAll('input[type="hidden"][name$="[student_id]"]')).map(function(hiddenInput) {
                             const rowPrefix = hiddenInput.name.replace(/\[student_id\]$/, '');
                             const studentId = hiddenInput.value;
@@ -324,6 +330,7 @@
                             training_id: trainingId,
                             schedule_id: scheduleId,
                             date: dateValue,
+                            local_time: localTimeInput ? localTimeInput.value : null,
                             attendances: attendances,
                         };
 
@@ -395,7 +402,6 @@
                                     html += '<div class="list-group-item d-flex justify-content-between align-items-center">';
                                     html += '<div>';
                                     html += '<div><strong>' + s.date + '</strong></div>';
-                                    html += '<small class="text-muted">Horario: ' + (s.start_time && s.end_time ? s.start_time + ' - ' + s.end_time : s.start_time || 'N/A') + '</small>';
                                     html += '</div>';
                                     html += '<div><span class="badge bg-primary me-2">' + s.count + ' registros</span>';
                                     html += '<button class="btn btn-sm btn-outline-primary" onclick="showAttendances(' + s.schedule_id + ')">Mostrar</button>';
