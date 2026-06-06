@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid px-4 py-4">
+    <div class="container-fluid px-4 py-1">
         <style>
             .calendar-table {
                 table-layout: fixed;

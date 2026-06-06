@@ -200,6 +200,21 @@
             color: #fff !important;
         }
 
+        .container-fluid h1.h3 {
+            margin-bottom: 1rem !important;
+            font-weight: 700 !important;
+        }
+
+        .container-fluid h1.h3 + p {
+            margin-top: 0.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        #content > .container-fluid {
+            padding-top: 0.25rem !important;
+            padding-bottom: 0.25rem !important;
+        }
+
         .table-borderless tr {
             padding: 0.5rem 0;
         }

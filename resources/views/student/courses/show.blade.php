@@ -222,7 +222,7 @@
                                                         {{ $assessment->active ? 'Activo' : 'Inactivo' }}
                                                     </span>
                                                     @if($assessment->active)
-                                                        <a href="{{ route('student.assessment.take', $assessment->assessment_id) }}" class="btn btn-sm btn-primary">
+                                                        <a href="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" data-start-url="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" class="btn btn-sm btn-primary exam-start-btn">
                                                             Tomar examen
                                                         </a>
                                                     @endif
@@ -412,4 +412,28 @@
         .course-banner-fallback { background: #0d6efd; }
         .course-banner-overlay { position: absolute; inset: 0; pointer-events: none; }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.exam-start-btn').forEach(function (button) {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const startUrl = button.dataset.startUrl || button.href;
+
+                    Swal.fire({
+                        title: '¿Estás listo para iniciar el examen?',
+                        text: 'El tiempo comenzará cuando confirmes. Asegúrate de estar preparado.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, comenzar',
+                        cancelButtonText: 'Cancelar',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = startUrl;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @endsection

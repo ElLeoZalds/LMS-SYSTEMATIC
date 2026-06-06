@@ -56,7 +56,7 @@ class CourseController extends Controller
         return view('student.courses.show', compact('training', 'attempts', 'attendances', 'submissions'));
     }
 
-    public function takeExam($assessment_id)
+    public function takeExam(Request $request, $assessment_id)
     {
         $studentId = auth()->id();
 
@@ -77,13 +77,16 @@ class CourseController extends Controller
             ->latest('attempt_id')
             ->first();
 
+        $attempt = null;
+        $timerStarted = false;
+
         if ($pendingAttempt) {
             $attempt = $pendingAttempt;
-        } else {
+            $timerStarted = true;
+        } elseif ($request->query('start') === '1') {
             try {
                 $this->ensureAttemptAllowed($assessment, $enrollment);
             } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-                // Mostrar mensaje con SweetAlert via session error
                 return redirect()->route('student.courses.show', $assessment->training_id)
                     ->with('error', $e->getMessage());
             }
@@ -99,14 +102,17 @@ class CourseController extends Controller
                 'date' => Carbon::now()->toDateString(),
                 'score' => 0,
             ]);
+
+            $timerStarted = true;
         }
 
         // Calcular y pasar datos para que el cliente calcule el tiempo restante de forma consistente
         $totalSeconds = max(0, ($assessment->time_limit ?: 60) * 60);
-        $attemptCreatedTs = $attempt->created_at->timestamp;
+        $attemptCreatedTs = $attempt ? $attempt->created_at->timestamp : null;
         $serverNowTs = Carbon::now()->timestamp;
+        $startUrl = route('student.assessment.take', ['id' => $assessment_id]) . '?start=1';
 
-        return view('student.courses.take', compact('assessment', 'totalSeconds', 'attemptCreatedTs', 'serverNowTs', 'enrollment', 'attempt'));
+        return view('student.courses.take', compact('assessment', 'totalSeconds', 'attemptCreatedTs', 'serverNowTs', 'enrollment', 'attempt', 'timerStarted', 'startUrl'));
     }
 
     public function submitExam(Request $request, $assessment_id)

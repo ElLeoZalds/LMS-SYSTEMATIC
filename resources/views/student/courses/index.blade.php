@@ -2,9 +2,9 @@
 
 @section('content')
 <div class="container-fluid px-4 py-1">
-    <div class="mb-5">
-        <h1 class="h3 mb-2 text-gray-800 font-weight-bold">Mis Cursos</h1>
-        <p class="text-muted">Accede a tus cursos activos y haz un seguimiento de tu progreso académico.</p>
+    <div class="mb-4">
+        <h1 class="h3 mb-2 text-gray-800 fw-bold">Mis Cursos</h1>
+        <p class="text-muted mb-0">Accede a tus cursos activos y haz un seguimiento de tu progreso académico.</p>
     </div>
 
     @if($courses->isEmpty())
@@ -72,11 +72,11 @@
                                 </div>
 
                                 <div class="mt-3 d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-success bg-opacity-10 text-success rounded-2 px-2 py-1.5 small border border-success border-opacity-25">
+                                    <span class="badge bg-primary text-white rounded-2 px-2 py-1 small">
                                         ✓ Matriculado
                                     </span>
                                     <span class="text-muted small fw-bold">
-                                        S/. {{ number_format((float)($enrollment->training?->price ?? 0), 2) }}
+                                        {{ $enrollment->schedule_label }}
                                     </span>
                                 </div>
                             </div>

@@ -13,11 +13,11 @@
                         <small class="d-block text-muted mb-1">Tiempo restante</small>
                         <div id="timer" class="h4 fw-bold text-primary mb-0">
                             @php
-                                // Calcular remainingSeconds desde los valores enviados por el servidor
+                                $timerStarted = $timerStarted ?? false;
                                 $serverNowTs = $serverNowTs ?? null;
                                 $attemptCreatedTs = $attemptCreatedTs ?? null;
                                 $totalSeconds = $totalSeconds ?? 3600;
-                                if ($serverNowTs && $attemptCreatedTs) {
+                                if ($timerStarted && $serverNowTs && $attemptCreatedTs) {
                                     $computed = max(0, intval($totalSeconds) - (intval($serverNowTs) - intval($attemptCreatedTs)));
                                 } else {
                                     $computed = intval($totalSeconds);
@@ -32,6 +32,22 @@
             </div>
         </div>
 
+    @if(!$timerStarted)
+        <div class="alert alert-info mb-4" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            El tiempo comenzará cuando presiones "Comenzar examen". Asegúrate de estar preparado.
+        </div>
+        <div class="mb-4 d-flex gap-2">
+            <a id="beginExamButton" href="{{ $startUrl }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-play-circle me-2"></i>Comenzar examen
+            </a>
+            <a id="cancelExamButton" href="{{ route('student.courses.show', $assessment->training_id) }}?tab=contenido" class="btn btn-secondary btn-lg cancel-exam-btn">
+                <i class="bi bi-x-circle me-2"></i>Cancelar
+            </a>
+        </div>
+    @endif
+
+    @if($timerStarted)
         <form id="examForm" action="{{ route('student.assessment.submit', $assessment->assessment_id) }}" method="POST" class="mb-4">
             @csrf
             <input type="hidden" name="attempt_id" value="{{ $attempt->attempt_id }}">
@@ -87,30 +103,75 @@
                     <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
                         <i class="bi bi-check-circle me-2"></i>Enviar evaluación
                     </button>
-                    <a href="{{ route('student.courses.show', $assessment->training_id) }}" class="btn btn-secondary btn-lg">
+                    <a id="cancelExamButton" href="{{ route('student.courses.show', $assessment->training_id) }}?tab=contenido" class="btn btn-secondary btn-lg cancel-exam-btn">
                         <i class="bi bi-x-circle me-2"></i>Cancelar
                     </a>
                 </div>
             @endif
         </form>
+    @endif
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Datos para cálculo del temporizador sin depender del reloj del servidor
             const totalSeconds = {{ $totalSeconds }};
-            const attemptCreatedTs = {{ $attemptCreatedTs }}; // en segundos epoch
-            const serverNowTs = {{ $serverNowTs }}; // en segundos epoch
+            const attemptCreatedTs = {{ $attemptCreatedTs ?? 'null' }}; // en segundos epoch
+            const serverNowTs = {{ $serverNowTs ?? 'null' }}; // en segundos epoch
+            const timerStarted = {{ $timerStarted ? 'true' : 'false' }};
 
             let isSubmitting = false;
             const minutesSpan = document.getElementById('minutes');
             const secondsSpan = document.getElementById('seconds');
             const timerDiv = document.getElementById('timer');
             const examForm = document.getElementById('examForm');
+            const beginExamButton = document.getElementById('beginExamButton');
 
-            examForm.addEventListener('submit', function() {
-                isSubmitting = true;
-            });
+            if (examForm) {
+                examForm.addEventListener('submit', function() {
+                    isSubmitting = true;
+                });
+            }
+
+            if (beginExamButton) {
+                beginExamButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const startUrl = beginExamButton.href;
+
+                    Swal.fire({
+                        title: 'Comenzar examen',
+                        text: 'El temporizador iniciará cuando confirmes. ¿Deseas continuar?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, iniciar',
+                        cancelButtonText: 'No, más tarde',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = startUrl;
+                        }
+                    });
+                });
+            }
+
+            function renderTimer(remaining) {
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                minutesSpan.textContent = String(minutes).padStart(2, '0');
+                secondsSpan.textContent = String(seconds).padStart(2, '0');
+
+                if (remaining <= 300) {
+                    timerDiv.classList.remove('text-primary');
+                    timerDiv.classList.add('text-danger');
+                } else {
+                    timerDiv.classList.remove('text-danger');
+                    timerDiv.classList.add('text-primary');
+                }
+            }
+
+            if (!timerStarted) {
+                renderTimer(totalSeconds);
+                return;
+            }
 
             // Calcular offset entre servidor y cliente para obtener tiempo del servidor en el cliente
             const clientNow = Date.now() / 1000;
@@ -122,29 +183,9 @@
                 return Math.max(0, totalSeconds - elapsed);
             }
 
-            function renderTimer(remaining) {
-                const minutes = Math.floor(remaining / 60);
-                const seconds = remaining % 60;
-                minutesSpan.textContent = String(minutes).padStart(2, '0');
-                secondsSpan.textContent = String(seconds).padStart(2, '0');
-
-                if (remaining <= 300) { // Menos de 5 minutos
-                    timerDiv.classList.remove('text-primary');
-                    timerDiv.classList.add('text-danger');
-                } else {
-                    timerDiv.classList.remove('text-danger');
-                    timerDiv.classList.add('text-primary');
-                }
-            }
-
-            // Evitar diálogo nativo beforeunload (el usuario pidió quitarlo)
-            // No añadimos listener a beforeunload.
-
-            // Inicializar mostrando el tiempo calculado
             let remainingSeconds = computeRemaining();
             renderTimer(remainingSeconds);
 
-            // Iniciar contador que recalcula cada segundo usando el offset (esto evita saltos)
             const timerInterval = setInterval(() => {
                 remainingSeconds = computeRemaining();
                 renderTimer(remainingSeconds);
@@ -158,29 +199,32 @@
                             text: 'El tiempo ha terminado. Tu evaluación será enviada automáticamente.',
                             allowOutsideClick: false,
                             didOpen: () => {
-                                examForm.submit();
+                                if (examForm) {
+                                    examForm.submit();
+                                }
                             }
                         });
                     }
                 }
             }, 1000);
 
-            // Cuando el usuario hace clic en el enlace 'Cancelar', mostrar SweetAlert informando que el tiempo sigue corriendo
-            const cancelLink = document.querySelector('a[href="{{ route('student.courses.show', $assessment->training_id) }}"]');
-            if (cancelLink) {
-                cancelLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Salir del examen',
-                        text: 'Si sales, el tiempo seguirá corriendo. ¿Deseas continuar?',
-                        showCancelButton: true,
-                        confirmButtonText: 'Salir',
-                        cancelButtonText: 'Permanecer'
-                    }).then((res) => {
-                        if (res.isConfirmed) {
-                            window.location.href = cancelLink.href;
-                        }
+            const cancelLinks = document.querySelectorAll('.cancel-exam-btn');
+            if (cancelLinks.length && timerStarted) {
+                cancelLinks.forEach(function(cancelLink) {
+                    cancelLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Salir del examen',
+                            text: 'Si sales, el tiempo seguirá corriendo. ¿Deseas continuar?',
+                            showCancelButton: true,
+                            confirmButtonText: 'Salir',
+                            cancelButtonText: 'Permanecer'
+                        }).then((res) => {
+                            if (res.isConfirmed) {
+                                window.location.href = cancelLink.href;
+                            }
+                        });
                     });
                 });
             }

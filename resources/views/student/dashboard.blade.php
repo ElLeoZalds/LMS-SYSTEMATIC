@@ -83,29 +83,23 @@
                                 </div>
 
                                 <div class="mb-3 pt-2 border-top flex-grow-1 d-flex flex-column justify-content-end">
-                                    <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.75rem;">
-                                        <small class="text-muted">Progreso</small>
-                                        <small class="fw-bold text-primary">
-                                            @php
-                                                $progress = $enrollment->status == 'A' ? 50 : 10;
-                                            @endphp
-                                            {{ $progress }}%
-                                        </small>
+                                    <div class="d-flex justify-content-between align-items-center text-muted small mb-1">
+                                        <span>Progreso de aprendizaje</span>
+                                        <span class="fw-bold text-primary">{{ $enrollment->progress_percentage }}%</span>
                                     </div>
                                     <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $progress }}%"
-                                            aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $enrollment->progress_percentage }}%"
+                                            aria-valuenow="{{ $enrollment->progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
 
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <span class="badge @if($enrollment->status == 'A') bg-success bg-opacity-10 text-success border border-success border-opacity-25 @else bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 @endif px-2 py-1" style="font-size: 0.75rem;">
-                                        {{ $enrollment->status == 'A' ? '✓ Activo' : 'Inactivo' }}
+                                <div class="mt-3 d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary text-white rounded-2 px-2 py-1 small">
+                                        ✓ Matriculado
                                     </span>
-                                    <a href="{{ route('student.courses.show', $enrollment->training->training_id) }}"
-                                        class="btn btn-sm btn-primary px-3">
-                                        Ver<i class="bi bi-arrow-right ms-1"></i>
-                                    </a>
+                                    <span class="text-muted small fw-bold">
+                                        {{ $enrollment->schedule_label }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
