@@ -83,14 +83,14 @@ class AttendanceController extends Controller
         $request->validate([
             'training_id' => 'required|exists:trainings,training_id',
             'schedule_id' => [
-                'nullable',
+                'required',
                 Rule::exists('schedules', 'schedule_id')->where(function ($query) use ($request) {
                     if ($request->filled('training_id')) {
                         $query->where('training_id', $request->training_id);
                     }
                 }),
             ],
-            'date' => 'required_without:schedule_id|nullable|date',
+            'date' => 'nullable|date',
             'local_time' => 'nullable|date_format:H:i:s',
             'attendances' => 'required|array',
             'attendances.*.student_id' => 'required|exists:users,user_id',
@@ -106,32 +106,17 @@ class AttendanceController extends Controller
 
         // Determine schedule: either provided or based on provided date
         $scheduleId = $request->input('schedule_id');
-        $selectedDate = $request->input('date');
 
-        if (!$scheduleId && $selectedDate) {
-            // Try to find existing schedule for that training and date
-            $existing = DB::table('schedules')
-                ->where('training_id', $training->training_id)
-                ->where('date', $selectedDate)
-                ->first();
+        $schedule = DB::table('schedules')
+            ->where('schedule_id', $scheduleId)
+            ->where('training_id', $training->training_id)
+            ->first();
 
-            if ($existing) {
-                $scheduleId = $existing->schedule_id;
-            } else {
-                $localTime = $request->input('local_time');
-                $timeValue = $localTime ?: date('H:i:s');
-
-                // Create a lightweight schedule record so attendances can be linked
-                $scheduleId = DB::table('schedules')->insertGetId([
-                    'training_id' => $training->training_id,
-                    'date' => $selectedDate,
-                    'start_time' => $timeValue,
-                    'end_time' => $timeValue,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+        if (!$schedule) {
+            return back()->with('error', 'Sesión no válida para esta capacitación.')->withInput();
         }
+
+        $selectedDate = $schedule->date;
 
         // Ensure schedule date is not in the future
         $scheduleDate = DB::table('schedules')->where('schedule_id', $scheduleId)->value('date');

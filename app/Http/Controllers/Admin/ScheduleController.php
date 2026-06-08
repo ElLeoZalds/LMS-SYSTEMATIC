@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Schedule;
 use App\Models\Training;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ScheduleController extends Controller
 {
@@ -15,8 +16,11 @@ class ScheduleController extends Controller
     public function index()
     {
         $schedules = Schedule::with(['training.course', 'training.teacher.person'])
-            ->orderBy('date', 'asc')
-            ->get();
+            ->get()
+            ->sortBy([
+                fn($schedule) => optional($schedule->training->course)->title ?? '',
+                'date',
+            ]);
 
         $trainings = Training::where('status', 'A')->get();
 
@@ -93,12 +97,18 @@ class ScheduleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'training_id' => 'required|exists:trainings,training_id',
             'date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('admin.schedules.index')
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         // Obtener el profesor asignado a la capacitación actual
         $training = Training::findOrFail($request->training_id);

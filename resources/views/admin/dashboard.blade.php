@@ -38,6 +38,15 @@
                 </div>
             </div>
 
+            <div class="col-md-3">
+                <a href="{{ route('admin.schedules.index') }}" class="text-decoration-none text-dark">
+                    <div class="card p-3 shadow-sm text-center">
+                        <h5>Horarios</h5>
+                        <h2>{{ $totalSchedules }}</h2>
+                    </div>
+                </a>
+            </div>
+
         </div>
 
         <hr class="my-4">

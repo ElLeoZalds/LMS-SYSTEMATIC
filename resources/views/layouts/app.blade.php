@@ -219,6 +219,27 @@
             padding: 0.5rem 0;
         }
 
+        .admin-users-accordion .accordion-item {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .admin-users-accordion .accordion-button {
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .admin-users-accordion .accordion-button:hover,
+        .admin-users-accordion .accordion-button:not(.collapsed) {
+            background-color: #f8f9fc;
+            color: #212529;
+        }
+
+        .admin-users-accordion .accordion-body {
+            background: #ffffff;
+        }
+
         .table-borderless .border-bottom {
             border-bottom: 1px solid #dee2e6 !important;
         }

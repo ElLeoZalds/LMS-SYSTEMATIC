@@ -36,22 +36,17 @@
                         @if(isset($training) && $training->schedules->count() > 0)
                             <select id="schedule_select" name="schedule_id" class="form-select">
                                 <option value="">Seleccione una sesión</option>
-                                @foreach($training->schedules as $s)
-                                    <option value="{{ $s->schedule_id }}" data-date="{{ $s->date }}">{{ $s->date }} {{ $s->start_time ? ' · ' . $s->start_time : '' }}</option>
+                                    @foreach($training->schedules as $s)
+                                    <option value="{{ $s->schedule_id }}" data-date="{{ $s->date }}" {{ (old('schedule_id') == $s->schedule_id || $selectedScheduleId == $s->schedule_id) ? 'selected' : '' }}>
+                                        {{ $s->date }}{{ $s->start_time ? ' · ' . $s->start_time : '' }}
+                                    </option>
                                 @endforeach
-                                <option value="other">Otra fecha...</option>
                             </select>
                         @else
                             <select id="schedule_select" name="schedule_id" class="form-select">
                                 <option value="">No hay sesiones programadas</option>
-                                <option value="other">Otra fecha...</option>
                             </select>
                         @endif
-
-                        <div id="customDateWrapper" class="mt-2" style="display:none;">
-                            <label for="custom_date" class="form-label fw-bold small text-muted">Selecciona fecha</label>
-                            <input type="date" id="custom_date" name="date_custom" class="form-control" @if(isset($training) && $training->start_date) min="{{ $training->start_date->format('Y-m-d') }}" @endif>
-                        </div>
                     </div>
 
                 </form>
@@ -161,30 +156,14 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const scheduleSelect = document.getElementById('schedule_select');
-                const customDateWrapper = document.getElementById('customDateWrapper');
-                const customDate = document.getElementById('custom_date');
                 const postScheduleId = document.getElementById('post_schedule_id');
                 const postDate = document.getElementById('post_date');
-
-                // set max for custom date (no future dates)
-                if (customDate) {
-                    customDate.max = new Date().toISOString().split('T')[0];
-                }
 
                 if (scheduleSelect) {
                     scheduleSelect.addEventListener('change', async function() {
                         const val = this.value;
-                        if (val === 'other') {
-                            customDateWrapper.style.display = 'block';
-                            postScheduleId.value = '';
-                            postDate.value = '';
-                            return;
-                        }
-
-                        customDateWrapper.style.display = 'none';
                         postScheduleId.value = val || '';
                         postDate.value = this.options[this.selectedIndex].dataset.date || '';
-
                         if (!val) return;
 
                         // Check if attendance already exists for this schedule
@@ -230,73 +209,6 @@
                                 }
                             } else {
                                 // no previous attendance -> default present
-                                document.querySelectorAll('input[type="radio"][value="P"]').forEach(r => r.checked = true);
-                            }
-                        } catch (e) {
-                            console.error(e);
-                        }
-                    });
-                }
-
-                if (customDate) {
-                    customDate.addEventListener('change', async function() {
-                        const selected = this.value;
-                        if (!selected) return;
-                        const today = new Date().toISOString().split('T')[0];
-                        const minDate = this.min || '0000-01-01';
-
-                        if (selected > today) {
-                            Swal.fire({ icon: 'error', title: 'Fecha inválida', text: 'No se puede seleccionar una fecha futura.' });
-                            this.value = '';
-                            return;
-                        }
-                        if (selected < minDate) {
-                            Swal.fire({ icon: 'error', title: 'Fecha inválida', text: 'No se puede seleccionar una fecha anterior al inicio del curso.' });
-                            this.value = '';
-                            return;
-                        }
-                        postDate.value = selected;
-                        postScheduleId.value = '';
-
-                        // Check if schedule exists for this training & date
-                        const url = '{{ route('teacher.attendance.check') }}?training_id=' + {{ $training->training_id }} + '&date=' + selected;
-                        try {
-                            const resp = await fetch(url);
-                            const json = await resp.json();
-                            if (json.exists) {
-                                const res = await Swal.fire({
-                                    title: 'Asistencia registrada',
-                                    text: 'Ya se registró asistencia para esta fecha. ¿Deseas actualizarla?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Sí, actualizar',
-                                    cancelButtonText: 'No, cancelar'
-                                });
-
-                                if (res.isConfirmed) {
-                                    if (json.attendances && json.attendances.length) {
-                                        const map = {};
-                                        json.attendances.forEach(a => { map[a.student_id] = a.attendance; });
-
-                                        document.querySelectorAll('input[type="hidden"][name$="[student_id]"]').forEach(function(h) {
-                                            const studentId = h.value;
-                                            const rowPrefix = h.name.replace(/\[student_id\]$/, '');
-                                            const status = map[studentId] || null;
-                                            if (status) {
-                                                const short = status === 'present' ? 'P' : (status === 'absent' ? 'A' : 'J');
-                                                const radio = document.querySelector('input[name="' + rowPrefix + '[status]"][value="' + short + '"]');
-                                                if (radio) radio.checked = true;
-                                            } else {
-                                                const radioDefault = document.querySelector('input[name="' + rowPrefix + '[status]"][value="P"]');
-                                                if (radioDefault) radioDefault.checked = true;
-                                            }
-                                        });
-                                    }
-                                } else {
-                                    this.value = '';
-                                    postDate.value = '';
-                                }
-                            } else {
                                 document.querySelectorAll('input[type="radio"][value="P"]').forEach(r => r.checked = true);
                             }
                         } catch (e) {

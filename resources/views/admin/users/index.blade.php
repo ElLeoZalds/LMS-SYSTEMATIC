@@ -59,16 +59,26 @@
                         return $user->roles->pluck('name')->first() ?? 'Sin Rol';
                     });
                 @endphp
-                <div class="accordion" id="usersAccordion">
+                <div class="accordion admin-users-accordion" id="usersAccordion">
                     @foreach($usersByRole as $roleName => $roleUsers)
-                        <div class="accordion-item border-0 shadow-sm mb-2 rounded">
+                        @php
+                            $normalizedRoleName = strtolower(trim($roleName));
+                        @endphp
+                        @if(in_array($normalizedRoleName, ['student', 'students']))
+                            @continue
+                        @endif
+                        <div class="accordion-item border-0 shadow-sm mb-3 rounded overflow-hidden">
                             <h2 class="accordion-header" id="heading{{ str_replace(' ', '', $roleName) }}">
-                                <button class="accordion-button collapsed bg-white text-dark fw-bold" type="button" data-toggle="collapse" data-target="#collapse{{ str_replace(' ', '', $roleName) }}" aria-expanded="false" aria-controls="collapse{{ str_replace(' ', '', $roleName) }}">
-                                    <i class="fas fa-users me-2"></i> {{ $roleName }} ({{ $roleUsers->count() }} usuarios)
+                                <button class="accordion-button collapsed bg-white text-dark fw-semibold py-3 px-4 d-flex align-items-center justify-content-between" type="button" data-toggle="collapse" data-target="#collapse{{ str_replace(' ', '', $roleName) }}" aria-expanded="false" aria-controls="collapse{{ str_replace(' ', '', $roleName) }}">
+                                    <span class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-users text-primary me-2"></i>
+                                        <span>{{ $roleName }} <small class="text-muted">({{ $roleUsers->count() }} usuarios)</small></span>
+                                    </span>
+                                    <span class="badge rounded-pill bg-primary px-3 py-2">{{ $roleUsers->count() }}</span>
                                 </button>
                             </h2>
-                            <div id="collapse{{ str_replace(' ', '', $roleName) }}" class="accordion-collapse collapse" aria-labelledby="heading{{ str_replace(' ', '', $roleName) }}" data-parent="#usersAccordion">
-                                <div class="accordion-body p-0">
+                            <div id="collapse{{ str_replace(' ', '', $roleName) }}" class="accordion-collapse collapse border-top" aria-labelledby="heading{{ str_replace(' ', '', $roleName) }}" data-parent="#usersAccordion">
+                                <div class="accordion-body p-0 bg-white">
                                     <div class="table-responsive">
                                         <table class="table table-sm table-hover mb-0">
                                             <thead class="table-light">

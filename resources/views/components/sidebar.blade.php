@@ -80,6 +80,13 @@
             </a>
         </li>
 
+        <li class="nav-item {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.schedules.index') }}">
+                <i class="fas fa-fw fa-calendar-week"></i>
+                <span>Horarios</span>
+            </a>
+        </li>
+
     @elseif($role === 'Teacher')
         <li class="nav-item {{ request()->routeIs('teacher.dashboard') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('teacher.dashboard') }}">

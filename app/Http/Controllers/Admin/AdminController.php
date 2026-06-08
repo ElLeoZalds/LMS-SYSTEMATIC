@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Course;
 use App\Models\Training;
 use App\Models\Enrollment;
+use App\Models\Schedule;
 
 class AdminController extends Controller
 {
@@ -24,6 +25,7 @@ class AdminController extends Controller
 
         $totalCourses = Course::count();
         $totalTrainings = Training::count();
+        $totalSchedules = Schedule::count();
         $totalEnrollments = Enrollment::count();
 
         // Precargamos la relación 'person' para evitar N+1 si la vista muestra el nombre real
@@ -35,6 +37,7 @@ class AdminController extends Controller
             'totalAdmins',
             'totalCourses',
             'totalTrainings',
+            'totalSchedules',
             'totalEnrollments',
             'latestUsers'
         ));
