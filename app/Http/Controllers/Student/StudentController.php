@@ -17,17 +17,14 @@ class StudentController extends Controller
             'training.course',
             'training.teacher.person',
             'training.schedules',
+            'training.contents',
+            'training.tasks',
+            'training.assessments',
             'progress'
         ])
             ->where('student_id', $studentId)
             ->get()
             ->map(function ($enrollment) {
-                if ($enrollment->progress && $enrollment->progress->isNotEmpty()) {
-                    $enrollment->progress_percentage = $enrollment->progress->first()->percentage;
-                } else {
-                    $enrollment->progress_percentage = $enrollment->status === 'C' ? 100 : 0;
-                }
-
                 $schedule = $enrollment->training?->schedules?->sortBy('date')->first();
                 if ($schedule && $schedule->start_time && $schedule->end_time) {
                     $enrollment->schedule_label = Carbon::parse($schedule->start_time)->format('H:i') . ' - ' . Carbon::parse($schedule->end_time)->format('H:i');
@@ -58,17 +55,14 @@ class StudentController extends Controller
             'training.course',
             'training.teacher.person',
             'training.schedules',
+            'training.contents',
+            'training.tasks',
+            'training.assessments',
             'progress'
         ])
             ->where('student_id', $studentId)
             ->get()
             ->map(function ($enrollment) {
-                if ($enrollment->progress && $enrollment->progress->isNotEmpty()) {
-                    $enrollment->progress_percentage = $enrollment->progress->first()->percentage;
-                } else {
-                    $enrollment->progress_percentage = $enrollment->status === 'C' ? 100 : 0;
-                }
-
                 $schedule = $enrollment->training?->schedules?->sortBy('date')->first();
                 if ($schedule && $schedule->start_time && $schedule->end_time) {
                     $enrollment->schedule_label = Carbon::parse($schedule->start_time)->format('H:i') . ' - ' . Carbon::parse($schedule->end_time)->format('H:i');

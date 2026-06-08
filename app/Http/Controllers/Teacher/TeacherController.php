@@ -307,16 +307,20 @@ class TeacherController extends Controller
     {
         $user = auth()->user();
 
-        $training = Training::with([
-            'course',
-            'enrollments.student.person',
-            'enrollments.progress'
-        ])
+        $training = Training::with('course')
             ->where('training_id', $id)
             ->where('teacher_id', $user->user_id)
             ->firstOrFail();
 
-        $students = $training->enrollments;
+        $students = Enrollment::with([
+            'student.person',
+            'progress',
+            'training.contents',
+            'training.tasks',
+            'training.assessments'
+        ])
+            ->where('training_id', $id)
+            ->get();
 
         return view('teacher.courses.students', compact('training', 'students'));
     }

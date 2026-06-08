@@ -61,13 +61,17 @@ class CourseController extends Controller
         $studentId = auth()->id();
 
         // Actualizado: Cambiado 'questions.options' a 'questions.alternatives'
-        $assessment = Assessment::with('questions.alternatives')
+        $assessment = Assessment::with(['training', 'questions.alternatives'])
             ->where('assessment_id', $assessment_id)
             ->firstOrFail();
 
         $enrollment = Enrollment::where('student_id', $studentId)
             ->where('training_id', $assessment->training_id)
             ->firstOrFail();
+
+        if ($assessment->training->isClosed()) {
+            abort(403, 'El curso ya se cerró y no se pueden responder evaluaciones.');
+        }
 
         $this->validateAssessmentAvailability($assessment);
 
@@ -120,7 +124,7 @@ class CourseController extends Controller
         $studentId = auth()->id();
 
         // Actualizado: Cambiado 'questions.options' a 'questions.alternatives'
-        $assessment = Assessment::with('questions.alternatives')
+        $assessment = Assessment::with(['training', 'questions.alternatives'])
             ->where('assessment_id', $assessment_id)
             ->firstOrFail();
 
@@ -198,6 +202,10 @@ class CourseController extends Controller
         $enrollment = Enrollment::where('student_id', $studentId)
             ->where('training_id', $task->training_id)
             ->firstOrFail();
+
+        if ($task->training->isClosed()) {
+            abort(403, 'El curso ya se cerró y no se aceptan nuevas entregas.');
+        }
 
         $validated = $request->validate([
             'submission_text' => 'nullable|string',

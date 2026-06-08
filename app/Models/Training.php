@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Training extends Model
@@ -104,5 +105,59 @@ class Training extends Model
     public function announcements()
     {
         return $this->hasMany(Announcement::class, 'training_id', 'training_id');
+    }
+
+    public function contents()
+    {
+        return $this->hasMany(Content::class, 'training_id', 'training_id');
+    }
+
+    public function normalizedStatus(): string
+    {
+        return strtoupper(trim((string) $this->status));
+    }
+
+    public function isDraft(): bool
+    {
+        return in_array($this->normalizedStatus(), ['DRAFT', 'D'], true);
+    }
+
+    public function isActive(): bool
+    {
+        $startDate = $this->start_date ? Carbon::parse($this->start_date)->startOfDay() : null;
+        $endDate = $this->end_date ? Carbon::parse($this->end_date)->endOfDay() : null;
+        $today = Carbon::today();
+
+        if ($startDate && $today->lt($startDate)) {
+            return false;
+        }
+
+        if ($endDate && $today->gt($endDate)) {
+            return false;
+        }
+
+        if ($this->normalizedStatus() === 'C' || $this->normalizedStatus() === 'CLOSED') {
+            return false;
+        }
+
+        return $startDate || $endDate
+            ? ! $this->isClosed()
+            : in_array($this->normalizedStatus(), ['ACTIVE', 'A'], true);
+    }
+
+    public function isClosed(): bool
+    {
+        $endDate = $this->end_date ? Carbon::parse($this->end_date)->endOfDay() : null;
+
+        if ($endDate && Carbon::now()->gt($endDate)) {
+            return true;
+        }
+
+        return in_array($this->normalizedStatus(), ['CLOSED', 'C'], true);
+    }
+
+    public function canModifyActivities(): bool
+    {
+        return $this->isActive() && ! $this->isClosed();
     }
 }

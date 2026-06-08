@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\AssessmentAttempt;
+use App\Models\TaskSubmission;
 use Illuminate\Database\Eloquent\Model;
 
 class Enrollment extends Model
@@ -45,5 +47,105 @@ class Enrollment extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class, 'enrollment_id', 'enrollment_id');
+    }
+
+    public function completedContentsCount()
+    {
+        if (! $this->training) {
+            return 0;
+        }
+
+        return $this->progress
+            ->where('percentage', '>=', 100)
+            ->unique('content_id')
+            ->count();
+    }
+
+    public function completedTasksCount()
+    {
+        if (! $this->training) {
+            return 0;
+        }
+
+        $taskIds = $this->training->tasks->pluck('task_id')->all();
+
+        if (empty($taskIds)) {
+            return 0;
+        }
+
+        return TaskSubmission::where('student_id', $this->student_id)
+            ->whereIn('task_id', $taskIds)
+            ->distinct('task_id')
+            ->count('task_id');
+    }
+
+    public function completedAssessmentsCount()
+    {
+        return AssessmentAttempt::where('enrollment_id', $this->enrollment_id)
+            ->whereColumn('created_at', '!=', 'updated_at')
+            ->distinct('assessment_id')
+            ->count('assessment_id');
+    }
+
+    public function completedActivitiesCount()
+    {
+        return $this->completedContentsCount()
+            + $this->completedTasksCount()
+            + $this->completedAssessmentsCount();
+    }
+
+    public function totalActivitiesCount()
+    {
+        if (! $this->training) {
+            return 0;
+        }
+
+        return $this->training->contents->count()
+            + $this->training->tasks->count()
+            + $this->training->assessments->count();
+    }
+
+    public function getProgressPercentageAttribute()
+    {
+        if ($this->isCompleted() || $this->training?->isClosed()) {
+            return 100;
+        }
+
+        $total = $this->totalActivitiesCount();
+        if ($total === 0) {
+            return 0;
+        }
+
+        return (int) round(($this->completedActivitiesCount() / $total) * 100);
+    }
+
+    public function isCompleted()
+    {
+        return strtoupper(trim((string) $this->status)) === 'C';
+    }
+
+    public function isInProgress()
+    {
+        return strtoupper(trim((string) $this->status)) === 'A';
+    }
+
+    public function isNotStarted()
+    {
+        return strtoupper(trim((string) $this->status)) === 'P';
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'C');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'A');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'P');
     }
 }
