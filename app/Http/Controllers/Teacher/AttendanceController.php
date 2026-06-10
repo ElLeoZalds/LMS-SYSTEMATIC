@@ -94,7 +94,7 @@ class AttendanceController extends Controller
             'local_time' => 'nullable|date_format:H:i:s',
             'attendances' => 'required|array',
             'attendances.*.student_id' => 'required|exists:users,user_id',
-            'attendances.*.status' => 'required|in:P,A,J',
+            'attendances.*.status' => 'required|in:P,A,J,T',
         ]);
 
         // Buscamos la capacitación limpia para validar propiedad
@@ -134,11 +134,12 @@ class AttendanceController extends Controller
                     ->where('student_id', $attendanceData['student_id'])
                     ->value('enrollment_id');
 
-                // Mapeo exacto según los valores definidos en el ENUM de la base de datos
+                // Mapeo exacto según los códigos enviados desde la UI
                 $statusValue = match ($attendanceData['status']) {
                     'P' => 'present',
                     'A' => 'absent',
-                    'J' => 'late',   // Mapeamos Justificado como 'late' (tarde) para cumplir con el enum
+                    'J' => 'justified',
+                    'T' => 'late',
                     default => 'absent',
                 };
 

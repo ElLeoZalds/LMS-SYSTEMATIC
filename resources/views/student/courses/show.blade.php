@@ -178,8 +178,10 @@
                                                     <span class="badge bg-success">Presente</span>
                                                 @elseif($status === 'absent')
                                                     <span class="badge bg-danger">Ausente</span>
+                                                @elseif($status === 'justified')
+                                                    <span class="badge bg-info text-dark">Justificado</span>
                                                 @elseif($status === 'late')
-                                                    <span class="badge bg-warning text-dark">Tarde</span>
+                                                    <span class="badge bg-warning text-dark">Tardanza</span>
                                                 @else
                                                     <span class="badge bg-secondary">{{ ucfirst($status ?? 'Desconocido') }}</span>
                                                 @endif

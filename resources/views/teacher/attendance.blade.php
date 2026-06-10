@@ -88,6 +88,7 @@
                                         <th class="text-dark small fw-bold text-center"><span class="text-success">✓ Presente</span></th>
                                         <th class="text-dark small fw-bold text-center"><span class="text-danger">✕ Ausente</span></th>
                                         <th class="text-dark small fw-bold text-center"><span class="text-warning">⊘ Justificado</span></th>
+                                        <th class="text-dark small fw-bold text-center"><span class="text-warning">T Tardanza</span></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -108,6 +109,9 @@
                                             </td>
                                             <td class="align-middle text-center">
                                                 <input type="radio" name="attendances[{{ $loop->index }}][status]" value="J" class="form-check-input">
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <input type="radio" name="attendances[{{ $loop->index }}][status]" value="T" class="form-check-input">
                                             </td>
                                         </tr>
                                     @endforeach
@@ -192,7 +196,7 @@
                                             const rowPrefix = h.name.replace(/\[student_id\]$/, '');
                                             const status = map[studentId] || null;
                                             if (status) {
-                                                const short = status === 'present' ? 'P' : (status === 'absent' ? 'A' : 'J');
+                                                const short = status === 'present' ? 'P' : (status === 'absent' ? 'A' : (status === 'justified' ? 'J' : 'T'));
                                                 const radio = document.querySelector('input[name="' + rowPrefix + '[status]"][value="' + short + '"]');
                                                 if (radio) radio.checked = true;
                                             } else {
@@ -357,7 +361,7 @@
                             html += '</tr></thead>';
                             html += '<tbody>';
                             json.attendances.forEach(a => {
-                                const statusMap = { 'present': '✓ Presente', 'absent': '✕ Ausente', 'late': '⊘ Justificado', 'justified': '⊘ Justificado' };
+                                const statusMap = { 'present': '✓ Presente', 'absent': '✕ Ausente', 'justified': '⊘ Justificado', 'late': 'T Tardanza' };
                                 const status = statusMap[a.attendance] || a.attendance;
                                 html += '<tr>';
                                 html += '<td>' + a.student_name + '</td>';

@@ -113,8 +113,8 @@
                 <div class="mb-3">
                     <span class="badge bg-success">✓ Presente</span>
                     <span class="badge bg-danger">✕ Ausente</span>
-                    <span class="badge bg-warning text-dark">! Tarde</span>
                     <span class="badge bg-info text-dark">J Justificado</span>
+                    <span class="badge bg-warning text-dark">T Tardanza</span>
                 </div>
             </div>
 
@@ -149,7 +149,7 @@
                                             @elseif($status === 'j' || $status === 'justified')
                                                 <span class="text-warning fw-bold">J</span>
                                             @elseif($status === 'late')
-                                                <span class="text-warning fw-bold">!</span>
+                                                <span class="text-warning fw-bold">T</span>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
