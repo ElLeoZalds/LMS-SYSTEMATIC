@@ -69,6 +69,7 @@
                                     <h5 class="m-0 font-weight-bold text-primary mb-1">{{ $assessment->title }}</h5>
                                     <p class="text-muted small mb-1">Intentos permitidos: {{ $assessment->allowed_attempts }}</p>
                                     <p class="text-muted small mb-0">Inicio: {{ optional($assessment->start_date)->format('d/m/Y') }} · Fin: {{ optional($assessment->end_date)->format('d/m/Y') }}</p>
+                                    <p class="text-muted small mb-0">Preguntas: {{ $assessment->questions->count() }} / 20 · El sistema asigna automáticamente los puntos.</p>
                                 </div>
                                 <div class="text-md-right mt-2 mt-md-0">
                                     <span class="badge badge-{{ $assessment->active ? 'primary' : 'secondary' }} mb-2 d-block d-md-inline-block">
@@ -80,7 +81,9 @@
                                         data-toggle="modal"
                                         data-target="#questionModal"
                                         data-mode="create"
-                                        data-action="{{ route('teacher.assessments.questions.store', $assessment->assessment_id) }}">
+                                        data-action="{{ route('teacher.assessments.questions.store', $assessment->assessment_id) }}"
+                                        data-current-questions="{{ $assessment->questions->count() }}"
+                                        data-max-questions="20">
                                         <i class="fas fa-plus-circle mr-1"></i> Nueva Pregunta
                                     </button>
 

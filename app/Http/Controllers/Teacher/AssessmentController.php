@@ -13,6 +13,9 @@ use Carbon\Carbon;
 
 class AssessmentController extends Controller
 {
+    private const MAX_QUESTIONS = 20;
+    private const MAX_TOTAL_SCORE = 20;
+
     public function index()
     {
         $user = auth()->user();
@@ -112,7 +115,6 @@ class AssessmentController extends Controller
     {
         $request->validate([
             'question_text' => 'required|string',
-            'score' => 'required|integer|min:0',
             'alternatives' => 'required|array|min:2|max:5',
             'alternatives.*.text' => 'required|string',
             'correct_alternative' => 'required|integer|min:0',
@@ -126,9 +128,9 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
-        $currentTotal = $assessment->questions->sum('score');
-        if (($currentTotal + $request->score) > 20) {
-            return redirect()->back()->withInput()->with('error', 'Límite de 20 puntos excedido.');
+        $questionCount = $assessment->questions()->count();
+        if ($questionCount >= self::MAX_QUESTIONS) {
+            return redirect()->back()->withInput()->with('error', 'El máximo permitido es de 20 preguntas por evaluación.');
         }
 
         DB::transaction(function () use ($request, $assessment) {
@@ -140,7 +142,7 @@ class AssessmentController extends Controller
             $question = Question::create([
                 'assessment_id' => $assessment->assessment_id,
                 'question_text' => $request->question_text,
-                'score' => $request->score,
+                'score' => 1,
                 'order_index' => $assessment->questions()->count() + 1,
                 'image_path' => $imagePath,
             ]);
@@ -152,6 +154,8 @@ class AssessmentController extends Controller
                     'is_correct'   => $request->correct_alternative == $index,
                 ]);
             }
+
+            $this->redistributeQuestionScores($assessment->assessment_id);
         });
 
         return redirect()->route('teacher.assessments.show', ['assessment_id' => $assessment->assessment_id])
@@ -162,7 +166,6 @@ class AssessmentController extends Controller
     {
         $request->validate([
             'question_text' => 'required|string',
-            'score' => 'required|integer|min:0',
             'alternatives' => 'required|array|min:2|max:5',
             'alternatives.*.text' => 'required|string',
             'correct_alternative' => 'required|integer|min:0',
@@ -174,11 +177,6 @@ class AssessmentController extends Controller
 
         if ($question->assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
-        }
-
-        $currentTotal = $question->assessment->questions->where('question_id', '!=', $question_id)->sum('score');
-        if (($currentTotal + $request->score) > 20) {
-            return redirect()->back()->withInput()->with('error', 'Límite excedido.');
         }
 
         DB::transaction(function () use ($request, $question) {
@@ -196,7 +194,7 @@ class AssessmentController extends Controller
                 $question->image_path = $imagePath;
             }
 
-            $question->update(['question_text' => $request->question_text, 'score' => $request->score, 'image_path' => $question->image_path ?? null]);
+            $question->update(['question_text' => $request->question_text, 'score' => $question->score, 'image_path' => $question->image_path ?? null]);
             $question->alternatives()->delete();
 
             foreach ($request->alternatives as $index => $alternativeData) {
@@ -206,6 +204,8 @@ class AssessmentController extends Controller
                     'is_correct'   => $request->correct_alternative == $index,
                 ]);
             }
+
+            $this->redistributeQuestionScores($question->assessment_id);
         });
 
         return redirect()->route('teacher.assessments.show', ['assessment_id' => $question->assessment->assessment_id])
@@ -237,6 +237,8 @@ class AssessmentController extends Controller
             } catch (\Exception $e) {}
             $question->delete();
         });
+
+        $this->redistributeQuestionScores($assessmentId);
 
         return redirect()->route('teacher.assessments.show', ['assessment_id' => $assessmentId]);
     }
@@ -308,5 +310,28 @@ class AssessmentController extends Controller
 
         return redirect()->route('teacher.courses.show', ['id' => $trainingId, 'tab' => 'contenido'])
             ->with('success', $message);
+    }
+
+    private function redistributeQuestionScores(int $assessmentId): void
+    {
+        $questions = Question::where('assessment_id', $assessmentId)
+            ->orderBy('order_index')
+            ->orderBy('question_id')
+            ->get();
+
+        $questionCount = $questions->count();
+
+        if ($questionCount === 0) {
+            return;
+        }
+
+        $baseScore = intdiv(self::MAX_TOTAL_SCORE, $questionCount);
+        $remainder = self::MAX_TOTAL_SCORE % $questionCount;
+
+        foreach ($questions as $index => $question) {
+            $question->update([
+                'score' => $baseScore + ($index < $remainder ? 1 : 0),
+            ]);
+        }
     }
 }

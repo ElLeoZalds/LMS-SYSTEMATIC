@@ -24,7 +24,7 @@
                         @else
                             <select id="training_id" name="training_id" class="form-select" required>
                                 <option value="">Seleccione una capacitación</option>
-                                @foreach($trainings ?? [] as $item)
+                                @foreach($trainings as $item)
                                     <option value="{{ $item->training_id }}">{{ $item->course->title }}</option>
                                 @endforeach
                             </select>
@@ -164,18 +164,49 @@
                     radio.checked = true;
                 });
             }
+
+            function getLocalToday() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
         </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const scheduleSelect = document.getElementById('schedule_select');
                 const postScheduleId = document.getElementById('post_schedule_id');
                 const postDate = document.getElementById('post_date');
+                const today = getLocalToday();
+
+                function resetScheduleSelection() {
+                    scheduleSelect.value = '';
+                    postScheduleId.value = '';
+                    postDate.value = '';
+                }
+
+                function showFutureDateError() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pueden registrar asistencias posteriores',
+                    });
+                }
 
                 if (scheduleSelect) {
                     scheduleSelect.addEventListener('change', async function() {
                         const val = this.value;
+                        const selectedDate = this.options[this.selectedIndex].dataset.date || '';
+
+                        if (selectedDate && selectedDate > today) {
+                            showFutureDateError();
+                            resetScheduleSelection();
+                            return;
+                        }
+
                         postScheduleId.value = val || '';
-                        postDate.value = this.options[this.selectedIndex].dataset.date || '';
+                        postDate.value = selectedDate;
                         if (!val) return;
 
                         // Check if attendance already exists for this schedule
@@ -243,6 +274,14 @@
                         const scheduleId = postScheduleId.value || null;
                         const dateValue = postDate.value || null;
 
+                        if (dateValue && dateValue > today) {
+                            showFutureDateError();
+                            if (submitButton) {
+                                submitButton.disabled = false;
+                            }
+                            return;
+                        }
+
                         const localTimeInput = document.getElementById('local_time');
                         if (localTimeInput) {
                             localTimeInput.value = new Date().toTimeString().slice(0, 8);
@@ -280,33 +319,29 @@
                                 body: JSON.stringify(payload),
                             });
 
-                            const json = await response.json();
+                            const contentType = response.headers.get('content-type') || '';
+                            const json = contentType.includes('application/json')
+                                ? await response.json()
+                                : { message: await response.text() };
 
                             console.log('Attendance store response', response.status, json);
 
                             if (!response.ok) {
                                 console.error('Attendance store response', response.status, json);
+                                throw new Error('No se pudo guardar la asistencia.');
                             }
 
-                            if (json.message) {
-                                Swal.fire({
-                                    icon: response.ok ? 'success' : 'error',
-                                    title: response.ok ? 'Listo' : 'Error',
-                                    text: json.message,
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'Hubo un error al procesar la asistencia.',
-                                });
-                            }
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Listo',
+                                text: 'Asistencia guardada correctamente.',
+                            });
                         } catch (error) {
                             console.error('Error sending attendance JSON:', error);
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: 'No se pudo guardar la asistencia. Revisa la consola de desarrollador.',
+                                text: 'No se pudo guardar la asistencia.',
                             });
                         } finally {
                             if (submitButton) {

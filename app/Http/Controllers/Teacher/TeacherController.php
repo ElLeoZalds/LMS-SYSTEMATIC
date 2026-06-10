@@ -250,12 +250,59 @@ class TeacherController extends Controller
             }
         }
 
+        $attendanceSummary = [];
+        $totalSchedules = $schedules->count();
+
+        foreach ($training->enrollments as $enrollment) {
+            $counts = [
+                'present' => 0,
+                'absent' => 0,
+                'justified' => 0,
+                'late' => 0,
+            ];
+
+            foreach ($schedules as $schedule) {
+                $attendance = $attendanceMap[$enrollment->enrollment_id][$schedule->schedule_id] ?? null;
+                $status = $attendance ? ($attendance->attendance_status ?? $attendance->attendance) : null;
+                $status = is_string($status) ? strtolower($status) : null;
+
+                if ($status === 'p') {
+                    $status = 'present';
+                } elseif ($status === 'a') {
+                    $status = 'absent';
+                } elseif ($status === 'j') {
+                    $status = 'justified';
+                } elseif ($status === 't') {
+                    $status = 'late';
+                }
+
+                if (isset($counts[$status])) {
+                    $counts[$status]++;
+                }
+            }
+
+            $attendanceSummary[$enrollment->enrollment_id] = [
+                'counts' => $counts,
+                'percentages' => collect($counts)
+                    ->map(function ($count) use ($totalSchedules) {
+                        if ($totalSchedules === 0) {
+                            return 0;
+                        }
+
+                        return round(($count / $totalSchedules) * 100, 1);
+                    })
+                    ->all(),
+            ];
+        }
+
         $totalAttendanceRecords = $training->attendances()->count();
 
         return view('teacher.courses.report-attendance', compact(
             'training',
             'schedules',
             'attendanceMap',
+            'attendanceSummary',
+            'totalSchedules',
             'totalAttendanceRecords'
         ));
     }

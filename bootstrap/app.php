@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,5 +20,15 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (PostTooLargeException $e, $request) {
+            $message = 'El archivo o formulario supera el tamaño permitido. Reduce el peso e inténtalo de nuevo.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $message,
+                ], 413);
+            }
+
+            return back()->withInput()->with('error', $message);
+        });
     })->create();

@@ -310,7 +310,6 @@
                             <div class="col-md-4">
                                 <label class="form-label">Fecha</label>
                                 <input type="date" name="schedules[${index}][date]" class="form-control schedule-date-input" ${minAttr} ${maxAttr} required>
-                                ${trainingStartDate && trainingEndDate ? `<small class="text-muted d-block mt-1">Debe estar entre ${new Date(trainingStartDate).toLocaleDateString('es-ES')} y ${new Date(trainingEndDate).toLocaleDateString('es-ES')}</small>` : ''}
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Hora inicio</label>

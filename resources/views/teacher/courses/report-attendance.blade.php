@@ -39,7 +39,11 @@
         }
         .col-idx { width: 45px; min-width: 45px; text-align: center; }
         .col-student { min-width: 240px; text-align: left; }
-        .col-date { min-width: 70px; text-align: center; }
+        .col-status { min-width: 110px; text-align: center; }
+        .status-percent {
+            font-size: 0.78rem;
+            line-height: 1.15;
+        }
 
         @page {
             size: A4 portrait;
@@ -106,6 +110,7 @@
                     <div class="col-12 col-md-6 mb-2">
                         <p class="mb-1"><strong>Modalidad:</strong> {{ ucfirst($training->modality) }}</p>
                         <p class="mb-1"><strong>Estudiantes registrados:</strong> {{ $training->enrollments->count() }}</p>
+                        <p class="mb-1"><strong>Sesiones evaluadas:</strong> {{ $totalSchedules }}</p>
                         <p class="mb-0"><strong>Registros:</strong> {{ $totalAttendanceRecords }}</p>
                     </div>
                 </div>
@@ -125,36 +130,39 @@
                             <tr>
                                 <th class="col-idx">#</th>
                                 <th class="col-student">Alumno</th>
-                                @foreach($schedules as $schedule)
-                                    <th class="col-date">{{ $schedule->date ? $schedule->date->format('d/m') : 'S/F' }}</th>
-                                @endforeach
+                                <th class="col-status">Presente</th>
+                                <th class="col-status">Ausente</th>
+                                <th class="col-status">Justificado</th>
+                                <th class="col-status">Tardanza</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($training->enrollments as $index => $enrollment)
+                                @php
+                                    $summary = $attendanceSummary[$enrollment->enrollment_id] ?? [
+                                        'counts' => ['present' => 0, 'absent' => 0, 'justified' => 0, 'late' => 0],
+                                        'percentages' => ['present' => 0, 'absent' => 0, 'justified' => 0, 'late' => 0],
+                                    ];
+                                @endphp
                                 <tr>
                                     <td class="text-center">{{ $index + 1 }}</td>
                                     <td class="fw-bold text-start">{{ $enrollment->student->person->first_names }} {{ $enrollment->student->person->last_names }}</td>
-                                    @foreach($schedules as $schedule)
-                                        @php
-                                            $attendance = $attendanceMap[$enrollment->enrollment_id][$schedule->schedule_id] ?? null;
-                                            $status = $attendance ? ($attendance->attendance_status ?? $attendance->attendance) : null;
-                                            $status = is_string($status) ? strtolower($status) : null;
-                                        @endphp
-                                        <td class="text-center">
-                                            @if($status === 'p' || $status === 'present')
-                                                <span class="text-success fw-bold">✓</span>
-                                            @elseif($status === 'a' || $status === 'absent')
-                                                <span class="text-danger fw-bold">✕</span>
-                                            @elseif($status === 'j' || $status === 'justified')
-                                                <span class="text-warning fw-bold">J</span>
-                                            @elseif($status === 'late')
-                                                <span class="text-warning fw-bold">T</span>
-                                            @else
-                                                <span class="text-muted">-</span>
-                                            @endif
-                                        </td>
-                                    @endforeach
+                                    <td class="text-center">
+                                        <div class="status-percent fw-bold text-success">{{ $summary['counts']['present'] }}</div>
+                                        <div class="status-percent text-muted">{{ $summary['percentages']['present'] }}%</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="status-percent fw-bold text-danger">{{ $summary['counts']['absent'] }}</div>
+                                        <div class="status-percent text-muted">{{ $summary['percentages']['absent'] }}%</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="status-percent fw-bold text-warning">{{ $summary['counts']['justified'] }}</div>
+                                        <div class="status-percent text-muted">{{ $summary['percentages']['justified'] }}%</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="status-percent fw-bold text-warning">{{ $summary['counts']['late'] }}</div>
+                                        <div class="status-percent text-muted">{{ $summary['percentages']['late'] }}%</div>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

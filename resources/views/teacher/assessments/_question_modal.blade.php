@@ -16,9 +16,8 @@
                         <label for="question_text" class="text-gray-700 font-weight-bold">Pregunta</label>
                         <input type="text" class="form-control form-control-sm" id="question_text" name="question_text" required>
                     </div>
-                    <div class="form-group mb-3">
-                        <label for="score" class="text-gray-700 font-weight-bold">Puntos</label>
-                        <input type="number" class="form-control form-control-sm" id="score" name="score" min="0" required>
+                    <div class="alert alert-info py-2 px-3 mb-3 small">
+                        Los puntos se asignan automáticamente según la cantidad total de preguntas. El máximo es 20 preguntas y cada una vale entre 1 y 20 puntos.
                     </div>
                     <div class="form-group mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -52,6 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalTitle = document.getElementById('questionModalLabel');
     const alternativesContainer = document.getElementById('alternativesContainer');
     const addAlternativeBtn = document.getElementById('addAlternativeBtn');
+    const questionImageInput = document.getElementById('question-image');
+    const maxImageSizeBytes = 2 * 1024 * 1024;
     let alternativeIndex = 0;
 
     function createAlternativeRow(index, textValue = '', isChecked = false) {
@@ -107,12 +108,44 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    if (questionImageInput) {
+        questionImageInput.addEventListener('change', function () {
+            const file = this.files && this.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            if (file.size > maxImageSizeBytes) {
+                this.value = '';
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Imagen demasiado grande',
+                    text: 'La imagen debe pesar como máximo 2 MB.',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+        });
+    }
+
     document.addEventListener('click', function (event) {
         const button = event.target.closest('.add-question-btn, .edit-question-btn');
         if (!button) return;
 
         const mode = button.getAttribute('data-mode');
         const action = button.getAttribute('data-action');
+        const currentQuestions = parseInt(button.getAttribute('data-current-questions') || '0', 10);
+        const maxQuestions = parseInt(button.getAttribute('data-max-questions') || '20', 10);
+
+        if (mode === 'create' && currentQuestions >= maxQuestions) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Límite alcanzado',
+                text: 'Esta evaluación ya alcanzó el máximo de 20 preguntas.',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
         
         questionForm.action = action;
         questionForm.reset();
@@ -131,7 +164,6 @@ document.addEventListener('DOMContentLoaded', function () {
             
             const questionData = JSON.parse(button.getAttribute('data-question'));
             document.getElementById('question_text').value = questionData.text;
-            document.getElementById('score').value = questionData.score;
 
             if (questionData.alternatives && questionData.alternatives.length > 0) {
                 questionData.alternatives.forEach((alt) => {
@@ -158,6 +190,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Validate alternatives count before submit
     questionForm.addEventListener('submit', function(e) {
+        const file = questionImageInput && questionImageInput.files ? questionImageInput.files[0] : null;
+
+        if (file && file.size > maxImageSizeBytes) {
+            e.preventDefault();
+            questionImageInput.value = '';
+            Swal.fire({
+                icon: 'warning',
+                title: 'Imagen demasiado grande',
+                text: 'La imagen debe pesar como máximo 2 MB.',
+                confirmButtonText: 'Entendido'
+            });
+            return false;
+        }
+
         const count = alternativesContainer.querySelectorAll('.alternative-row').length;
         if (count < 2 || count > 5) {
             e.preventDefault();

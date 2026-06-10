@@ -75,7 +75,7 @@ class AttendanceController extends Controller
      * Store attendance records for a specific training and date.
      *
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+        * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {

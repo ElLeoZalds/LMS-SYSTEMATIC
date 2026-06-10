@@ -110,6 +110,10 @@ class CourseController extends Controller
             $timerStarted = true;
         }
 
+        if ($attempt) {
+            $assessment = $this->shuffleQuestionsForAttempt($assessment, $attempt->attempt_id);
+        }
+
         // Calcular y pasar datos para que el cliente calcule el tiempo restante de forma consistente
         $totalSeconds = max(0, ($assessment->time_limit ?: 60) * 60);
         $attemptCreatedTs = $attempt ? $attempt->created_at->timestamp : null;
@@ -117,6 +121,30 @@ class CourseController extends Controller
         $startUrl = route('student.assessment.take', ['id' => $assessment_id]) . '?start=1';
 
         return view('student.courses.take', compact('assessment', 'totalSeconds', 'attemptCreatedTs', 'serverNowTs', 'enrollment', 'attempt', 'timerStarted', 'startUrl'));
+    }
+
+    private function shuffleQuestionsForAttempt(Assessment $assessment, int $attemptId): Assessment
+    {
+        $sessionKey = "assessment_question_order.{$attemptId}";
+        $questionIds = session($sessionKey);
+
+        if (!is_array($questionIds) || empty($questionIds)) {
+            $questionIds = $assessment->questions->pluck('question_id')->shuffle()->values()->all();
+            session([$sessionKey => $questionIds]);
+        }
+
+        $orderedQuestions = collect($questionIds)
+            ->map(fn ($questionId) => $assessment->questions->firstWhere('question_id', $questionId))
+            ->filter()
+            ->values();
+
+        $remainingQuestions = $assessment->questions
+            ->reject(fn ($question) => in_array($question->question_id, $questionIds))
+            ->values();
+
+        $assessment->setRelation('questions', $orderedQuestions->concat($remainingQuestions)->values());
+
+        return $assessment;
     }
 
     public function submitExam(Request $request, $assessment_id)

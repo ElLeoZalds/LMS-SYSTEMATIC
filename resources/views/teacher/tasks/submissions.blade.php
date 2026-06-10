@@ -44,7 +44,7 @@
                     @forelse($submissions as $submission)
                         <tr style="border-bottom: 1px solid #edf2f7;">
                             <td style="padding: 15px 20px; font-weight: 500; color: #111827;">
-                                {{ $submission->student->name ?? 'Estudiante' }}
+                                {{ trim(($submission->student->person->first_names ?? '') . ' ' . ($submission->student->person->last_names ?? '')) ?: ($submission->student->username ?? 'Estudiante') }}
                             </td>
                             <td style="padding: 15px 20px; color: #6b7280;">
                                 {{ $submission->created_at ? $submission->created_at->format('d/m/Y H:i') : '-' }}
@@ -76,7 +76,7 @@
                             </td>
                             <td style="padding: 15px 20px; text-align: right;">
                                 <button type="button" 
-                                        onclick="openGradeModal({{ json_encode($submission) }})"
+                                        onclick='openGradeModal(@json($submission))'
                                         style="background: #2563eb; color: white; border: none; padding: 6px 12px; font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer;">
                                     {{ is_null($submission->grade) ? 'Evaluar' : 'Editar' }}
                                 </button>
@@ -142,7 +142,7 @@
     function openGradeModal(submission) {
         form.action = `/teacher/submissions/${submission.submission_id}/grade`;
         gradeInput.value = submission.grade !== null ? submission.grade : '';
-        feedbackTextarea.value = submission.feedback !== null ? submission.feedback : '';
+        feedbackTextarea.value = submission.teacher_feedback !== null ? submission.teacher_feedback : '';
         
         // Corrección de despliegue universal en JS
         modal.style.display = 'flex';

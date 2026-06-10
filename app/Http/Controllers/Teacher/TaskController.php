@@ -77,7 +77,7 @@ class TaskController extends Controller
             })->firstOrFail();
 
         // Cargamos las entregas junto con los datos del estudiante
-        $submissions = $task->submissions()->with('student')->get();
+        $submissions = $task->submissions()->with('student.person')->get();
 
         return view('teacher.tasks.submissions', compact('task', 'submissions'));
     }
@@ -102,9 +102,9 @@ class TaskController extends Controller
 
         // Actualizamos los campos de la calificación
         $submission->update([
-            'grade'     => $request->grade,
-            'feedback'  => $request->feedback,
-            'graded_at' => now(),
+            'grade'            => $request->grade,
+            'teacher_feedback' => $request->feedback,
+            'graded_at'        => now(),
         ]);
 
         return redirect()->route('teacher.tasks.submissions', ['task_id' => $submission->task_id])
