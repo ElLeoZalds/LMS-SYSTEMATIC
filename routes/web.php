@@ -61,6 +61,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Administrator'
     Route::post('enrollments/store', [AdminEnrollmentController::class, 'store'])->name('enrollments.store');
     Route::resource('specialties', SpecialtyController::class);
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    Route::post('schedules/bulk-store', [ScheduleController::class, 'bulkStore'])->name('schedules.bulk-store');
     Route::resource('schedules', ScheduleController::class);
     Route::resource('contents', ContentController::class);
     Route::resource('payments', PaymentController::class);

@@ -14,19 +14,15 @@ class Training extends Model
         'teacher_id',
         'administrator_id',
         'modality',
-        'price',
-        'creation_date',
+        'start_date',
+        'end_date',
         'status'
     ];
 
     protected $casts = [
-        'creation_date' => 'date',
-        'price'         => 'decimal:2',
-    ];
-
-    protected $appends = [
-        'start_date',
-        'end_date',
+        'start_date' => 'date',
+        'end_date'   => 'date',
+        'status'     => 'integer',
     ];
 
     public function course()
@@ -55,28 +51,6 @@ class Training extends Model
     public function schedules()
     {
         return $this->hasMany(Schedule::class, 'training_id', 'training_id');
-    }
-
-    public function getStartDateAttribute()
-    {
-        if ($this->relationLoaded('schedules')) {
-            $schedule = $this->schedules->sortBy('date')->first();
-        } else {
-            $schedule = $this->schedules()->orderBy('date')->first();
-        }
-
-        return $schedule ? $schedule->date : null;
-    }
-
-    public function getEndDateAttribute()
-    {
-        if ($this->relationLoaded('schedules')) {
-            $schedule = $this->schedules->sortByDesc('date')->first();
-        } else {
-            $schedule = $this->schedules()->orderByDesc('date')->first();
-        }
-
-        return $schedule ? $schedule->date : null;
     }
 
     public function attendances()
@@ -114,12 +88,12 @@ class Training extends Model
 
     public function normalizedStatus(): string
     {
-        return strtoupper(trim((string) $this->status));
+        return trim((string) $this->status);
     }
 
     public function isDraft(): bool
     {
-        return in_array($this->normalizedStatus(), ['DRAFT', 'D'], true);
+        return in_array($this->normalizedStatus(), ['0', 'DRAFT', 'D'], true);
     }
 
     public function isActive(): bool
@@ -136,13 +110,15 @@ class Training extends Model
             return false;
         }
 
-        if ($this->normalizedStatus() === 'C' || $this->normalizedStatus() === 'CLOSED') {
+        if (in_array($this->normalizedStatus(), ['0', 'C', 'CLOSED'], true)) {
             return false;
         }
 
-        return $startDate || $endDate
-            ? ! $this->isClosed()
-            : in_array($this->normalizedStatus(), ['ACTIVE', 'A'], true);
+        if ($startDate || $endDate) {
+            return ! $this->isClosed();
+        }
+
+        return in_array($this->normalizedStatus(), ['1', 'ACTIVE', 'A'], true);
     }
 
     public function isClosed(): bool
@@ -153,7 +129,7 @@ class Training extends Model
             return true;
         }
 
-        return in_array($this->normalizedStatus(), ['CLOSED', 'C'], true);
+        return in_array($this->normalizedStatus(), ['0', 'CLOSED', 'C'], true);
     }
 
     public function canModifyActivities(): bool

@@ -15,54 +15,54 @@ class TrainingsSeeder extends Seeder
                 'teacher_id' => 2,
                 'administrator_id' => 1,
                 'modality' => 'virtual',
-                'price' => 220.00,
-                'creation_date' => now(),
-                'status' => 'A'
+                'start_date' => '2026-05-22',
+                'end_date' => '2026-06-22',
+                'status' => 1,
             ],
             [
                 'course_id' => 2,
                 'teacher_id' => 3,
                 'administrator_id' => 1,
                 'modality' => 'presential',
-                'price' => 180.00,
-                'creation_date' => now(),
-                'status' => 'A'
+                'start_date' => '2026-05-25',
+                'end_date' => '2026-07-10',
+                'status' => 1,
             ],
             [
                 'course_id' => 3,
                 'teacher_id' => 2,
                 'administrator_id' => 1,
                 'modality' => 'virtual',
-                'price' => 280.00,
-                'creation_date' => now(),
-                'status' => 'A'
+                'start_date' => '2026-06-01',
+                'end_date' => '2026-07-15',
+                'status' => 1,
             ],
             [
                 'course_id' => 4,
                 'teacher_id' => 3,
                 'administrator_id' => 1,
                 'modality' => 'presential',
-                'price' => 300.00,
-                'creation_date' => now(),
-                'status' => 'A'
+                'start_date' => '2026-06-05',
+                'end_date' => '2026-08-05',
+                'status' => 1,
             ],
             [
                 'course_id' => 5,
                 'teacher_id' => 2,
                 'administrator_id' => 1,
                 'modality' => 'virtual',
-                'price' => 140.00,
-                'creation_date' => now(),
-                'status' => 'A'
+                'start_date' => '2026-06-10',
+                'end_date' => '2026-07-20',
+                'status' => 1,
             ],
             [
                 'course_id' => 6,
                 'teacher_id' => 3,
                 'administrator_id' => 1,
                 'modality' => 'virtual',
-                'price' => 260.00,
-                'creation_date' => now(),
-                'status' => 'A'
+                'start_date' => '2026-06-12',
+                'end_date' => '2026-08-12',
+                'status' => 1,
             ]
         ]);
     }

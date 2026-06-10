@@ -36,9 +36,17 @@
                         @if(isset($training) && $training->schedules->count() > 0)
                             <select id="schedule_select" name="schedule_id" class="form-select">
                                 <option value="">Seleccione una sesión</option>
-                                    @foreach($training->schedules as $s)
-                                    <option value="{{ $s->schedule_id }}" data-date="{{ $s->date }}" {{ (old('schedule_id') == $s->schedule_id || $selectedScheduleId == $s->schedule_id) ? 'selected' : '' }}>
-                                        {{ $s->date }}{{ $s->start_time ? ' · ' . $s->start_time : '' }}
+                                @foreach($training->schedules as $s)
+                                    <option
+                                        value="{{ $s->schedule_id }}"
+                                        data-date="{{ $s->date }}"
+                                        data-start-time="{{ $s->start_time }}"
+                                        data-end-time="{{ $s->end_time }}"
+                                        {{ (old('schedule_id') == $s->schedule_id || $selectedScheduleId == $s->schedule_id) ? 'selected' : '' }}
+                                    >
+                                        {{ $s->date ? $s->date->format('Y-m-d') : 'Sin fecha' }}
+                                        · Inicio {{ $s->start_time ? \Illuminate\Support\Carbon::parse($s->start_time)->format('H:i') : '--:--' }}
+                                        · Fin {{ $s->end_time ? \Illuminate\Support\Carbon::parse($s->end_time)->format('H:i') : '--:--' }}
                                     </option>
                                 @endforeach
                             </select>

@@ -17,7 +17,7 @@ class TrainingController extends Controller
     public function index()
     {
         $trainings = Training::with(['course', 'teacher.person', 'administrator.person'])
-            ->where('status', 'A')
+            ->where('status', 1)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -50,10 +50,8 @@ class TrainingController extends Controller
             'course_id' => 'required|exists:courses,course_id',
             'teacher_id' => 'required|exists:users,user_id',
             'modality' => 'required|in:virtual,presential,hybrid',
-            'price' => 'required|numeric|min:0.01',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'schedule' => 'required|string|max:100',
         ]);
 
         Training::create([
@@ -61,13 +59,17 @@ class TrainingController extends Controller
             'teacher_id' => $request->teacher_id,
             'administrator_id' => auth()->id(),
             'modality' => $request->modality,
-            'price' => $request->price,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
-            'schedule' => $request->schedule,
-            'creation_date' => now()->toDateString(),
-            'status' => 'A',
+            'status' => 1,
         ]);
+
+        if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Capacitación programada con éxito.',
+            ]);
+        }
 
         return redirect()->route('admin.trainings.index')
             ->with('success', 'Capacitación programada con éxito.');
@@ -93,7 +95,8 @@ class TrainingController extends Controller
             'course_id' => 'required|exists:courses,course_id',
             'teacher_id' => 'required|exists:users,user_id',
             'modality' => 'required|in:virtual,presential,hybrid',
-            'price' => 'required|numeric|min:0.01',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
         $training = Training::findOrFail($id);
@@ -101,9 +104,18 @@ class TrainingController extends Controller
         $training->update([
             'course_id' => $request->course_id,
             'teacher_id' => $request->teacher_id,
+            'administrator_id' => auth()->id(),
             'modality' => $request->modality,
-            'price' => $request->price,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
         ]);
+
+        if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Training actualizado correctamente',
+            ]);
+        }
 
         return redirect()
             ->route('admin.trainings.index')

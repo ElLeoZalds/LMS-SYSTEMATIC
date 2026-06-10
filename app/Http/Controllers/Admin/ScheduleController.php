@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use App\Models\Schedule;
 use App\Models\Training;
 use Illuminate\Http\Request;
@@ -22,7 +24,7 @@ class ScheduleController extends Controller
                 'date',
             ]);
 
-        $trainings = Training::where('status', 'A')->get();
+        $trainings = Training::where('status', 1)->get();
 
         return view('admin.schedules.index', compact('schedules', 'trainings'));
     }
@@ -32,7 +34,7 @@ class ScheduleController extends Controller
      */
     public function create()
     {
-        $trainings = Training::where('status', 'A')->with('course')->get();
+        $trainings = Training::where('status', 1)->with('course')->get();
 
         return view('admin.schedules.create', compact('trainings'));
     }
@@ -87,9 +89,102 @@ class ScheduleController extends Controller
     public function edit($id)
     {
         $schedule = Schedule::findOrFail($id);
-        $trainings = Training::where('status', 'A')->with('course')->get();
+        $trainings = Training::where('status', 1)->with('course')->get();
 
         return view('admin.schedules.edit', compact('schedule', 'trainings'));
+    }
+
+    /**
+     * Store multiple schedules for a training from the trainings page.
+     */
+    public function bulkStore(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'training_id' => 'required|exists:trainings,training_id',
+            'schedules' => 'required|array|min:1',
+            'schedules.*.date' => 'required|date|after_or_equal:today',
+            'schedules.*.start_time' => 'required|date_format:H:i',
+            'schedules.*.end_time' => 'required|date_format:H:i',
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Revisa los datos de los horarios.',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $training = Training::findOrFail($request->training_id);
+
+        foreach ($request->input('schedules', []) as $index => $scheduleData) {
+            // Validar que la fecha esté dentro del rango del entrenamiento
+            if ($training->start_date && $training->end_date) {
+                $scheduleDate = Carbon::createFromFormat('Y-m-d', $scheduleData['date']);
+                
+                if ($scheduleDate->lt($training->start_date) || $scheduleDate->gt($training->end_date)) {
+                    $validator->errors()->add(
+                        "schedules.$index.date", 
+                        "La fecha debe estar entre {$training->start_date->format('d/m/Y')} y {$training->end_date->format('d/m/Y')}."
+                    );
+                }
+            }
+
+            if (($scheduleData['end_time'] ?? null) <= ($scheduleData['start_time'] ?? null)) {
+                $validator->errors()->add("schedules.$index.end_time", 'La hora fin debe ser posterior a la hora inicio.');
+            }
+
+            $overlap = Schedule::where('date', $scheduleData['date'])
+                ->whereHas('training', function ($query) use ($training) {
+                    $query->where('teacher_id', $training->teacher_id);
+                })
+                ->where(function ($query) use ($scheduleData) {
+                    $query->where('start_time', '<', $scheduleData['end_time'])
+                          ->where('end_time', '>', $scheduleData['start_time']);
+                })
+                ->exists();
+
+            if ($overlap) {
+                $validator->errors()->add("schedules.$index.start_time", 'El profesor ya tiene otra capacitación programada en ese rango horario.');
+            }
+        }
+
+        if ($validator->errors()->any()) {
+            if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No fue posible guardar todos los horarios.',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            return back()->withErrors($validator)->withInput();
+        }
+
+        DB::transaction(function () use ($training, $request) {
+            foreach ($request->input('schedules', []) as $scheduleData) {
+                Schedule::create([
+                    'training_id' => $training->training_id,
+                    'date' => $scheduleData['date'],
+                    'start_time' => $scheduleData['start_time'],
+                    'end_time' => $scheduleData['end_time'],
+                ]);
+            }
+        });
+
+        if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Horarios guardados correctamente.',
+            ]);
+        }
+
+        return redirect()->route('admin.trainings.index')
+            ->with('success', 'Horarios guardados correctamente.');
     }
 
     /**

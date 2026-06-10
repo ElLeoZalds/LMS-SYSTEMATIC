@@ -96,7 +96,7 @@ php artisan db:seed
 ```
 Ejecutar todo junto (Migraciones + Seeders)
 ```bash
-php artisan migrate --seed
+php artisan migrate:fresh --seed
 ```
 ## 💻 Ejecución del Proyecto
 Antes de levantar el servidor, limpia la caché de la aplicación y genera el enlace simbólico para el almacenamiento de archivos:
