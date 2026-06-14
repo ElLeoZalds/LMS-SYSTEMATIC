@@ -111,6 +111,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:Teacher'])
     Route::delete('/assessments/{assessment_id}', [AssessmentController::class, 'destroy'])->name('assessments.destroy');
     
     Route::post('assessments/{assessment_id}/questions', [AssessmentController::class, 'addQuestion'])->name('assessments.questions.store');
+    Route::put('questions/{question_id}/score', [AssessmentController::class, 'updateQuestionScore'])->name('questions.score.update');
     Route::put('questions/{question_id}', [AssessmentController::class, 'updateQuestion'])->name('questions.update');
     Route::delete('questions/{question_id}', [AssessmentController::class, 'destroyQuestion'])->name('questions.destroy');
 });

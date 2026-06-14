@@ -10,21 +10,48 @@
             <a href="{{ route('teacher.courses.show', $assessment->training->training_id) }}?tab=contenido" class="btn btn-sm btn-outline-secondary">Volver al Curso</a>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
         <div class="card shadow mb-4">
             <div class="card-body">
+                @php
+                    $totalScore = $assessment->questions->sum('score');
+                @endphp
                 <div class="mb-3">
                     <p class="text-muted small mb-1">Intentos permitidos: {{ $assessment->allowed_attempts }}</p>
                     <p class="text-muted small">Inicio: {{ optional($assessment->start_date)->format('d/m/Y') }} · Fin: {{ optional($assessment->end_date)->format('d/m/Y') }}</p>
+                    <p class="text-muted small mb-0">Puntaje total configurado: {{ $totalScore }} / 20 pts</p>
                 </div>
 
                 <div class="mb-4">
-                    <button class="btn btn-sm btn-outline-success add-question-btn" type="button"
-                        data-toggle="modal"
-                        data-target="#questionModal"
-                        data-mode="create"
-                        data-action="{{ route('teacher.assessments.questions.store', $assessment->assessment_id) }}">
-                        <i class="fas fa-plus-circle mr-1"></i> Nueva Pregunta
-                    </button>
+                    <div class="d-flex flex-column flex-md-row gap-2">
+                        <button type="button" class="btn btn-sm btn-primary save-assessment-btn">
+                            <i class="fas fa-save mr-1"></i> Guardar Evaluación
+                        </button>
+                        <button class="btn btn-sm btn-outline-success add-question-btn" type="button"
+                            data-toggle="modal"
+                            data-target="#questionModal"
+                            data-mode="create"
+                            data-action="{{ route('teacher.assessments.questions.store', $assessment->assessment_id) }}">
+                            <i class="fas fa-plus-circle mr-1"></i> Nueva Pregunta
+                        </button>
+                    </div>
                 </div>
 
                 @if($assessment->questions->count())
@@ -34,7 +61,12 @@
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div class="font-weight-bold text-gray-800">{{ $question->question_text }}</div>
                                     <div class="d-flex align-items-center">
-                                        <span class="badge badge-secondary p-2 mr-2">{{ $question->score }} pts</span>
+                                        <form action="{{ route('teacher.questions.score.update', $question->question_id) }}" method="POST" class="d-flex align-items-center mr-2 question-score-form">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="number" name="score" value="{{ $question->score }}" min="0" max="20" step="1" class="form-control form-control-sm text-center mr-1 question-score-input" style="width: 72px;">
+                                            <span class="text-muted small mr-2">pts</span>
+                                        </form>
 
                                         <button class="btn btn-sm btn-light text-primary edit-question-btn mr-1" type="button"
                                             data-toggle="modal"
@@ -43,7 +75,6 @@
                                             data-action="{{ route('teacher.questions.update', $question->question_id) }}"
                                             data-question="{{ json_encode([
                                                 'text' => $question->question_text,
-                                                'score' => $question->score,
                                                 'alternatives' => $question->alternatives->map(function($alt) {
                                                     return ['text' => $alt->option_text, 'is_correct' => $alt->is_correct];
                                                 })
@@ -91,6 +122,39 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const scoreForms = Array.from(document.querySelectorAll('.question-score-form'));
+            const saveAssessmentButton = document.querySelector('.save-assessment-btn');
+
+            scoreForms.forEach(function (form) {
+                const input = form.querySelector('.question-score-input');
+                let saveTimer = null;
+
+                function submitScore() {
+                    form.requestSubmit();
+                }
+
+                if (input) {
+                    input.addEventListener('input', function () {
+                        clearTimeout(saveTimer);
+                        saveTimer = setTimeout(submitScore, 700);
+                    });
+
+                    input.addEventListener('change', submitScore);
+                }
+            });
+
+            if (saveAssessmentButton) {
+                saveAssessmentButton.addEventListener('click', function () {
+                    scoreForms.forEach(function (form) {
+                        form.requestSubmit();
+                    });
+                });
+            }
+        });
+    </script>
 
     @include('teacher.assessments._question_modal')
 

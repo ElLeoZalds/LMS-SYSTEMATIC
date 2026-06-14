@@ -61,6 +61,9 @@
         {{-- Listado de Evaluaciones y Preguntas --}}
         <div class="row">
             @forelse($training->assessments as $assessment)
+                @php
+                    $totalScore = $assessment->questions->sum('score');
+                @endphp
                 <div class="col-12 mb-4">
                     <div class="card shadow">
                         <div class="card-body">
@@ -69,23 +72,26 @@
                                     <h5 class="m-0 font-weight-bold text-primary mb-1">{{ $assessment->title }}</h5>
                                     <p class="text-muted small mb-1">Intentos permitidos: {{ $assessment->allowed_attempts }}</p>
                                     <p class="text-muted small mb-0">Inicio: {{ optional($assessment->start_date)->format('d/m/Y') }} · Fin: {{ optional($assessment->end_date)->format('d/m/Y') }}</p>
-                                    <p class="text-muted small mb-0">Preguntas: {{ $assessment->questions->count() }} / 20 · El sistema asigna automáticamente los puntos.</p>
+                                    <p class="text-muted small mb-0">Preguntas: {{ $assessment->questions->count() }}</p>
+                                    <p class="text-muted small mb-0">Puntaje total configurado: {{ $totalScore }} / 20 pts</p>
                                 </div>
                                 <div class="text-md-right mt-2 mt-md-0">
                                     <span class="badge badge-{{ $assessment->active ? 'primary' : 'secondary' }} mb-2 d-block d-md-inline-block">
                                         {{ $assessment->active ? 'Activo' : 'Inactivo' }}
                                     </span>
-                                    
-                                    {{-- Botón Nueva Pregunta --}}
-                                    <button class="btn btn-sm btn-outline-success add-question-btn d-block mt-1" type="button"
-                                        data-toggle="modal"
-                                        data-target="#questionModal"
-                                        data-mode="create"
-                                        data-action="{{ route('teacher.assessments.questions.store', $assessment->assessment_id) }}"
-                                        data-current-questions="{{ $assessment->questions->count() }}"
-                                        data-max-questions="20">
-                                        <i class="fas fa-plus-circle mr-1"></i> Nueva Pregunta
-                                    </button>
+                                    <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
+                                        <button type="button" class="btn btn-sm btn-primary save-assessment-btn d-block mt-1">
+                                            <i class="fas fa-save mr-1"></i> Guardar Evaluación
+                                        </button>
+
+                                        <button class="btn btn-sm btn-outline-success add-question-btn d-block mt-1" type="button"
+                                            data-toggle="modal"
+                                            data-target="#questionModal"
+                                            data-mode="create"
+                                            data-action="{{ route('teacher.assessments.questions.store', $assessment->assessment_id) }}">
+                                            <i class="fas fa-plus-circle mr-1"></i> Nueva Pregunta
+                                        </button>
+                                    </div>
 
                                     {{-- Botón Eliminar Evaluación --}}
                                     <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="d-inline-block mt-1 swal-confirm" data-message="¿Estás seguro de eliminar esta evaluación? Se eliminarán también los intentos asociados.">
@@ -142,18 +148,12 @@
                                 </div>
                             </div>
 
-                            {{-- INDICADOR DE PUNTAJE MÁXIMO / ACUMULADO --}}
-                            @php
-                                $totalScore = $assessment->questions->sum('score');
-                                $targetScore = 20; 
-                            @endphp
-
                             @if($assessment->questions->count())
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h6 class="text-uppercase text-secondary font-weight-bold small m-0">Preguntas Asignadas</h6>
-                                        <span class="badge badge-{{ $totalScore == $targetScore ? 'success' : ($totalScore > $targetScore ? 'danger' : 'warning') }} p-2">
-                                            Puntaje total configurado: <strong>{{ $totalScore }} / {{ $targetScore }} pts</strong>
+                                        <span class="badge badge-{{ $totalScore == 20 ? 'success' : ($totalScore > 20 ? 'danger' : 'warning') }} p-2">
+                                            Puntaje total configurado: <strong>{{ $totalScore }} / 20 pts</strong>
                                         </span>
                                     </div>
 
@@ -163,7 +163,12 @@
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <div class="font-weight-bold text-gray-800">{{ $question->question_text }}</div>
                                                     <div class="d-flex align-items-center">
-                                                        <span class="badge badge-secondary p-2 mr-2">{{ $question->score }} pts</span>
+                                                        <form action="{{ route('teacher.questions.score.update', $question->question_id) }}" method="POST" class="d-flex align-items-center mr-2 question-score-form">
+                                                            @csrf
+                                                            @method('PUT')
+                                                            <input type="number" name="score" value="{{ $question->score }}" min="0" max="20" step="1" class="form-control form-control-sm text-center mr-1 question-score-input" style="width: 72px;">
+                                                            <span class="text-muted small mr-2">pts</span>
+                                                        </form>
                                                         
                                                         {{-- Botón para Editar Pregunta --}}
                                                         <button class="btn btn-sm btn-light text-primary edit-question-btn mr-1" type="button"
@@ -173,7 +178,6 @@
                                                             data-action="{{ route('teacher.questions.update', $question->question_id) }}"
                                                                 data-question="{{ json_encode([
                                                                 'text' => $question->question_text,
-                                                                'score' => $question->score,
                                                                 'alternatives' => $question->alternatives->map(function($alt) {
                                                                     return ['text' => $alt->option_text, 'is_correct' => $alt->is_correct];
                                                                 })
@@ -233,6 +237,39 @@
             @endforelse
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const scoreForms = Array.from(document.querySelectorAll('.question-score-form'));
+            const saveAssessmentButton = document.querySelector('.save-assessment-btn');
+
+            scoreForms.forEach(function (form) {
+                const input = form.querySelector('.question-score-input');
+                let saveTimer = null;
+
+                function submitScore() {
+                    form.requestSubmit();
+                }
+
+                if (input) {
+                    input.addEventListener('input', function () {
+                        clearTimeout(saveTimer);
+                        saveTimer = setTimeout(submitScore, 700);
+                    });
+
+                    input.addEventListener('change', submitScore);
+                }
+            });
+
+            if (saveAssessmentButton) {
+                saveAssessmentButton.addEventListener('click', function () {
+                    scoreForms.forEach(function (form) {
+                        form.requestSubmit();
+                    });
+                });
+            }
+        });
+    </script>
 
     {{-- MODAL DE CREACIÓN / EDICIÓN --}}
     <div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">

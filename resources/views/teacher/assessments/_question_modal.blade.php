@@ -16,9 +16,6 @@
                         <label for="question_text" class="text-gray-700 font-weight-bold">Pregunta</label>
                         <input type="text" class="form-control form-control-sm" id="question_text" name="question_text" required>
                     </div>
-                    <div class="alert alert-info py-2 px-3 mb-3 small">
-                        Los puntos se asignan automáticamente según la cantidad total de preguntas. El máximo es 20 preguntas y cada una vale entre 1 y 20 puntos.
-                    </div>
                     <div class="form-group mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="text-gray-700 font-weight-bold mb-0">Alternativas</label>
@@ -132,33 +129,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const button = event.target.closest('.add-question-btn, .edit-question-btn');
         if (!button) return;
 
-        const mode = button.getAttribute('data-mode');
+        const activeMode = button.getAttribute('data-mode');
         const action = button.getAttribute('data-action');
-        const currentQuestions = parseInt(button.getAttribute('data-current-questions') || '0', 10);
-        const maxQuestions = parseInt(button.getAttribute('data-max-questions') || '20', 10);
-
-        if (mode === 'create' && currentQuestions >= maxQuestions) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Límite alcanzado',
-                text: 'Esta evaluación ya alcanzó el máximo de 20 preguntas.',
-                confirmButtonText: 'Entendido'
-            });
-            return;
-        }
         
         questionForm.action = action;
         questionForm.reset();
         alternativesContainer.innerHTML = '';
         alternativeIndex = 0;
 
-        if (mode === 'create') {
+        if (activeMode === 'create') {
             modalTitle.textContent = 'Nueva Pregunta';
             methodContainer.innerHTML = ''; 
             addAlternativeRow('', true); 
             addAlternativeRow('', false);
             document.getElementById('question-image-preview').innerHTML = '';
-        } else if (mode === 'edit') {
+        } else if (activeMode === 'edit') {
             modalTitle.textContent = 'Editar Pregunta';
             methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">'; 
             

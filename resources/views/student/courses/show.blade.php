@@ -14,6 +14,24 @@
             </div>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom">
                 <ul class="nav nav-tabs card-header-tabs" role="tablist">
@@ -210,6 +228,17 @@
                             @else
                                 <div class="list-group">
                                     @foreach($training->assessments as $assessment)
+                                        @php
+                                            $assessmentAttempts = $attempts->where('assessment_id', $assessment->assessment_id);
+                                            $submittedAttempts = $assessmentAttempts->filter(function ($attempt) {
+                                                return $attempt->created_at && $attempt->updated_at && $attempt->created_at->ne($attempt->updated_at);
+                                            });
+                                            $pendingAttempt = $assessmentAttempts->first(function ($attempt) {
+                                                return $attempt->created_at && $attempt->updated_at && $attempt->created_at->equalTo($attempt->updated_at);
+                                            });
+                                            $attemptsUsed = $submittedAttempts->count();
+                                            $remainingAttempts = max(0, $assessment->allowed_attempts - $attemptsUsed);
+                                        @endphp
                                         <div class="list-group-item mb-2 rounded-3 shadow-sm">
                                             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                                                 <div>
@@ -218,15 +247,29 @@
                                                     <small class="text-muted">
                                                         Inicio: {{ optional($assessment->start_date)->format('d/m/Y') ?? 'Sin fecha' }} · Fin: {{ optional($assessment->end_date)->format('d/m/Y') ?? 'Sin fecha' }}
                                                     </small>
+                                                    <p class="text-muted small mb-0 mt-1">
+                                                        Intentos usados: {{ $attemptsUsed }} / {{ $assessment->allowed_attempts }}
+                                                        @if($pendingAttempt)
+                                                            · Examen en curso
+                                                        @elseif($remainingAttempts <= 0)
+                                                            · Intentos agotados
+                                                        @endif
+                                                    </p>
                                                 </div>
                                                 <div class="text-end">
                                                     <span class="badge bg-{{ $assessment->active ? 'success' : 'secondary' }} mb-2">
                                                         {{ $assessment->active ? 'Activo' : 'Inactivo' }}
                                                     </span>
-                                                    @if($assessment->active)
+                                                    @if($assessment->active && $pendingAttempt)
+                                                        <a href="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" data-start-url="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" class="btn btn-sm btn-primary exam-start-btn">
+                                                            Continuar examen
+                                                        </a>
+                                                    @elseif($assessment->active && $remainingAttempts > 0)
                                                         <a href="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" data-start-url="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" class="btn btn-sm btn-primary exam-start-btn">
                                                             Tomar examen
                                                         </a>
+                                                    @elseif($assessment->active)
+                                                        <span class="badge bg-danger">Intentos agotados</span>
                                                     @endif
                                                 </div>
                                             </div>

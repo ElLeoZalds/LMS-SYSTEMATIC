@@ -81,6 +81,17 @@ class CourseController extends Controller
             ->latest('attempt_id')
             ->first();
 
+        if (! $pendingAttempt) {
+            $attemptsUsed = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
+                ->where('assessment_id', $assessment_id)
+                ->count();
+
+            if ($attemptsUsed >= $assessment->allowed_attempts) {
+                return redirect()->route('student.courses.show', $assessment->training_id)
+                    ->with('error', 'Ha alcanzado el número máximo de intentos permitidos para esta evaluación.');
+            }
+        }
+
         $attempt = null;
         $timerStarted = false;
 

@@ -13,7 +13,6 @@ use Carbon\Carbon;
 
 class AssessmentController extends Controller
 {
-    private const MAX_QUESTIONS = 20;
     private const MAX_TOTAL_SCORE = 20;
 
     public function index()
@@ -128,11 +127,6 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
-        $questionCount = $assessment->questions()->count();
-        if ($questionCount >= self::MAX_QUESTIONS) {
-            return redirect()->back()->withInput()->with('error', 'El máximo permitido es de 20 preguntas por evaluación.');
-        }
-
         DB::transaction(function () use ($request, $assessment) {
             $imagePath = null;
             if ($request->hasFile('image')) {
@@ -142,7 +136,7 @@ class AssessmentController extends Controller
             $question = Question::create([
                 'assessment_id' => $assessment->assessment_id,
                 'question_text' => $request->question_text,
-                'score' => 1,
+                'score' => 0,
                 'order_index' => $assessment->questions()->count() + 1,
                 'image_path' => $imagePath,
             ]);
@@ -154,8 +148,6 @@ class AssessmentController extends Controller
                     'is_correct'   => $request->correct_alternative == $index,
                 ]);
             }
-
-            $this->redistributeQuestionScores($assessment->assessment_id);
         });
 
         return redirect()->route('teacher.assessments.show', ['assessment_id' => $assessment->assessment_id])
@@ -204,8 +196,6 @@ class AssessmentController extends Controller
                     'is_correct'   => $request->correct_alternative == $index,
                 ]);
             }
-
-            $this->redistributeQuestionScores($question->assessment_id);
         });
 
         return redirect()->route('teacher.assessments.show', ['assessment_id' => $question->assessment->assessment_id])
@@ -229,7 +219,6 @@ class AssessmentController extends Controller
         $assessmentId = $question->assessment->assessment_id;
         DB::transaction(function () use ($question) {
             $question->alternatives()->delete();
-            // delete image file if exists
             try {
                 if ($question->image_path) {
                     \Storage::disk('public')->delete($question->image_path);
@@ -238,9 +227,33 @@ class AssessmentController extends Controller
             $question->delete();
         });
 
-        $this->redistributeQuestionScores($assessmentId);
-
         return redirect()->route('teacher.assessments.show', ['assessment_id' => $assessmentId]);
+    }
+
+    public function updateQuestionScore(Request $request, $question_id)
+    {
+        $request->validate([
+            'score' => 'required|integer|min:0|max:20',
+        ]);
+
+        $user = auth()->user();
+        $question = Question::with('assessment.training')->findOrFail($question_id);
+
+        if ($question->assessment->training->teacher_id !== $user->user_id) {
+            abort(403, 'No autorizado.');
+        }
+
+        $otherQuestionsScore = (int) Question::where('assessment_id', $question->assessment_id)
+            ->where('question_id', '!=', $question->question_id)
+            ->sum('score');
+
+        if (($otherQuestionsScore + (int) $request->score) > self::MAX_TOTAL_SCORE) {
+            return redirect()->back()->with('error', 'El puntaje total de la evaluación no puede superar los 20 puntos.');
+        }
+
+        $question->update(['score' => (int) $request->score]);
+
+        return redirect()->back()->with('success', 'Puntaje actualizado correctamente.');
     }
 
     public function update(Request $request, $assessment_id)
@@ -312,26 +325,4 @@ class AssessmentController extends Controller
             ->with('success', $message);
     }
 
-    private function redistributeQuestionScores(int $assessmentId): void
-    {
-        $questions = Question::where('assessment_id', $assessmentId)
-            ->orderBy('order_index')
-            ->orderBy('question_id')
-            ->get();
-
-        $questionCount = $questions->count();
-
-        if ($questionCount === 0) {
-            return;
-        }
-
-        $baseScore = intdiv(self::MAX_TOTAL_SCORE, $questionCount);
-        $remainder = self::MAX_TOTAL_SCORE % $questionCount;
-
-        foreach ($questions as $index => $question) {
-            $question->update([
-                'score' => $baseScore + ($index < $remainder ? 1 : 0),
-            ]);
-        }
-    }
 }
