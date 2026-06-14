@@ -230,13 +230,10 @@
                                     @foreach($training->assessments as $assessment)
                                         @php
                                             $assessmentAttempts = $attempts->where('assessment_id', $assessment->assessment_id);
-                                            $submittedAttempts = $assessmentAttempts->filter(function ($attempt) {
-                                                return $attempt->created_at && $attempt->updated_at && $attempt->created_at->ne($attempt->updated_at);
-                                            });
                                             $pendingAttempt = $assessmentAttempts->first(function ($attempt) {
                                                 return $attempt->created_at && $attempt->updated_at && $attempt->created_at->equalTo($attempt->updated_at);
                                             });
-                                            $attemptsUsed = $submittedAttempts->count();
+                                            $attemptsUsed = $assessmentAttempts->count();
                                             $remainingAttempts = max(0, $assessment->allowed_attempts - $attemptsUsed);
                                         @endphp
                                         <div class="list-group-item mb-2 rounded-3 shadow-sm">

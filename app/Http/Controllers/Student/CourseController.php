@@ -189,18 +189,14 @@ class CourseController extends Controller
             abort(403, 'Este intento ya fue enviado.');
         }
 
-        try {
-            $this->ensureAttemptAllowed($assessment, $enrollment, $attempt);
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
         $timeLimit = $assessment->time_limit;
         $elapsedSeconds = Carbon::now()->diffInSeconds($attempt->created_at);
         $maxSeconds = ($timeLimit * 60) + 120;
 
         if ($elapsedSeconds > $maxSeconds) {
             $attempt->score = 0;
+            $attempt->timestamps = false;
+            $attempt->updated_at = Carbon::now()->addSecond();
             $attempt->save();
             $attempt->load('assessment');
 
@@ -224,7 +220,9 @@ class CourseController extends Controller
         }
 
         $attempt->score = $totalScore;
-        $attempt->save();
+    $attempt->timestamps = false;
+    $attempt->updated_at = Carbon::now()->addSecond();
+    $attempt->save();
         $attempt->load('assessment');
 
         return view('student.assessments.result', compact('attempt'));

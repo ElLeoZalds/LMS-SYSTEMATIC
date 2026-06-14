@@ -9,7 +9,7 @@ class AssessmentAttemptsSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('assessment_attempts')->insert([
+        $attempts = [
             [
                 'enrollment_id' => 1,
                 'assessment_id' => 1,
@@ -17,7 +17,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 18.50,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 2,
@@ -26,7 +26,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 16.00,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 3,
@@ -35,7 +35,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 19.00,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 4,
@@ -44,7 +44,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 15.75,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 5,
@@ -53,7 +53,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 17.25,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             // Nuevos intentos para assessment 1
             [
@@ -63,7 +63,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 19.00,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 7,
@@ -72,7 +72,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 17.50,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 8,
@@ -81,7 +81,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 16.25,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 9,
@@ -90,7 +90,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 18.75,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 10,
@@ -99,7 +99,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 15.00,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             // Assessment 2
             [
@@ -109,7 +109,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 18.00,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 16,
@@ -118,7 +118,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 17.50,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 17,
@@ -127,7 +127,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 19.25,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 18,
@@ -136,7 +136,7 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 16.75,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ],
             [
                 'enrollment_id' => 19,
@@ -145,8 +145,10 @@ class AssessmentAttemptsSeeder extends Seeder
                 'date' => now(),
                 'score' => 18.50,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now()->addSecond(),
             ]
-        ]);
+        ];
+
+        DB::table('assessment_attempts')->insert($attempts);
     }
 }
