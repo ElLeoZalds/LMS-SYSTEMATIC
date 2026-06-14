@@ -4,11 +4,16 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class PeopleSeeder extends Seeder
 {
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
+        DB::table('people')->truncate();
+        Schema::enableForeignKeyConstraints();
+
         DB::table('people')->insert([
             [
                 'last_names' => 'Gomez Perez',
@@ -21,7 +26,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1990-05-10',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Lopez Ramirez',
@@ -34,7 +39,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'F',
                 'birth_date' => '1995-08-20',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Torres Diaz',
@@ -47,7 +52,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1988-03-15',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Rojas Castillo',
@@ -55,12 +60,12 @@ class PeopleSeeder extends Seeder
                 'document_type' => 'DNI',
                 'document_number' => '10000004',
                 'phone' => '955443322',
-                'address' => 'Av. Perú 321',
+                'address' => 'Av. Peru 321',
                 'email' => 'ana.rojas.004@example.com',
                 'gender' => 'F',
                 'birth_date' => '2000-11-05',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Martinez Lopez',
@@ -73,7 +78,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1992-03-12',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Garcia Sanchez',
@@ -86,7 +91,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'F',
                 'birth_date' => '1994-07-22',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Hernandez Ruiz',
@@ -99,7 +104,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1989-12-01',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Jimenez Morales',
@@ -112,7 +117,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'F',
                 'birth_date' => '1996-04-18',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Perez Alvarez',
@@ -125,7 +130,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1991-09-30',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Ramirez Torres',
@@ -138,7 +143,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'F',
                 'birth_date' => '1998-01-14',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Flores Castillo',
@@ -151,7 +156,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1993-06-25',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Gutierrez Vargas',
@@ -164,7 +169,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'F',
                 'birth_date' => '1997-11-08',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Reyes Mendoza',
@@ -177,7 +182,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1990-02-19',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Morales Silva',
@@ -190,7 +195,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'F',
                 'birth_date' => '1995-05-03',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Ortiz Chavez',
@@ -203,7 +208,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1987-08-27',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Delgado Rios',
@@ -216,7 +221,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'F',
                 'birth_date' => '1999-12-16',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Sanchez Guzman',
@@ -229,7 +234,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1992-10-09',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Vargas Leon',
@@ -242,7 +247,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'F',
                 'birth_date' => '1994-03-21',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Castro Medina',
@@ -255,7 +260,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'M',
                 'birth_date' => '1988-07-04',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'last_names' => 'Romero Aguilar',
@@ -268,124 +273,7 @@ class PeopleSeeder extends Seeder
                 'gender' => 'F',
                 'birth_date' => '1996-09-13',
                 'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'last_names' => 'Ruiz Navarro',
-                'first_names' => 'Antonio Jose',
-                'document_type' => 'DNI',
-                'document_number' => '10000021',
-                'phone' => '944445566',
-                'address' => 'Av. Junin 1414',
-                'email' => 'antonio.ruiz.021@example.com',
-                'gender' => 'M',
-                'birth_date' => '1991-01-26',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'last_names' => 'Mendoza Soto',
-                'first_names' => 'Silvia Maria',
-                'document_type' => 'DNI',
-                'document_number' => '10000022',
-                'phone' => '955556677',
-                'address' => 'Calle Ancash 1515',
-                'email' => 'silvia.mendoza.022@example.com',
-                'gender' => 'F',
-                'birth_date' => '1998-04-07',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'last_names' => 'Guerrero Ponce',
-                'first_names' => 'Ricardo Alberto',
-                'document_type' => 'DNI',
-                'document_number' => '10000023',
-                'phone' => '966667788',
-                'address' => 'Jr. La Libertad 1616',
-                'email' => 'ricardo.guerrero.023@example.com',
-                'gender' => 'M',
-                'birth_date' => '1993-11-18',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'last_names' => 'Herrera Vega',
-                'first_names' => 'Daniela Sofia',
-                'document_type' => 'DNI',
-                'document_number' => '10000024',
-                'phone' => '977778899',
-                'address' => 'Av. Ucayali 1717',
-                'email' => 'daniela.herrera.024@example.com',
-                'gender' => 'F',
-                'birth_date' => '1997-06-29',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'last_names' => 'Medina Rojas',
-                'first_names' => 'Oscar Eduardo',
-                'document_type' => 'DNI',
-                'document_number' => '10000025',
-                'phone' => '988889900',
-                'address' => 'Calle Madre de Dios 1818',
-                'email' => 'oscar.medina.025@example.com',
-                'gender' => 'M',
-                'birth_date' => '1990-08-11',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'last_names' => 'Cabrera Luna',
-                'first_names' => 'Veronica Andrea',
-                'document_type' => 'DNI',
-                'document_number' => '10000026',
-                'phone' => '999990011',
-                'address' => 'Jr. Tumbes 1919',
-                'email' => 'veronica.cabrera.026@example.com',
-                'gender' => 'F',
-                'birth_date' => '1995-12-02',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'last_names' => 'Vega Torres',
-                'first_names' => 'Roberto Carlos',
-                'document_type' => 'DNI',
-                'document_number' => '10000027',
-                'phone' => '911112233',
-                'address' => 'Av. Libertad 2020',
-                'email' => 'roberto.vega.027@example.com',
-                'gender' => 'M',
-                'birth_date' => '1985-03-14',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'last_names' => 'Luna Morales',
-                'first_names' => 'Sofia Isabel',
-                'document_type' => 'DNI',
-                'document_number' => '10000028',
-                'phone' => '922223344',
-                'address' => 'Calle Union 2121',
-                'email' => 'sofia.luna.028@example.com',
-                'gender' => 'F',
-                'birth_date' => '1992-07-25',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'last_names' => 'Ponce Reyes',
-                'first_names' => 'Diego Alejandro',
-                'document_type' => 'DNI',
-                'document_number' => '10000029',
-                'phone' => '933334455',
-                'address' => 'Jr. Bolivar 2222',
-                'email' => 'diego.ponce.029@example.com',
-                'gender' => 'M',
-                'birth_date' => '1988-11-30',
-                'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]
         ]);
     }

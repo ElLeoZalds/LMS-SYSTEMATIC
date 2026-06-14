@@ -16,8 +16,12 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
+        $hasRole = $user->roles->contains('name', $role);
+        $isAdministratorManagingTeacherArea = $role === 'Teacher'
+            && $user->roles->contains('name', 'Administrator');
+
         // Si está autenticado pero sin el rol necesario
-        if (!$user->roles->contains('name', $role)) {
+        if (!$hasRole && !$isAdministratorManagingTeacherArea) {
             abort(403, 'No autorizado');
         }
 

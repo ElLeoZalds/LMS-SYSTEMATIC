@@ -1,12 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $isAdministrator = auth()->user()?->roles->contains('name', 'Administrator') ?? false;
+    @endphp
+
     <div class="teacher-course-view">
         <div class="container-fluid px-4 py-1">
             <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="h3 mb-2 text-gray-800">{{ $training->course->title }}</h1>
-                <small class="text-muted">NRC: {{ $training->course->nrc ?? 'N/A' }} | Modalidad:
+                <small class="text-muted">NRC: {{ $training->nrc ?? 'N/A' }} | Modalidad:
                     <strong>{{ ucfirst($training->modality) }}</strong></small>
             </div>
             <a href="{{ route('teacher.courses') }}" class="btn btn-sm btn-outline-secondary">
@@ -392,14 +396,14 @@
                                                         <button type="button" class="btn btn-sm btn-outline-primary edit-assessment-btn mb-2" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
                                                             <i class="bi bi-pencil"></i> Editar
                                                         </button>
-                                                        @if($hasAttempts)
+                                                        @if($hasAttempts && ! $isAdministrator)
                                                             <span class="badge bg-warning text-dark mb-2">No se puede eliminar: tiene intentos</span>
                                                         @else
-                                                            <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm mb-2" data-message="¿Estás seguro de eliminar esta evaluación?">
+                                                            <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm mb-2" data-message="{{ $hasAttempts ? 'Esta evaluación tiene intentos registrados. Como administrador puedes eliminarla junto con sus datos relacionados. ¿Deseas continuar?' : '¿Estás seguro de eliminar esta evaluación?' }}">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit" class="btn btn-sm btn-danger">
-                                                                    <i class="bi bi-trash"></i> Eliminar
+                                                                    <i class="bi bi-trash"></i> {{ $hasAttempts ? 'Eliminar como admin' : 'Eliminar' }}
                                                                 </button>
                                                             </form>
                                                         @endif
@@ -480,14 +484,14 @@
                                                             <button type="button" class="btn btn-sm btn-primary edit-task-btn mb-2" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}'>
                                                                 <i class="bi bi-pencil"></i> Editar
                                                             </button>
-                                                            @if($hasSubmissions)
+                                                            @if($hasSubmissions && ! $isAdministrator)
                                                                 <span class="badge bg-warning text-dark mb-2">No se puede eliminar: tiene entregas</span>
                                                             @else
-                                                                <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="swal-confirm mb-2" data-message="¿Deseas eliminar esta tarea?">
+                                                                <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="swal-confirm mb-2" data-message="{{ $hasSubmissions ? 'Esta tarea tiene entregas registradas. Como administrador puedes eliminarla junto con sus datos relacionados. ¿Deseas continuar?' : '¿Deseas eliminar esta tarea?' }}">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit" class="btn btn-sm btn-danger">
-                                                                        <i class="bi bi-trash"></i> Eliminar
+                                                                        <i class="bi bi-trash"></i> {{ $hasSubmissions ? 'Eliminar como admin' : 'Eliminar' }}
                                                                     </button>
                                                                 </form>
                                                             @endif
@@ -626,7 +630,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3 print-report-header">
                         <div>
                             <h5 class="fw-bold text-dark mb-1">Consolidado de Calificaciones</h5>
-                            <p class="text-muted mb-0">Curso: {{ $training->course->title }} | NRC: {{ $training->course->nrc ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
+                            <p class="text-muted mb-0">Curso: {{ $training->course->title }} | NRC: {{ $training->nrc ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
                         </div>
                         <a href="{{ route('teacher.courses.report', $training->training_id) }}" class="btn btn-sm btn-outline-success">
                             <i class="bi bi-printer me-1"></i> Imprimir Registro

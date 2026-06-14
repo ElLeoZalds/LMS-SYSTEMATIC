@@ -4,46 +4,116 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class SpecialtiesSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('courses')->truncate();
+        Schema::disableForeignKeyConstraints();
         DB::table('specialties')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        Schema::enableForeignKeyConstraints();
 
         DB::table('specialties')->insert([
             [
-                'specialty' => 'Ofimática y Análisis de Datos',
+                'specialty' => 'Ofimatica',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
-                'specialty' => 'Diseño, Arquitectura e Ingeniería',
+                'specialty' => 'Diseno y Arquitectura',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
-                'specialty' => 'Programación y Tecnología',
+                'specialty' => 'Programacion',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
-                'specialty' => 'Robótica y Tecnología Educativa',
+                'specialty' => 'Robotica',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
-                'specialty' => 'Marketing y Producción Multimedia',
+                'specialty' => 'Marketing Digital',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
-                'specialty' => 'Desarrollo Personal y Comunicación',
+                'specialty' => 'Comunicacion',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Analisis de Datos',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Gestion Empresarial',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Finanzas',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Idiomas',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Ciberseguridad',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Redes',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Multimedia',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Educacion',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Logistica',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Recursos Humanos',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Ventas',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Contabilidad',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Innovacion',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'specialty' => 'Emprendimiento',
+                'created_at' => now(),
+                'updated_at' => now(),
             ]
         ]);
     }

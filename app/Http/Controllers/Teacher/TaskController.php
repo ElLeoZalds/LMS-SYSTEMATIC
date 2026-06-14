@@ -11,6 +11,11 @@ use Carbon\Carbon;
 
 class TaskController extends Controller
 {
+    private function isAdministrator(): bool
+    {
+        return auth()->user()?->roles->contains('name', 'Administrator') ?? false;
+    }
+
     /**
      * Almacena una nueva tarea asignada desde el modal.
      */
@@ -27,7 +32,7 @@ class TaskController extends Controller
         $user = auth()->user();
 
         $training = Training::where('training_id', $request->training_id)
-            ->where('teacher_id', $user->user_id)
+            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $dueDate = Carbon::parse($request->delivery_date)->endOfDay();
@@ -72,9 +77,10 @@ class TaskController extends Controller
 
         // Buscamos la tarea asegurándonos de que pertenezca a un curso del profesor logueado
         $task = Task::where('task_id', $task_id)
-            ->whereHas('training', function ($query) use ($user) {
+            ->when(! $this->isAdministrator(), fn($query) => $query->whereHas('training', function ($query) use ($user) {
                 $query->where('teacher_id', $user->user_id);
-            })->firstOrFail();
+            }))
+            ->firstOrFail();
 
         // Cargamos las entregas junto con los datos del estudiante
         $submissions = $task->submissions()->with('student.person')->get();
@@ -96,9 +102,10 @@ class TaskController extends Controller
 
         // Buscamos la entrega asegurando que pertenezca a una tarea del profesor logueado
         $submission = TaskSubmission::where('submission_id', $submission_id)
-            ->whereHas('task.training', function ($query) use ($user) {
+            ->when(! $this->isAdministrator(), fn($query) => $query->whereHas('task.training', function ($query) use ($user) {
                 $query->where('teacher_id', $user->user_id);
-            })->firstOrFail();
+            }))
+            ->firstOrFail();
 
         // Actualizamos los campos de la calificación
         $submission->update([
@@ -126,9 +133,10 @@ class TaskController extends Controller
         $user = auth()->user();
 
         $task = Task::where('task_id', $task_id)
-            ->whereHas('training', function ($q) use ($user) {
+            ->when(! $this->isAdministrator(), fn($query) => $query->whereHas('training', function ($q) use ($user) {
                 $q->where('teacher_id', $user->user_id);
-            })->firstOrFail();
+            }))
+            ->firstOrFail();
 
         if ($task->training->end_date) {
             $courseEnd = Carbon::parse($task->training->end_date)->endOfDay();
@@ -167,11 +175,12 @@ class TaskController extends Controller
         $user = auth()->user();
 
         $task = Task::where('task_id', $task_id)
-            ->whereHas('training', function ($q) use ($user) {
+            ->when(! $this->isAdministrator(), fn($query) => $query->whereHas('training', function ($q) use ($user) {
                 $q->where('teacher_id', $user->user_id);
-            })->firstOrFail();
+            }))
+            ->firstOrFail();
 
-        if ($task->submissions()->exists()) {
+        if (! $this->isAdministrator() && $task->submissions()->exists()) {
             return redirect()->route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])
                 ->with('error', 'No se puede eliminar la tarea porque ya tiene entregas registradas.');
         }

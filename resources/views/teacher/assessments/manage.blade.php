@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $isAdministrator = auth()->user()?->roles->contains('name', 'Administrator') ?? false;
+    @endphp
+
     <div class="container-fluid px-4 py-1">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -34,7 +38,7 @@
                     <div class="card-body">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Capacitación</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $training->course->title }}</div>
-                        <div class="small text-muted mt-1">NRC: {{ $training->course->nrc ?? 'N/A' }}</div>
+                        <div class="small text-muted mt-1">NRC: {{ $training->nrc ?? 'N/A' }}</div>
                     </div>
                 </div>
             </div>
@@ -95,14 +99,14 @@
                                     </div>
 
                                     {{-- Botón Eliminar Evaluación --}}
-                                    @if($hasAttempts)
+                                    @if($hasAttempts && ! $isAdministrator)
                                         <span class="badge badge-warning text-dark mt-1 d-inline-block">No se puede eliminar: tiene intentos</span>
                                     @else
-                                        <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="d-inline-block mt-1 swal-confirm" data-message="¿Estás seguro de eliminar esta evaluación?">
+                                        <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="d-inline-block mt-1 swal-confirm" data-message="{{ $hasAttempts ? 'Esta evaluación tiene intentos registrados. Como administrador puedes eliminarla junto con sus datos relacionados. ¿Deseas continuar?' : '¿Estás seguro de eliminar esta evaluación?' }}">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                                                <i class="fas fa-trash-alt mr-1"></i> {{ $hasAttempts ? 'Eliminar como admin' : 'Eliminar' }}
                                             </button>
                                         </form>
                                     @endif

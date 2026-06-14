@@ -14,6 +14,11 @@ use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
+    private function isAdministrator(): bool
+    {
+        return auth()->user()?->roles->contains('name', 'Administrator') ?? false;
+    }
+
     /**
      * Show the form for recording attendance for a specific schedule.
      *
@@ -30,7 +35,7 @@ class AttendanceController extends Controller
 
         $user = auth()->user();
         $trainings = Training::with('course')
-            ->where('teacher_id', $user->user_id)
+            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
             ->get();
 
         $training = null;
@@ -100,7 +105,7 @@ class AttendanceController extends Controller
         // Buscamos la capacitación limpia para validar propiedad
         $training = \App\Models\Training::findOrFail($request->training_id);
 
-        if ($training->teacher_id !== auth()->user()->user_id) {
+        if (! $this->isAdministrator() && $training->teacher_id !== auth()->user()->user_id) {
             abort(403, 'No tienes permiso para registrar asistencias en esta capacitación.');
         }
 

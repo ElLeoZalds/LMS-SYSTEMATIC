@@ -5,11 +5,16 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class UsersSeeder extends Seeder
 {
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
+        DB::table('users')->truncate();
+        Schema::enableForeignKeyConstraints();
+
         DB::table('users')->insert([
             [
                 'person_id' => 1,
@@ -17,7 +22,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 2,
@@ -25,7 +30,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 3,
@@ -33,56 +38,31 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'person_id' => 27,
-                'username' => 'roberto.vega.teacher',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'person_id' => 28,
-                'username' => 'sofia.luna.teacher',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'person_id' => 29,
-                'username' => 'diego.ponce.teacher',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 4,
-                'username' => 'ana.rojas.student',
+                'username' => 'ana.rojas.teacher',
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
-
             [
                 'person_id' => 5,
-                'username' => 'carlos.martinez.student',
+                'username' => 'carlos.martinez.teacher',
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 6,
-                'username' => 'laura.garcia.student',
+                'username' => 'laura.garcia.teacher',
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 7,
@@ -90,7 +70,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 8,
@@ -98,7 +78,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 9,
@@ -106,7 +86,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 10,
@@ -114,7 +94,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 11,
@@ -122,7 +102,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 12,
@@ -130,7 +110,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 13,
@@ -138,7 +118,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 14,
@@ -146,7 +126,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 15,
@@ -154,7 +134,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 16,
@@ -162,7 +142,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 17,
@@ -170,7 +150,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 18,
@@ -178,7 +158,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 19,
@@ -186,7 +166,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'person_id' => 20,
@@ -194,55 +174,7 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'status' => 'A',
                 'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'person_id' => 21,
-                'username' => 'antonio.ruiz.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'person_id' => 22,
-                'username' => 'silvia.mendoza.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'person_id' => 23,
-                'username' => 'ricardo.guerrero.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'person_id' => 24,
-                'username' => 'daniela.herrera.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'person_id' => 25,
-                'username' => 'oscar.medina.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'person_id' => 26,
-                'username' => 'veronica.cabrera.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]
         ]);
     }

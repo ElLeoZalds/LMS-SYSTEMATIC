@@ -8,6 +8,7 @@ use App\Models\Training;
 use App\Models\Course;
 use App\Models\User;
 use App\Models\Enrollment;
+use Illuminate\Validation\Rule;
 
 class TrainingController extends Controller
 {
@@ -18,6 +19,7 @@ class TrainingController extends Controller
     {
         $trainings = Training::with(['course', 'teacher.person', 'administrator.person'])
             ->where('status', 1)
+            ->when(request('nrc'), fn($query, $nrc) => $query->where('nrc', 'like', '%' . $nrc . '%'))
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -49,6 +51,7 @@ class TrainingController extends Controller
         $request->validate([
             'course_id' => 'required|exists:courses,course_id',
             'teacher_id' => 'required|exists:users,user_id',
+            'nrc' => 'required|digits:5|unique:trainings,nrc',
             'modality' => 'required|in:virtual,presential,hybrid',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -58,6 +61,7 @@ class TrainingController extends Controller
             'course_id' => $request->course_id,
             'teacher_id' => $request->teacher_id,
             'administrator_id' => auth()->id(),
+            'nrc' => $request->nrc,
             'modality' => $request->modality,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
@@ -94,6 +98,11 @@ class TrainingController extends Controller
         $request->validate([
             'course_id' => 'required|exists:courses,course_id',
             'teacher_id' => 'required|exists:users,user_id',
+            'nrc' => [
+                'required',
+                'digits:5',
+                Rule::unique('trainings', 'nrc')->ignore($id, 'training_id'),
+            ],
             'modality' => 'required|in:virtual,presential,hybrid',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -105,6 +114,7 @@ class TrainingController extends Controller
             'course_id' => $request->course_id,
             'teacher_id' => $request->teacher_id,
             'administrator_id' => auth()->id(),
+            'nrc' => $request->nrc,
             'modality' => $request->modality,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,

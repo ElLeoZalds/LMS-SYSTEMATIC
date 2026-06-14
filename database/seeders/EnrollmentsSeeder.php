@@ -4,230 +4,216 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class EnrollmentsSeeder extends Seeder
 {
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
+        DB::table('enrollments')->truncate();
+        Schema::enableForeignKeyConstraints();
+
         DB::table('enrollments')->insert([
-            [
-                'training_id' => 1,
-                'student_id' => 4,
-                'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => 10,
-                'status' => 'A'
-            ],
-            [
-                'training_id' => 2,
-                'student_id' => 4,
-                'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
-            ],
-            [
-                'training_id' => 3,
-                'student_id' => 2,
-                'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => 5,
-                'status' => 'A'
-            ],
-            [
-                'training_id' => 4,
-                'student_id' => 3,
-                'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
-            ],
-            [
-                'training_id' => 5,
-                'student_id' => 4,
-                'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => 15,
-                'status' => 'A'
-            ],
-            // Nuevos enrollments para training 1 (10 estudiantes)
-            [
-                'training_id' => 1,
-                'student_id' => 5,
-                'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
-            ],
-            [
-                'training_id' => 1,
-                'student_id' => 6,
-                'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
-            ],
             [
                 'training_id' => 1,
                 'student_id' => 7,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(19)->toDateString(),
+                'scholarship_percentage' => 5,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 1,
+                'training_id' => 2,
                 'student_id' => 8,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(18)->toDateString(),
+                'scholarship_percentage' => 10,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 1,
+                'training_id' => 3,
                 'student_id' => 9,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(17)->toDateString(),
+                'scholarship_percentage' => 15,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 1,
+                'training_id' => 4,
                 'student_id' => 10,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(16)->toDateString(),
+                'scholarship_percentage' => 20,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 1,
+                'training_id' => 5,
                 'student_id' => 11,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(15)->toDateString(),
+                'scholarship_percentage' => 0,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 1,
+                'training_id' => 6,
                 'student_id' => 12,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(14)->toDateString(),
+                'scholarship_percentage' => 5,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 1,
+                'training_id' => 7,
                 'student_id' => 13,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(13)->toDateString(),
+                'scholarship_percentage' => 10,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-            // Training 2 (11 estudiantes)
             [
-                'training_id' => 2,
+                'training_id' => 8,
                 'student_id' => 14,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(12)->toDateString(),
+                'scholarship_percentage' => 15,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
+                'training_id' => 9,
                 'student_id' => 15,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(11)->toDateString(),
+                'scholarship_percentage' => 20,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
+                'training_id' => 10,
                 'student_id' => 16,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(10)->toDateString(),
+                'scholarship_percentage' => 0,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
+                'training_id' => 11,
                 'student_id' => 17,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(9)->toDateString(),
+                'scholarship_percentage' => 5,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
+                'training_id' => 12,
                 'student_id' => 18,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(8)->toDateString(),
+                'scholarship_percentage' => 10,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
+                'training_id' => 13,
                 'student_id' => 19,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(7)->toDateString(),
+                'scholarship_percentage' => 15,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
+                'training_id' => 14,
                 'student_id' => 20,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(6)->toDateString(),
+                'scholarship_percentage' => 20,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
-                'student_id' => 21,
+                'training_id' => 15,
+                'student_id' => 7,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(5)->toDateString(),
+                'scholarship_percentage' => 0,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
-                'student_id' => 22,
+                'training_id' => 16,
+                'student_id' => 8,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(4)->toDateString(),
+                'scholarship_percentage' => 5,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
-                'student_id' => 23,
+                'training_id' => 17,
+                'student_id' => 9,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(3)->toDateString(),
+                'scholarship_percentage' => 10,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 2,
-                'student_id' => 24,
+                'training_id' => 18,
+                'student_id' => 10,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
-            ],
-            // Training 3 (3 estudiantes)
-            [
-                'training_id' => 3,
-                'student_id' => 25,
-                'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(2)->toDateString(),
+                'scholarship_percentage' => 15,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'training_id' => 3,
-                'student_id' => 26,
+                'training_id' => 19,
+                'student_id' => 11,
                 'administrator_id' => 1,
-                'enrollment_date' => now(),
-                'scholarship_percentage' => null,
-                'status' => 'A'
+                'enrollment_date' => now()->subDays(1)->toDateString(),
+                'scholarship_percentage' => 20,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'training_id' => 20,
+                'student_id' => 12,
+                'administrator_id' => 1,
+                'enrollment_date' => now()->subDays(0)->toDateString(),
+                'scholarship_percentage' => 0,
+                'status' => 'A',
+                'created_at' => now(),
+                'updated_at' => now(),
             ]
         ]);
     }

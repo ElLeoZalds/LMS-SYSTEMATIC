@@ -13,6 +13,7 @@ class Training extends Model
         'course_id',
         'teacher_id',
         'administrator_id',
+        'nrc',
         'modality',
         'start_date',
         'end_date',

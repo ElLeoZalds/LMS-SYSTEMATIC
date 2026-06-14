@@ -14,6 +14,19 @@
             </button>
         </div>
 
+        <form method="GET" action="{{ route('admin.trainings.index') }}" class="row g-2 align-items-end mb-3">
+            <div class="col-12 col-md-4 col-lg-3">
+                <label for="search_nrc" class="form-label">Buscar por NRC</label>
+                <input type="text" name="nrc" id="search_nrc" value="{{ request('nrc') }}" class="form-control" maxlength="5" inputmode="numeric" placeholder="Ej. 10001">
+            </div>
+            <div class="col-12 col-md-auto">
+                <button type="submit" class="btn btn-outline-primary">Buscar</button>
+                @if(request('nrc'))
+                    <a href="{{ route('admin.trainings.index') }}" class="btn btn-outline-secondary">Limpiar</a>
+                @endif
+            </div>
+        </form>
+
         <div class="card shadow mb-4">
             <div class="card-body p-3">
                 <div class="table-responsive">
@@ -38,6 +51,7 @@
                                     <td class="align-middle">
                                         <div class="fw-bold">{{ optional($training->course)->title ?? 'Sin curso' }}</div>
                                         <div class="text-muted small">
+                                            NRC: {{ $training->nrc }}<br>
                                             {{ optional($training->teacher->person)->first_names ?? 'Sin nombre' }}
                                             {{ optional($training->teacher->person)->last_names ?? '' }}
                                         </div>
@@ -66,6 +80,9 @@
                                         <span class="badge {{ $badgeClass }}">{{ $badgeText }}</span>
                                     </td>
                                     <td class="align-middle text-end">
+                                        <a href="{{ route('teacher.courses.show', $training->training_id) }}" class="btn btn-sm btn-info text-white">
+                                            <i class="fas fa-chalkboard-teacher"></i> Gestionar
+                                        </a>
                                         <a href="{{ route('admin.enrollments.create', ['training_id' => $training->training_id]) }}" class="btn btn-sm btn-success">
                                             <i class="fas fa-user-plus"></i>
                                         </a>
@@ -74,6 +91,7 @@
                                         </button>
                                         <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $training->training_id }}"
                                             data-course="{{ $training->course_id }}" data-teacher="{{ $training->teacher_id }}"
+                                            data-nrc="{{ $training->nrc }}"
                                             data-start-date="{{ $training->start_date ? $training->start_date->format('Y-m-d') : '' }}"
                                             data-end-date="{{ $training->end_date ? $training->end_date->format('Y-m-d') : '' }}"
                                             data-modality="{{ $training->modality }}">
@@ -116,6 +134,10 @@
                                         <option value="{{ $course->course_id }}">{{ $course->title }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nrc" class="form-label">NRC</label>
+                                <input type="text" name="nrc" id="nrc" class="form-control" maxlength="5" pattern="\d{5}" inputmode="numeric" required>
                             </div>
                             <div class="mb-3">
                                 <label for="teacher_id" class="form-label">Profesor</label>
@@ -223,6 +245,10 @@
                                             {{ $teacher->person->first_names ?? 'Sin nombre' }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_nrc" class="form-label">NRC</label>
+                                <input type="text" name="nrc" id="edit_nrc" class="form-control" maxlength="5" pattern="\d{5}" inputmode="numeric" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -369,12 +395,14 @@
                     const id = this.getAttribute('data-id');
                     const course = this.getAttribute('data-course');
                     const teacher = this.getAttribute('data-teacher');
+                    const nrc = this.getAttribute('data-nrc');
                     const startDate = this.getAttribute('data-start-date');
                     const endDate = this.getAttribute('data-end-date');
                     const modality = this.getAttribute('data-modality');
 
                     document.getElementById('edit_course_id').value = course;
                     document.getElementById('edit_teacher_id').value = teacher;
+                    document.getElementById('edit_nrc').value = nrc;
                     document.getElementById('edit_start_date').value = startDate;
                     document.getElementById('edit_end_date').value = endDate;
                     document.getElementById('edit_modality').value = modality;

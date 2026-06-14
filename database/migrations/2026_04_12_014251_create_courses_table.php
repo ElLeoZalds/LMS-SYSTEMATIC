@@ -16,7 +16,6 @@ return new class extends Migration {
             $table->unsignedBigInteger('specialty_id');
             $table->foreign('specialty_id')->references('specialty_id')->on('specialties')->onDelete('restrict');
             $table->string('banner_path')->nullable();
-            $table->char('nrc', 5)->unique();
             $table->string('title', 150);
             $table->text('description')->nullable();
             $table->integer('hours_count')->nullable();

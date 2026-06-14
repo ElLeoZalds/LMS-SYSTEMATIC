@@ -15,11 +15,16 @@ class AssessmentController extends Controller
 {
     private const MAX_TOTAL_SCORE = 20;
 
+    private function isAdministrator(): bool
+    {
+        return auth()->user()?->roles->contains('name', 'Administrator') ?? false;
+    }
+
     public function index()
     {
         $user = auth()->user();
         $trainings = Training::with('course')
-            ->where('teacher_id', $user->user_id)
+            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
             ->get();
 
         return view('teacher.assessments.index', compact('trainings'));
@@ -35,7 +40,7 @@ class AssessmentController extends Controller
                 'assessments.attempts.user'
             ])
             ->where('training_id', $training_id)
-            ->where('teacher_id', $user->user_id)
+            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         return view('teacher.assessments.manage', compact('training'));
@@ -49,7 +54,7 @@ class AssessmentController extends Controller
             ->where('assessment_id', $assessment_id)
             ->firstOrFail();
 
-        if ($assessment->training->teacher_id !== $user->user_id) {
+        if (! $this->isAdministrator() && $assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
         }
 
@@ -71,7 +76,7 @@ class AssessmentController extends Controller
 
         $user = auth()->user();
         $training = Training::where('training_id', $request->training_id)
-            ->where('teacher_id', $user->user_id)
+            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $startDate = Carbon::parse($request->start_date);
@@ -123,7 +128,7 @@ class AssessmentController extends Controller
         $user = auth()->user();
         $assessment = Assessment::with('training')->findOrFail($assessment_id);
 
-        if ($assessment->training->teacher_id !== $user->user_id) {
+        if (! $this->isAdministrator() && $assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
         }
 
@@ -167,7 +172,7 @@ class AssessmentController extends Controller
         $user = auth()->user();
         $question = Question::with('assessment.training')->findOrFail($question_id);
 
-        if ($question->assessment->training->teacher_id !== $user->user_id) {
+        if (! $this->isAdministrator() && $question->assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
         }
 
@@ -207,11 +212,11 @@ class AssessmentController extends Controller
         $user = auth()->user();
         $question = Question::with('assessment.training')->findOrFail($question_id);
 
-        if ($question->assessment->training->teacher_id !== $user->user_id) {
+        if (! $this->isAdministrator() && $question->assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
         }
 
-        if ($question->assessment->attempts()->exists()) {
+        if (! $this->isAdministrator() && $question->assessment->attempts()->exists()) {
             return redirect()->back()->with('error', 'La evaluación ya tiene intentos.');
         }
 
@@ -239,7 +244,7 @@ class AssessmentController extends Controller
         $user = auth()->user();
         $question = Question::with('assessment.training')->findOrFail($question_id);
 
-        if ($question->assessment->training->teacher_id !== $user->user_id) {
+        if (! $this->isAdministrator() && $question->assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
         }
 
@@ -270,7 +275,7 @@ class AssessmentController extends Controller
         $user = auth()->user();
         $assessment = Assessment::with('training')->where('assessment_id', $assessment_id)->firstOrFail();
 
-        if ($assessment->training->teacher_id !== $user->user_id) {
+        if (! $this->isAdministrator() && $assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
         }
 
@@ -309,12 +314,12 @@ class AssessmentController extends Controller
         $user = auth()->user();
         $assessment = Assessment::with('training')->where('assessment_id', $assessment_id)->firstOrFail();
 
-        if ($assessment->training->teacher_id !== $user->user_id) {
+        if (! $this->isAdministrator() && $assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
         }
 
         $trainingId = $assessment->training_id;
-        if ($assessment->attempts()->exists()) {
+        if (! $this->isAdministrator() && $assessment->attempts()->exists()) {
             return redirect()->route('teacher.courses.show', ['id' => $trainingId, 'tab' => 'contenido'])
                 ->with('error', 'No se puede eliminar la evaluación porque ya tiene intentos registrados.');
         }
