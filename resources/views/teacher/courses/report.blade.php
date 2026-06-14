@@ -119,7 +119,7 @@
                         <h1 class="h4 mb-1">Reporte de Calificaciones</h1>
                         <p class="mb-1">Curso: <strong>{{ $training->course->title }}</strong></p>
                         <p class="mb-1">Docente: <strong>{{ $training->teacher->person->first_names ?? '' }} {{ $training->teacher->person->last_names ?? '' }}</strong></p>
-                        <p class="mb-1">Código: <strong>{{ $training->course->code ?? 'N/A' }}</strong> | Modalidad: <strong>{{ ucfirst($training->modality) }}</strong></p>
+                        <p class="mb-1">NRC: <strong>{{ $training->course->nrc ?? 'N/A' }}</strong> | Modalidad: <strong>{{ ucfirst($training->modality) }}</strong></p>
                         <p class="mb-1">Estudiantes registrados: <strong>{{ $students->count() }}</strong></p>
                         <p class="text-muted mb-0">Fecha de emisión: {{ now()->format('d/m/Y H:i') }}</p>
                     </div>

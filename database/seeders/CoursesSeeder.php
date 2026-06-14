@@ -14,6 +14,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 1,
                 'banner_path' => null,
+                'nrc' => '10001',
                 'title' => 'Excel Profesional',
                 'description' => 'Domina Excel desde básico hasta avanzado',
                 'hours_count' => 60,
@@ -22,6 +23,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 1,
                 'banner_path' => null,
+                'nrc' => '10002',
                 'title' => 'Excel Macros',
                 'description' => 'Automatiza tareas con macros en Excel',
                 'hours_count' => 40,
@@ -30,6 +32,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 1,
                 'banner_path' => null,
+                'nrc' => '10003',
                 'title' => 'Excel Financiero',
                 'description' => 'Excel para análisis financiero',
                 'hours_count' => 50,
@@ -38,6 +41,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 1,
                 'banner_path' => null,
+                'nrc' => '10004',
                 'title' => 'Power BI',
                 'description' => 'Análisis y visualización de datos',
                 'hours_count' => 40,
@@ -46,6 +50,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 1,
                 'banner_path' => null,
+                'nrc' => '10005',
                 'title' => 'Microsoft Project',
                 'description' => 'Gestión de proyectos con MS Project',
                 'hours_count' => 35,
@@ -54,6 +59,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 1,
                 'banner_path' => null,
+                'nrc' => '10006',
                 'title' => 'Ofimática Profesional',
                 'description' => 'Suite ofimática completa',
                 'hours_count' => 50,
@@ -63,6 +69,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 2,
                 'banner_path' => null,
+                'nrc' => '20001',
                 'title' => 'AutoCAD Profesional',
                 'description' => 'Diseño técnico con AutoCAD',
                 'hours_count' => 70,
@@ -71,6 +78,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 2,
                 'banner_path' => null,
+                'nrc' => '20002',
                 'title' => 'Revit Profesional',
                 'description' => 'Modelado BIM con Revit',
                 'hours_count' => 80,
@@ -79,6 +87,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 2,
                 'banner_path' => null,
+                'nrc' => '20003',
                 'title' => 'Diseño Gráfico Profesional',
                 'description' => 'Herramientas y técnicas de diseño gráfico',
                 'hours_count' => 60,
@@ -87,6 +96,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 2,
                 'banner_path' => null,
+                'nrc' => '20004',
                 'title' => 'Topografía Profesional',
                 'description' => 'Técnicas modernas de topografía',
                 'hours_count' => 70,
@@ -96,6 +106,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 3,
                 'banner_path' => null,
+                'nrc' => '30001',
                 'title' => 'Python',
                 'description' => 'Programación desde cero hasta avanzado',
                 'hours_count' => 60,
@@ -104,6 +115,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 3,
                 'banner_path' => null,
+                'nrc' => '30002',
                 'title' => 'Programación de Videojuegos',
                 'description' => 'Crea tus propios juegos desde cero',
                 'hours_count' => 75,
@@ -112,6 +124,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 3,
                 'banner_path' => null,
+                'nrc' => '30003',
                 'title' => 'Inteligencia Artificial Aplicada',
                 'description' => 'IA para negocios y tecnología',
                 'hours_count' => 80,
@@ -120,6 +133,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 3,
                 'banner_path' => null,
+                'nrc' => '30004',
                 'title' => 'SAP ERP',
                 'description' => 'Sistema de planificación de recursos empresariales',
                 'hours_count' => 90,
@@ -128,6 +142,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 3,
                 'banner_path' => null,
+                'nrc' => '30005',
                 'title' => 'Ensamblaje de Computadoras',
                 'description' => 'Técnicas de ensamblaje y reparación',
                 'hours_count' => 35,
@@ -137,6 +152,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 4,
                 'banner_path' => null,
+                'nrc' => '40001',
                 'title' => 'Robótica para Niños y Jóvenes',
                 'description' => 'Aprende construyendo robots',
                 'hours_count' => 45,
@@ -146,6 +162,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 5,
                 'banner_path' => null,
+                'nrc' => '50001',
                 'title' => 'Marketing Digital',
                 'description' => 'Estrategias y fundamentos del marketing digital',
                 'hours_count' => 50,
@@ -154,6 +171,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 5,
                 'banner_path' => null,
+                'nrc' => '50002',
                 'title' => 'Edición de Video',
                 'description' => 'Producción y edición de video',
                 'hours_count' => 55,
@@ -163,6 +181,7 @@ class CoursesSeeder extends Seeder
             [
                 'specialty_id' => 6,
                 'banner_path' => null,
+                'nrc' => '60001',
                 'title' => 'Oratoria',
                 'description' => 'Habla en público con confianza',
                 'hours_count' => 30,

@@ -3,6 +3,14 @@
     $person = optional(auth()->user()->person);
     $fullName = trim(($person->last_names ? $person->last_names . ' ' : '') . ($person->first_names ?? ''));
     $displayRole = 'Usuario';
+    $sidebarTheme = [
+        'Administrator' => ['bg-gradient-warning', 'sidebar-light', 'text-dark'],
+        'Teacher' => ['bg-gradient-success', 'sidebar-dark', 'text-light'],
+        'Student' => ['bg-gradient-primary', 'sidebar-dark', 'text-light'],
+    ][$role] ?? ['bg-gradient-primary', 'sidebar-dark', 'text-light'];
+
+    [$sidebarBackgroundClass, $sidebarTextClass, $sidebarInfoTextClass] = $sidebarTheme;
+
     if ($role === 'Administrator') {
         $displayRole = 'Administrador';
     } elseif ($role === 'Teacher') {
@@ -14,7 +22,7 @@
     }
 @endphp
 
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<ul class="navbar-nav {{ $sidebarBackgroundClass }} sidebar {{ $sidebarTextClass }} accordion" id="accordionSidebar">
 
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="
         @if($role === 'Administrator')
@@ -31,7 +39,7 @@
         <div class="sidebar-brand-text mx-3">Systematic LMS</div>
     </a>
 
-    <div class="text-center text-light small mb-3">
+    <div class="text-center {{ $sidebarInfoTextClass }} small mb-3">
         <div>{{ $fullName ?: 'Usuario' }}</div>
         <div class="small">{{ $displayRole }}</div>
     </div>

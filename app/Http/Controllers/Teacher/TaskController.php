@@ -171,6 +171,11 @@ class TaskController extends Controller
                 $q->where('teacher_id', $user->user_id);
             })->firstOrFail();
 
+        if ($task->submissions()->exists()) {
+            return redirect()->route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])
+                ->with('error', 'No se puede eliminar la tarea porque ya tiene entregas registradas.');
+        }
+
         if ($task->file_path) {
             try {
                 \Storage::disk('public')->delete($task->file_path);

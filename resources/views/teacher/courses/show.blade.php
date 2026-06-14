@@ -6,7 +6,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="h3 mb-2 text-gray-800">{{ $training->course->title }}</h1>
-                <small class="text-muted">Código: {{ $training->course->code ?? 'N/A' }} | Modalidad:
+                <small class="text-muted">NRC: {{ $training->course->nrc ?? 'N/A' }} | Modalidad:
                     <strong>{{ ucfirst($training->modality) }}</strong></small>
             </div>
             <a href="{{ route('teacher.courses') }}" class="btn btn-sm btn-outline-secondary">
@@ -370,6 +370,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach($training->assessments as $assessment)
+                                            @php $hasAttempts = $assessment->attempts()->exists(); @endphp
                                             <tr>
                                                 <td>
                                                     <div class="fw-bold">{{ $assessment->title }}</div>
@@ -391,13 +392,17 @@
                                                         <button type="button" class="btn btn-sm btn-outline-primary edit-assessment-btn mb-2" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
                                                             <i class="bi bi-pencil"></i> Editar
                                                         </button>
-                                                        <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm mb-2" data-message="¿Estás seguro de eliminar esta evaluación? Se eliminarán también los intentos asociados.">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                                <i class="bi bi-trash"></i> Eliminar
-                                                            </button>
-                                                        </form>
+                                                        @if($hasAttempts)
+                                                            <span class="badge bg-warning text-dark mb-2">No se puede eliminar: tiene intentos</span>
+                                                        @else
+                                                            <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm mb-2" data-message="¿Estás seguro de eliminar esta evaluación?">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                                    <i class="bi bi-trash"></i> Eliminar
+                                                                </button>
+                                                            </form>
+                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>
@@ -446,6 +451,7 @@
                                         </thead>
                                         <tbody>
                                             @foreach($training->tasks as $task)
+                                                @php $hasSubmissions = $task->submissions->isNotEmpty(); @endphp
                                                 <tr>
                                                     <td>
                                                         <div class="fw-bold">{{ $task->title }}</div>
@@ -474,13 +480,17 @@
                                                             <button type="button" class="btn btn-sm btn-primary edit-task-btn mb-2" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}'>
                                                                 <i class="bi bi-pencil"></i> Editar
                                                             </button>
-                                                            <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="swal-confirm mb-2" data-message="¿Deseas eliminar esta tarea? Las entregas asociadas también se eliminarán automáticamente.">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                                    <i class="bi bi-trash"></i> Eliminar
-                                                                </button>
-                                                            </form>
+                                                            @if($hasSubmissions)
+                                                                <span class="badge bg-warning text-dark mb-2">No se puede eliminar: tiene entregas</span>
+                                                            @else
+                                                                <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="swal-confirm mb-2" data-message="¿Deseas eliminar esta tarea?">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                                        <i class="bi bi-trash"></i> Eliminar
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -616,7 +626,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3 print-report-header">
                         <div>
                             <h5 class="fw-bold text-dark mb-1">Consolidado de Calificaciones</h5>
-                            <p class="text-muted mb-0">Curso: {{ $training->course->title }} | Código: {{ $training->course->code ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
+                            <p class="text-muted mb-0">Curso: {{ $training->course->title }} | NRC: {{ $training->course->nrc ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
                         </div>
                         <a href="{{ route('teacher.courses.report', $training->training_id) }}" class="btn btn-sm btn-outline-success">
                             <i class="bi bi-printer me-1"></i> Imprimir Registro

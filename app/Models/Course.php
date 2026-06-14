@@ -11,6 +11,7 @@ class Course extends Model
     protected $fillable = [
         'specialty_id',
         'banner_path',
+        'nrc',
         'title',
         'description',
         'hours_count',

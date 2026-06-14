@@ -34,7 +34,7 @@
                     <div class="card-body">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Capacitación</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $training->course->title }}</div>
-                        <div class="small text-muted mt-1">Código: {{ $training->course->code ?? 'N/A' }}</div>
+                        <div class="small text-muted mt-1">NRC: {{ $training->course->nrc ?? 'N/A' }}</div>
                     </div>
                 </div>
             </div>
@@ -63,6 +63,7 @@
             @forelse($training->assessments as $assessment)
                 @php
                     $totalScore = $assessment->questions->sum('score');
+                    $hasAttempts = $assessment->attempts()->exists();
                 @endphp
                 <div class="col-12 mb-4">
                     <div class="card shadow">
@@ -94,13 +95,17 @@
                                     </div>
 
                                     {{-- Botón Eliminar Evaluación --}}
-                                    <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="d-inline-block mt-1 swal-confirm" data-message="¿Estás seguro de eliminar esta evaluación? Se eliminarán también los intentos asociados.">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
-                                        </button>
-                                    </form>
+                                    @if($hasAttempts)
+                                        <span class="badge badge-warning text-dark mt-1 d-inline-block">No se puede eliminar: tiene intentos</span>
+                                    @else
+                                        <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="d-inline-block mt-1 swal-confirm" data-message="¿Estás seguro de eliminar esta evaluación?">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
 

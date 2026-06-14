@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Models\Specialty;
+use Illuminate\Validation\Rule;
 
 class CourseController extends Controller
 {
@@ -31,6 +32,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'specialty_id' => 'required|exists:specialties,specialty_id',
+            'nrc' => 'required|digits:5|unique:courses,nrc',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string',
             'hours_count' => 'nullable|integer|min:0',
@@ -40,6 +42,7 @@ class CourseController extends Controller
 
         Course::create([
             'specialty_id' => $request->specialty_id,
+            'nrc' => $request->nrc,
             'title' => $request->title,
             'description' => $request->description,
             'hours_count' => $request->hours_count,
@@ -64,6 +67,11 @@ class CourseController extends Controller
 
         $request->validate([
             'specialty_id' => 'required|exists:specialties,specialty_id',
+            'nrc' => [
+                'required',
+                'digits:5',
+                Rule::unique('courses', 'nrc')->ignore($course->course_id, 'course_id'),
+            ],
             'title' => 'required|string|max:150',
             'description' => 'nullable|string',
             'hours_count' => 'nullable|integer|min:0',
@@ -72,6 +80,7 @@ class CourseController extends Controller
 
         $course->update($request->only([
             'specialty_id',
+            'nrc',
             'title',
             'description',
             'hours_count',

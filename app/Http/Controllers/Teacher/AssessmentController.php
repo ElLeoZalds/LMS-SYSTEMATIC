@@ -314,15 +314,15 @@ class AssessmentController extends Controller
         }
 
         $trainingId = $assessment->training_id;
-        $hadAttempts = $assessment->attempts()->exists();
+        if ($assessment->attempts()->exists()) {
+            return redirect()->route('teacher.courses.show', ['id' => $trainingId, 'tab' => 'contenido'])
+                ->with('error', 'No se puede eliminar la evaluación porque ya tiene intentos registrados.');
+        }
+
         $assessment->delete();
 
-        $message = $hadAttempts
-            ? 'Evaluación eliminada. Los intentos existentes también fueron eliminados.'
-            : 'Evaluación eliminada correctamente.';
-
         return redirect()->route('teacher.courses.show', ['id' => $trainingId, 'tab' => 'contenido'])
-            ->with('success', $message);
+            ->with('success', 'Evaluación eliminada correctamente.');
     }
 
 }

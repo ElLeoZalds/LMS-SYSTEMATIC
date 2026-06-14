@@ -24,7 +24,7 @@
                                         <h5 class="card-title fw-bold text-dark mb-2 line-clamp-2" style="font-size: 1.1rem;">
                                             {{ $training->course->title }}
                                         </h5>
-                                        <p class="text-muted small mb-0">Código: {{ $training->course->code ?? 'N/A' }}</p>
+                                        <p class="text-muted small mb-0">NRC: {{ $training->course->nrc ?? 'N/A' }}</p>
                                     </div>
 
                                     <div class="row text-center mt-4 pt-3 border-top g-2 flex-grow-1 align-items-end">

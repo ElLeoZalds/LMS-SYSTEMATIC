@@ -32,6 +32,11 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="nrc" class="form-label">NRC</label>
+                                <input type="text" name="nrc" id="nrc" class="form-control" maxlength="5" pattern="\d{5}" inputmode="numeric" required>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="description" class="form-label">Descripción</label>
                                 <textarea name="description" id="description" class="form-control"></textarea>
                             </div>
@@ -90,6 +95,7 @@
                                     <td class="align-middle">
                                         <div class="fw-bold">{{ $course->title }}</div>
                                         <div class="text-muted small">
+                                            NRC: {{ $course->nrc }}<br>
                                             {{ optional($course->specialty)->specialty ?? 'Sin especialidad' }}
                                         </div>
                                     </td>
@@ -106,6 +112,7 @@
                                     <td class="align-middle text-end">
                                         <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $course->course_id }}"
                                             data-title="{{ $course->title }}" data-description="{{ $course->description }}"
+                                            data-nrc="{{ $course->nrc }}"
                                             data-specialty="{{ $course->specialty_id }}" data-hours="{{ $course->hours_count }}"
                                             data-price="{{ $course->reference_price }}">
                                             <i class="fas fa-edit"></i>
@@ -139,6 +146,10 @@
                             <div class="mb-3">
                                 <label for="edit_title" class="form-label">Título</label>
                                 <input type="text" name="title" id="edit_title" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_nrc" class="form-label">NRC</label>
+                                <input type="text" name="nrc" id="edit_nrc" class="form-control" maxlength="5" pattern="\d{5}" inputmode="numeric" required>
                             </div>
                             <div class="mb-3">
                                 <label for="edit_description" class="form-label">Descripción</label>
@@ -180,12 +191,14 @@
                 const id = this.getAttribute('data-id');
                 const title = this.getAttribute('data-title');
                 const description = this.getAttribute('data-description');
+                const nrc = this.getAttribute('data-nrc');
                 const specialty = this.getAttribute('data-specialty');
                 const hours = this.getAttribute('data-hours');
                 const price = this.getAttribute('data-price');
 
                 document.getElementById('edit_title').value = title;
                 document.getElementById('edit_description').value = description;
+                document.getElementById('edit_nrc').value = nrc;
                 document.getElementById('edit_specialty_id').value = specialty;
                 document.getElementById('edit_hours_count').value = hours;
                 document.getElementById('edit_reference_price').value = price;
