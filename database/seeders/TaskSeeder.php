@@ -194,7 +194,7 @@ class TaskSeeder extends Seeder
                 'file_path' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

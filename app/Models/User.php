@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Models\Specialty;
 
 class User extends Authenticatable
 {
@@ -13,11 +12,11 @@ class User extends Authenticatable
         'person_id',
         'username',
         'password',
-        'status'
+        'status',
     ];
 
     protected $hidden = [
-        'password'
+        'password',
     ];
 
     public function person()

@@ -254,7 +254,7 @@ class TrainingsSeeder extends Seeder
                 'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

@@ -17,13 +17,13 @@ class Training extends Model
         'modality',
         'start_date',
         'end_date',
-        'status'
+        'status',
     ];
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date'   => 'date',
-        'status'     => 'integer',
+        'end_date' => 'date',
+        'status' => 'integer',
     ];
 
     public function course()
@@ -46,9 +46,6 @@ class Training extends Model
         return $this->hasMany(Enrollment::class, 'training_id', 'training_id');
     }
 
-    /**
-     * Get the schedules associated with the training.
-     */
     public function schedules()
     {
         return $this->hasMany(Schedule::class, 'training_id', 'training_id');
@@ -59,10 +56,10 @@ class Training extends Model
         return $this->hasManyThrough(
             Attendance::class,
             Schedule::class,
-            'training_id',  // Clave foránea en tabla schedules
-            'schedule_id',  // Clave foránea en tabla attendances
-            'training_id',  // Clave local en tabla trainings
-            'schedule_id'   // Clave local en tabla schedules
+            'training_id',
+            'schedule_id',
+            'training_id',
+            'schedule_id'
         );
     }
 
@@ -71,7 +68,6 @@ class Training extends Model
         return $this->hasMany(Assessment::class, 'training_id', 'training_id');
     }
 
-    // Agrega esta relación si no existe (o cambia el nombre si tu modelo se llama distinto)
     public function tasks()
     {
         return $this->hasMany(Task::class, 'training_id', 'training_id');

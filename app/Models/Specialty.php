@@ -9,7 +9,7 @@ class Specialty extends Model
     protected $primaryKey = 'specialty_id';
 
     protected $fillable = [
-        'specialty'
+        'specialty',
     ];
 
     public function courses()

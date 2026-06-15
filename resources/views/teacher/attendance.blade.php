@@ -209,7 +209,6 @@
                         postDate.value = selectedDate;
                         if (!val) return;
 
-                        // Check if attendance already exists for this schedule
                         const url = '{{ route('teacher.attendance.check') }}?schedule_id=' + val;
                         try {
                             const resp = await fetch(url);
@@ -225,7 +224,6 @@
                                 });
 
                                 if (res.isConfirmed) {
-                                    // Prefill statuses
                                     if (json.attendances && json.attendances.length) {
                                         const map = {};
                                         json.attendances.forEach(a => { map[a.student_id] = a.attendance; });
@@ -245,13 +243,11 @@
                                         });
                                     }
                                 } else {
-                                    // reset selection
                                     scheduleSelect.value = '';
                                     postScheduleId.value = '';
                                     postDate.value = '';
                                 }
                             } else {
-                                // no previous attendance -> default present
                                 document.querySelectorAll('input[type="radio"][value="P"]').forEach(r => r.checked = true);
                             }
                         } catch (e) {
@@ -305,8 +301,6 @@
                             attendances: attendances,
                         };
 
-                        console.log('Attendance payload:', payload);
-
                         try {
                             const response = await fetch('{{ route('teacher.attendance.store') }}', {
                                 method: 'POST',
@@ -323,8 +317,6 @@
                             const json = contentType.includes('application/json')
                                 ? await response.json()
                                 : { message: await response.text() };
-
-                            console.log('Attendance store response', response.status, json);
 
                             if (!response.ok) {
                                 console.error('Attendance store response', response.status, json);
@@ -351,7 +343,6 @@
                     });
                 }
 
-                // Previous attendances modal
                 const prevBtn = document.getElementById('previousAttendancesBtn');
                 if (prevBtn) {
                     prevBtn.addEventListener('click', async function() {
@@ -385,7 +376,6 @@
                     });
                 }
 
-                // Show attendances for a schedule
                 window.showAttendances = async function(scheduleId) {
                     const container = document.getElementById('previousAttendancesList');
                     container.innerHTML = 'Cargando...';
@@ -393,7 +383,7 @@
                         const url = '{{ route('teacher.attendance.check') }}?schedule_id=' + scheduleId;
                         const resp = await fetch(url);
                         const json = await resp.json();
-                        
+
                         if (json.attendances && json.attendances.length) {
                             let html = '<button class="btn btn-sm btn-link mb-3" onclick="location.reload()"><i class="bi bi-arrow-left"></i> Volver a sesiones</button>';
                             html += '<div class="table-responsive">';

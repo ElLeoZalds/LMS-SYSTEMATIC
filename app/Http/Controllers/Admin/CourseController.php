@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Models\Specialty;
+use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
     public function index()
     {
-        // Añadimos 'specialty' con eager loading para evitar el problema N+1 en la tabla
         $courses = Course::with('specialty')
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         $specialties = Specialty::orderBy('specialty', 'asc')->get();
 
         return view('admin.courses.index', compact('courses', 'specialties'));
@@ -24,6 +23,7 @@ class CourseController extends Controller
     public function create()
     {
         $specialties = Specialty::orderBy('specialty', 'asc')->get();
+
         return view('admin.courses.create', compact('specialties'));
     }
 
@@ -35,7 +35,7 @@ class CourseController extends Controller
             'description' => 'nullable|string',
             'hours_count' => 'nullable|integer|min:0',
             'reference_price' => 'nullable|numeric|min:0',
-            'banner_path' => 'nullable|string'
+            'banner_path' => 'nullable|string',
         ]);
 
         Course::create([
@@ -44,7 +44,7 @@ class CourseController extends Controller
             'description' => $request->description,
             'hours_count' => $request->hours_count,
             'reference_price' => $request->reference_price,
-            'banner_path' => $request->banner_path
+            'banner_path' => $request->banner_path,
         ]);
 
         return redirect()->route('admin.courses.index')
@@ -55,6 +55,7 @@ class CourseController extends Controller
     {
         $course = Course::findOrFail($id);
         $specialties = Specialty::orderBy('specialty', 'asc')->get();
+
         return view('admin.courses.edit', compact('course', 'specialties'));
     }
 
@@ -75,7 +76,7 @@ class CourseController extends Controller
             'title',
             'description',
             'hours_count',
-            'reference_price'
+            'reference_price',
         ]));
 
         return redirect()->route('admin.courses.index')

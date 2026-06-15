@@ -3,18 +3,16 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Training;
-use App\Models\Attendance;
+use App\Models\Announcement;
 use App\Models\Assessment;
 use App\Models\AssessmentAttempt;
+use App\Models\Attendance;
 use App\Models\Enrollment;
-use App\Models\Announcement;
 use App\Models\Schedule;
-use Illuminate\Support\Facades\DB;
+use App\Models\Training;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TeacherController extends Controller
 {
@@ -27,16 +25,16 @@ class TeacherController extends Controller
     {
         $user = auth()->user();
 
-        $totalStudents = Enrollment::whereHas('training', fn($q) => $q->where('teacher_id', $user->user_id))->count();
+        $totalStudents = Enrollment::whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))->count();
         $totalActiveTrainings = $user->trainings->where('status', 'A')->count();
-        $totalTasks = Assessment::whereHas('training', fn($q) => $q->where('teacher_id', $user->user_id))->count();
+        $totalTasks = Assessment::whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))->count();
 
-        $totalAttempts = AssessmentAttempt::whereHas('assessment.training', fn($q) => $q->where('teacher_id', $user->user_id))->count();
-        $averageScore = AssessmentAttempt::whereHas('assessment.training', fn($q) => $q->where('teacher_id', $user->user_id))->avg('score');
+        $totalAttempts = AssessmentAttempt::whereHas('assessment.training', fn ($q) => $q->where('teacher_id', $user->user_id))->count();
+        $averageScore = AssessmentAttempt::whereHas('assessment.training', fn ($q) => $q->where('teacher_id', $user->user_id))->avg('score');
         $averageScore = $averageScore !== null ? round($averageScore, 2) : 0;
 
         $recentActivities = Assessment::with('training.course')
-            ->whereHas('training', fn($q) => $q->where('teacher_id', $user->user_id))
+            ->whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))
             ->latest('created_at')
             ->take(10)
             ->get();
@@ -60,7 +58,7 @@ class TeacherController extends Controller
         $user = auth()->user();
 
         $query = Training::with('course')
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id));
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id));
 
         // Soportar filtrado por estado: ?status=A para activos
         if ($request->query('status')) {
@@ -83,12 +81,12 @@ class TeacherController extends Controller
 
         $training = Training::with('course')
             ->where('training_id', $training_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $course = $training->course;
 
-        if (!$course) {
+        if (! $course) {
             return back()->with('error', 'No se encontró el curso asociado.');
         }
 
@@ -106,7 +104,7 @@ class TeacherController extends Controller
     {
         $user = auth()->user();
         $person = $user->person;
-        $fullName = trim(($person->last_names ?? '') . ' ' . ($person->first_names ?? '')) ?: ($user->username ?? 'Docente');
+        $fullName = trim(($person->last_names ?? '').' '.($person->first_names ?? '')) ?: ($user->username ?? 'Docente');
 
         $monthKey = $request->query('month', Carbon::now()->format('Y-m'));
         $selectedMonth = Carbon::createFromFormat('Y-m', $monthKey)->startOfMonth();
@@ -122,7 +120,7 @@ class TeacherController extends Controller
         }
 
         $trainings = Training::with(['course', 'assessments', 'tasks'])
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->get();
 
         $events = [];
@@ -133,7 +131,7 @@ class TeacherController extends Controller
                     'type' => 'assessment',
                     'title' => $assessment->title,
                     'training' => $training->course->title,
-                    'range' => $assessment->start_date->format('d/m/Y') . ' → ' . $assessment->end_date->format('d/m/Y'),
+                    'range' => $assessment->start_date->format('d/m/Y').' → '.$assessment->end_date->format('d/m/Y'),
                     'status' => $assessment->end_date->isToday() ? 'Vence hoy' : 'En curso',
                     'url' => route('teacher.assessments.show', $assessment->assessment_id),
                 ];
@@ -149,7 +147,7 @@ class TeacherController extends Controller
                     'type' => 'task',
                     'title' => $task->title,
                     'training' => $training->course->title,
-                    'range' => 'Entrega: ' . $task->due_date->format('d/m/Y H:i'),
+                    'range' => 'Entrega: '.$task->due_date->format('d/m/Y H:i'),
                     'status' => $task->due_date->isToday() ? 'Vence hoy' : ($task->due_date->isPast() ? 'Atrasada' : 'Pendiente'),
                     'url' => route('teacher.tasks.submissions', $task->task_id),
                 ];
@@ -182,20 +180,20 @@ class TeacherController extends Controller
             'announcements',
         ])
             ->where('training_id', $id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $totalStudents = $training->enrollments->count();
         $totalAssessments = $training->assessments->count();
-        $totalAttendanceRecords = Attendance::whereHas('schedule', fn($q) => $q->where('training_id', $id))->count();
+        $totalAttendanceRecords = Attendance::whereHas('schedule', fn ($q) => $q->where('training_id', $id))->count();
 
         // Obtenemos los estudiantes directamente desde las inscripciones cargadas
         $students = $training->enrollments;
 
         return view('teacher.courses.show', compact(
-            'training', 
-            'totalStudents', 
-            'totalAssessments', 
+            'training',
+            'totalStudents',
+            'totalAssessments',
             'totalAttendanceRecords',
             'students' // Enviamos los estudiantes para mapear la matriz en la vista
         ));
@@ -210,15 +208,15 @@ class TeacherController extends Controller
             'teacher.person',
             'enrollments.student.person',
             'assessments.attempts.enrollment',
-            'tasks.submissions'
+            'tasks.submissions',
         ])
             ->where('training_id', $id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $totalStudents = $training->enrollments->count();
         $totalAssessments = $training->assessments->count();
-        $totalAttendanceRecords = Attendance::whereHas('schedule', fn($q) => $q->where('training_id', $id))->count();
+        $totalAttendanceRecords = Attendance::whereHas('schedule', fn ($q) => $q->where('training_id', $id))->count();
         $students = $training->enrollments;
 
         return view('teacher.courses.report', compact(
@@ -237,10 +235,10 @@ class TeacherController extends Controller
         $training = Training::with([
             'course',
             'teacher.person',
-            'enrollments.student.person'
+            'enrollments.student.person',
         ])
             ->where('training_id', $id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $schedules = Schedule::where('training_id', $training->training_id)
@@ -317,7 +315,7 @@ class TeacherController extends Controller
         $user = auth()->user();
 
         $training = Training::where('training_id', $id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $validated = $request->validate([
@@ -361,7 +359,7 @@ class TeacherController extends Controller
 
         $training = Training::with('course')
             ->where('training_id', $id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $students = Enrollment::with([
@@ -369,7 +367,7 @@ class TeacherController extends Controller
             'progress',
             'training.contents',
             'training.tasks',
-            'training.assessments'
+            'training.assessments',
         ])
             ->where('training_id', $id)
             ->get();
@@ -383,10 +381,10 @@ class TeacherController extends Controller
 
         $training = Training::with([
             'course',
-            'enrollments.student.person'
+            'enrollments.student.person',
         ])
             ->where('training_id', $id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $students = $training->enrollments;
@@ -403,7 +401,7 @@ class TeacherController extends Controller
 
         $training = Training::with(['enrollments.student.person'])
             ->where('training_id', $id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $students = $training->enrollments->map(function ($enrollment) {
@@ -413,7 +411,7 @@ class TeacherController extends Controller
             // Los campos en la tabla people son first_names y last_names
             $first = $person->first_names ?? '';
             $last = $person->last_names ?? '';
-            $name = trim($first . ' ' . $last);
+            $name = trim($first.' '.$last);
 
             return [
                 'enrollment_id' => $enrollment->enrollment_id ?? null,
@@ -434,14 +432,15 @@ class TeacherController extends Controller
         $user = auth()->user();
 
         $training = Training::where('training_id', $id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $assessments = Assessment::where('training_id', $id)
             ->withCount(['attempts as attempts_count'])
             ->get()
-            ->map(function ($a) use ($id) {
-                $avg = AssessmentAttempt::whereHas('assessment', fn($q) => $q->where('assessment_id', $a->assessment_id))->avg('score');
+            ->map(function ($a) {
+                $avg = AssessmentAttempt::whereHas('assessment', fn ($q) => $q->where('assessment_id', $a->assessment_id))->avg('score');
+
                 return [
                     'assessment_id' => $a->assessment_id,
                     'title' => $a->title,
@@ -454,14 +453,13 @@ class TeacherController extends Controller
         return response()->json(['data' => $assessments]);
     }
 
-
     public function createTask($training_id)
     {
         $user = auth()->user();
 
         $training = Training::with('course')
             ->where('training_id', $training_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         return view('teacher.tasks.create', compact('training'));
@@ -480,10 +478,10 @@ class TeacherController extends Controller
         $user = auth()->user();
 
         $training = Training::where('training_id', $request->training_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->first();
 
-        if (!$training) {
+        if (! $training) {
             abort(403, 'No autorizado: Este training no te pertenece.');
         }
 

@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\AssessmentAttempt;
-use App\Models\TaskSubmission;
 use Illuminate\Database\Eloquent\Model;
 
 class Enrollment extends Model
@@ -16,7 +14,7 @@ class Enrollment extends Model
         'administrator_id',
         'enrollment_date',
         'scholarship_percentage',
-        'status'
+        'status',
     ];
 
     protected $casts = [

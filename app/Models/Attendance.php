@@ -11,7 +11,7 @@ class Attendance extends Model
     protected $fillable = [
         'schedule_id',
         'enrollment_id',
-        'attendance'
+        'attendance',
     ];
 
     protected $casts = [

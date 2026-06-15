@@ -194,7 +194,7 @@ class AnnouncementsSeeder extends Seeder
                 'attachments' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

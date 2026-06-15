@@ -114,7 +114,7 @@ class RolesSeeder extends Seeder
                 'name' => 'Demo Role',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

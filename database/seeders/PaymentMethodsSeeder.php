@@ -114,7 +114,7 @@ class PaymentMethodsSeeder extends Seeder
                 'payment_method' => 'Metodo demo',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

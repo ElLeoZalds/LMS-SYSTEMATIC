@@ -254,7 +254,7 @@ class AssessmentsSeeder extends Seeder
                 'active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

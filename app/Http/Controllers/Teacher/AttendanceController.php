@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
-use App\Models\Enrollment;
 use App\Models\Training;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Carbon\Carbon;
+use Illuminate\View\View;
 
 class AttendanceController extends Controller
 {
@@ -19,12 +20,6 @@ class AttendanceController extends Controller
         return auth()->user()?->roles->contains('name', 'Administrator') ?? false;
     }
 
-    /**
-     * Show the form for recording attendance for a specific schedule.
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
-     */
     public function create(Request $request)
     {
         $request->validate([
@@ -35,31 +30,25 @@ class AttendanceController extends Controller
 
         $user = auth()->user();
         $trainings = Training::with('course')
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->get();
 
         $training = null;
         $date = $request->date ?? date('Y-m-d');
-
         $selectedScheduleId = null;
+        $attendances = collect();
 
         if ($request->filled('training_id')) {
             $training = $trainings->firstWhere('training_id', $request->training_id);
 
-            if (!$training) {
+            if (! $training) {
                 abort(403, 'No tienes permiso para registrar asistencias en esta capacitación.');
             }
 
-            // Load enrollments and schedules for the selected training
             $training->load(['enrollments.student.person', 'schedules']);
 
-            // If a specific schedule_id was provided, verify it belongs to the training
             if ($request->filled('schedule_id')) {
-                $scheduleId = $request->schedule_id;
-                $schedule = DB::table('schedules')
-                    ->where('schedule_id', $scheduleId)
-                    ->where('training_id', $training->training_id)
-                    ->first();
+                $schedule = $this->scheduleForTraining($request->schedule_id, $training->training_id);
 
                 if ($schedule) {
                     $selectedScheduleId = $schedule->schedule_id;
@@ -68,98 +57,33 @@ class AttendanceController extends Controller
                 } else {
                     $attendances = collect();
                 }
-            } else {
-                $attendances = collect();
             }
         }
 
         return view('teacher.attendance', compact('trainings', 'training', 'date', 'attendances', 'selectedScheduleId'));
     }
 
-    /**
-     * Store attendance records for a specific training and date.
-     *
-     * @param Request $request
-        * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
-     */
     public function store(Request $request)
     {
-        // Validate training_id, date and attendance array
-        $request->validate([
-            'training_id' => 'required|exists:trainings,training_id',
-            'schedule_id' => [
-                'required',
-                Rule::exists('schedules', 'schedule_id')->where(function ($query) use ($request) {
-                    if ($request->filled('training_id')) {
-                        $query->where('training_id', $request->training_id);
-                    }
-                }),
-            ],
-            'date' => 'nullable|date',
-            'local_time' => 'nullable|date_format:H:i:s',
-            'attendances' => 'required|array',
-            'attendances.*.student_id' => 'required|exists:users,user_id',
-            'attendances.*.status' => 'required|in:P,A,J,T',
-        ]);
-
-        // Buscamos la capacitación limpia para validar propiedad
-        $training = \App\Models\Training::findOrFail($request->training_id);
+        $data = $this->validatedData($request);
+        $training = Training::findOrFail($data['training_id']);
 
         if (! $this->isAdministrator() && $training->teacher_id !== auth()->user()->user_id) {
             abort(403, 'No tienes permiso para registrar asistencias en esta capacitación.');
         }
 
-        // Determine schedule: either provided or based on provided date
-        $scheduleId = $request->input('schedule_id');
+        $scheduleId = $data['schedule_id'];
+        $schedule = $this->scheduleForTraining($scheduleId, $training->training_id);
 
-        $schedule = DB::table('schedules')
-            ->where('schedule_id', $scheduleId)
-            ->where('training_id', $training->training_id)
-            ->first();
-
-        if (!$schedule) {
+        if (! $schedule) {
             return back()->with('error', 'Sesión no válida para esta capacitación.')->withInput();
         }
 
-        $selectedDate = $schedule->date;
-
-        // Ensure schedule date is not in the future
-        $scheduleDate = DB::table('schedules')->where('schedule_id', $scheduleId)->value('date');
-        if ($scheduleDate && $scheduleDate > date('Y-m-d')) {
+        if ($schedule->date && $schedule->date > date('Y-m-d')) {
             return back()->with('error', 'No se puede tomar asistencia para una fecha futura.')->withInput();
         }
 
-        // Use transaction for atomic operations
-        DB::transaction(function () use ($request, $scheduleId, $training) {
-            foreach ($request->attendances as $attendanceData) {
-
-                // Extraemos el enrollment_id del estudiante en esta capacitación
-                $enrollmentId = DB::table('enrollments')
-                    ->where('training_id', $training->training_id)
-                    ->where('student_id', $attendanceData['student_id'])
-                    ->value('enrollment_id');
-
-                // Mapeo exacto según los códigos enviados desde la UI
-                $statusValue = match ($attendanceData['status']) {
-                    'P' => 'present',
-                    'A' => 'absent',
-                    'J' => 'justified',
-                    'T' => 'late',
-                    default => 'absent',
-                };
-
-                // Guardado limpio sin problemas de truncado de datos
-                Attendance::updateOrCreate(
-                    [
-                        'schedule_id'   => $scheduleId,
-                        'enrollment_id' => $enrollmentId ?? $attendanceData['student_id'],
-                    ],
-                    [
-                        'attendance'    => ['status' => $statusValue],
-                    ]
-                );
-            }
-        });
+        DB::transaction(fn () => $this->saveAttendances($data['attendances'], $scheduleId, $training->training_id));
 
         $redirectUrl = route('teacher.attendance.create', ['training_id' => $training->training_id, 'schedule_id' => $scheduleId]);
 
@@ -177,9 +101,6 @@ class AttendanceController extends Controller
             ->with('short_toast', true);
     }
 
-    /**
-     * AJAX: check if a schedule has attendances and optionally return them
-     */
     public function check(Request $request)
     {
         $request->validate([
@@ -190,7 +111,7 @@ class AttendanceController extends Controller
 
         $scheduleId = $request->schedule_id;
 
-        if (!$scheduleId && $request->filled('training_id') && $request->filled('date')) {
+        if (! $scheduleId && $request->filled('training_id') && $request->filled('date')) {
             $schedule = DB::table('schedules')
                 ->where('training_id', $request->training_id)
                 ->where('date', $request->date)
@@ -198,7 +119,7 @@ class AttendanceController extends Controller
             $scheduleId = $schedule->schedule_id ?? null;
         }
 
-        if (!$scheduleId) {
+        if (! $scheduleId) {
             return response()->json(['exists' => false, 'attendances' => []]);
         }
 
@@ -207,7 +128,7 @@ class AttendanceController extends Controller
         $map = $attendances->map(function ($a) {
             $student = optional($a->enrollment)->student;
             $person = optional($student)->person;
-            $studentName = optional($person)->first_names . ' ' . optional($person)->last_names;
+            $studentName = optional($person)->first_names.' '.optional($person)->last_names;
             $status = $a->attendance;
             if (is_array($status)) {
                 $status = $status['status'] ?? null;
@@ -224,9 +145,6 @@ class AttendanceController extends Controller
         return response()->json(['exists' => $attendances->isNotEmpty(), 'attendances' => $map]);
     }
 
-    /**
-     * AJAX: list previous attendances for a training grouped by schedule
-     */
     public function listPrevious($training_id)
     {
         $training = Training::with(['schedules'])->findOrFail($training_id);
@@ -244,5 +162,67 @@ class AttendanceController extends Controller
         })->values();
 
         return response()->json(['schedules' => $list]);
+    }
+
+    private function validatedData(Request $request): array
+    {
+        return $request->validate([
+            'training_id' => 'required|exists:trainings,training_id',
+            'schedule_id' => [
+                'required',
+                Rule::exists('schedules', 'schedule_id')->where(function ($query) use ($request) {
+                    if ($request->filled('training_id')) {
+                        $query->where('training_id', $request->training_id);
+                    }
+                }),
+            ],
+            'date' => 'nullable|date',
+            'local_time' => 'nullable|date_format:H:i:s',
+            'attendances' => 'required|array',
+            'attendances.*.student_id' => 'required|exists:users,user_id',
+            'attendances.*.status' => 'required|in:P,A,J,T',
+        ]);
+    }
+
+    private function scheduleForTraining(int $scheduleId, int $trainingId)
+    {
+        return DB::table('schedules')
+            ->where('schedule_id', $scheduleId)
+            ->where('training_id', $trainingId)
+            ->first();
+    }
+
+    private function saveAttendances(array $attendances, int $scheduleId, int $trainingId): void
+    {
+        foreach ($attendances as $attendanceData) {
+            Attendance::updateOrCreate(
+                [
+                    'schedule_id' => $scheduleId,
+                    'enrollment_id' => $this->enrollmentId($trainingId, $attendanceData['student_id']),
+                ],
+                [
+                    'attendance' => ['status' => $this->attendanceStatus($attendanceData['status'])],
+                ]
+            );
+        }
+    }
+
+    private function enrollmentId(int $trainingId, int $studentId): int
+    {
+        return DB::table('enrollments')
+            ->where('training_id', $trainingId)
+            ->where('student_id', $studentId)
+            ->value('enrollment_id') ?? $studentId;
+    }
+
+    private function attendanceStatus(string $status): string
+    {
+        return match ($status) {
+            'P' => 'present',
+            'A' => 'absent',
+            'J' => 'justified',
+            'T' => 'late',
+            default => 'absent',
+        };
     }
 }

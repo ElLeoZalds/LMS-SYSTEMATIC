@@ -13,7 +13,7 @@ class Content extends Model
         'description',
         'title',
         'type',
-        'order_index'
+        'order_index',
     ];
 
     public function training()

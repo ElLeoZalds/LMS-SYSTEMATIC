@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Training;
 use App\Models\Task;
 use App\Models\TaskSubmission;
+use App\Models\Training;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class TaskController extends Controller
 {
@@ -16,187 +18,175 @@ class TaskController extends Controller
         return auth()->user()?->roles->contains('name', 'Administrator') ?? false;
     }
 
-    /**
-     * Almacena una nueva tarea asignada desde el modal.
-     */
     public function store(Request $request)
     {
-        $request->validate([
-            'training_id'   => 'required|exists:trainings,training_id',
-            'title'         => 'required|string|max:150',
-            'description'   => 'nullable|string',
-            'delivery_date' => 'required|date|after_or_equal:today',
-            'attachment'    => 'nullable|file|max:5120|mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
-        ]);
+        $data = $this->validatedData($request, true);
+        $training = $this->trainingForCurrentUser($data['training_id']);
+        $dueDate = Carbon::parse($data['delivery_date'])->endOfDay();
 
-        $user = auth()->user();
-
-        $training = Training::where('training_id', $request->training_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
-            ->firstOrFail();
-
-        $dueDate = Carbon::parse($request->delivery_date)->endOfDay();
-
-        if ($training->start_date) {
-            $courseStart = Carbon::parse($training->start_date)->startOfDay();
-            if ($dueDate->lt($courseStart)) {
-                return redirect()->back()->withInput()->withErrors(['delivery_date' => 'La fecha de entrega no puede ser anterior al inicio del curso.']);
-            }
+        if ($error = $this->dateValidationError($training, $dueDate, true)) {
+            return redirect()->back()->withInput()->withErrors(['delivery_date' => $error]);
         }
 
-        if ($training->end_date) {
-            $courseEnd = Carbon::parse($training->end_date)->endOfDay();
-            if ($dueDate->gt($courseEnd)) {
-                return redirect()->back()->withInput()->withErrors(['delivery_date' => 'La fecha de entrega no puede ser posterior a la fecha de cierre del curso.']);
-            }
-        }
-
-        $filePath = null;
-        if ($request->hasFile('attachment')) {
-            $filePath = $request->file('attachment')->store('task-files', 'public');
-        }
-
-        Task::create([
+        $taskData = [
             'training_id' => $training->training_id,
-            'title'       => $request->title,
-            'description' => $request->description ?? null,
-            'due_date'    => Carbon::parse($request->delivery_date)->endOfDay(),
-            'file_path'   => $filePath,
-        ]);
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'due_date' => $dueDate,
+            'file_path' => $this->storeAttachment($request),
+        ];
+
+        Task::create($taskData);
 
         return redirect()->route('teacher.courses.show', ['id' => $training->training_id, 'tab' => 'contenido'])
             ->with('success', 'Tarea asignada correctamente.');
     }
 
-    /**
-     * Muestra la lista de alumnos y sus entregas para una tarea específica.
-     */
     public function submissions($task_id)
     {
-        $user = auth()->user();
-
-        // Buscamos la tarea asegurándonos de que pertenezca a un curso del profesor logueado
-        $task = Task::where('task_id', $task_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->whereHas('training', function ($query) use ($user) {
-                $query->where('teacher_id', $user->user_id);
-            }))
-            ->firstOrFail();
-
-        // Cargamos las entregas junto con los datos del estudiante
+        $task = $this->taskForCurrentUser($task_id);
         $submissions = $task->submissions()->with('student.person')->get();
 
         return view('teacher.tasks.submissions', compact('task', 'submissions'));
     }
 
-    /**
-     * Procesa y almacena la calificación y feedback de una entrega.
-     */
     public function grade(Request $request, $submission_id)
     {
-        $request->validate([
-            'grade'    => 'required|numeric|min:0|max:20',
+        $data = $request->validate([
+            'grade' => 'required|numeric|min:0|max:20',
             'feedback' => 'nullable|string',
         ]);
 
-        $user = auth()->user();
-
-        // Buscamos la entrega asegurando que pertenezca a una tarea del profesor logueado
-        $submission = TaskSubmission::where('submission_id', $submission_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->whereHas('task.training', function ($query) use ($user) {
-                $query->where('teacher_id', $user->user_id);
-            }))
-            ->firstOrFail();
-
-        // Actualizamos los campos de la calificación
+        $submission = $this->submissionForCurrentUser($submission_id);
         $submission->update([
-            'grade'            => $request->grade,
-            'teacher_feedback' => $request->feedback,
-            'graded_at'        => now(),
+            'grade' => $data['grade'],
+            'teacher_feedback' => $data['feedback'] ?? null,
+            'graded_at' => now(),
         ]);
 
         return redirect()->route('teacher.tasks.submissions', ['task_id' => $submission->task_id])
             ->with('success', 'Entrega calificada correctamente.');
     }
 
-    /**
-     * Update an existing task (allow editing title, description, due date and attachment).
-     */
     public function update(Request $request, $task_id)
     {
-        $request->validate([
-            'title' => 'required|string|max:150',
-            'description' => 'nullable|string',
-            'delivery_date' => 'required|date|after_or_equal:today',
-            'attachment' => 'nullable|file|max:5120|mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
-        ]);
+        $data = $this->validatedData($request);
+        $task = $this->taskForCurrentUser($task_id);
+        $dueDate = Carbon::parse($data['delivery_date'])->endOfDay();
 
-        $user = auth()->user();
-
-        $task = Task::where('task_id', $task_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->whereHas('training', function ($q) use ($user) {
-                $q->where('teacher_id', $user->user_id);
-            }))
-            ->firstOrFail();
-
-        if ($task->training->end_date) {
-            $courseEnd = Carbon::parse($task->training->end_date)->endOfDay();
-            $dueDate = Carbon::parse($request->delivery_date)->endOfDay();
-
-            if ($dueDate->gt($courseEnd)) {
-                return redirect()->back()->withInput()->withErrors(['delivery_date' => 'La fecha de entrega no puede ser posterior a la fecha de cierre del curso.']);
-            }
+        if ($error = $this->dateValidationError($task->training, $dueDate)) {
+            return redirect()->back()->withInput()->withErrors(['delivery_date' => $error]);
         }
 
-        // handle replacement of attachment
         if ($request->hasFile('attachment')) {
-            try {
-                if ($task->file_path) {
-                    \Storage::disk('public')->delete($task->file_path);
-                }
-            } catch (\Exception $e) {}
-            $path = $request->file('attachment')->store('task-files', 'public');
-            $task->file_path = $path;
+            $this->deleteAttachment($task->file_path);
+            $task->file_path = $this->storeAttachment($request);
         }
 
-        $task->title = $request->title;
-        $task->description = $request->description ?? null;
-        $task->due_date = Carbon::parse($request->delivery_date)->endOfDay();
+        $task->title = $data['title'];
+        $task->description = $data['description'] ?? null;
+        $task->due_date = $dueDate;
         $task->save();
 
         return redirect()->route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])
             ->with('success', 'Tarea actualizada correctamente.');
     }
 
-    /**
-     * Elimina una tarea y su archivo adjunto si existe.
-     */
     public function destroy($task_id)
     {
-        $user = auth()->user();
-
-        $task = Task::where('task_id', $task_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->whereHas('training', function ($q) use ($user) {
-                $q->where('teacher_id', $user->user_id);
-            }))
-            ->firstOrFail();
+        $task = $this->taskForCurrentUser($task_id);
 
         if (! $this->isAdministrator() && $task->submissions()->exists()) {
             return redirect()->route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])
                 ->with('error', 'No se puede eliminar la tarea porque ya tiene entregas registradas.');
         }
 
-        if ($task->file_path) {
-            try {
-                \Storage::disk('public')->delete($task->file_path);
-            } catch (\Exception $e) {
-                // ignore deletion error
-            }
-        }
-
         $trainingId = $task->training_id;
+        $this->deleteAttachment($task->file_path);
         $task->delete();
 
         return redirect()->route('teacher.courses.show', ['id' => $trainingId, 'tab' => 'contenido'])
             ->with('success', 'Tarea eliminada correctamente.');
+    }
+
+    private function validatedData(Request $request, bool $includeTraining = false): array
+    {
+        $rules = [
+            'title' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'delivery_date' => 'required|date|after_or_equal:today',
+            'attachment' => 'nullable|file|max:5120|mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
+        ];
+
+        if ($includeTraining) {
+            $rules = ['training_id' => 'required|exists:trainings,training_id'] + $rules;
+        }
+
+        return $request->validate($rules);
+    }
+
+    private function trainingForCurrentUser(int $trainingId): Training
+    {
+        $user = auth()->user();
+
+        return Training::where('training_id', $trainingId)
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
+            ->firstOrFail();
+    }
+
+    private function taskForCurrentUser(int $taskId): Task
+    {
+        $user = auth()->user();
+
+        return Task::where('task_id', $taskId)
+            ->when(! $this->isAdministrator(), fn ($query) => $query->whereHas('training', function ($query) use ($user) {
+                $query->where('teacher_id', $user->user_id);
+            }))
+            ->firstOrFail();
+    }
+
+    private function submissionForCurrentUser(int $submissionId): TaskSubmission
+    {
+        $user = auth()->user();
+
+        return TaskSubmission::where('submission_id', $submissionId)
+            ->when(! $this->isAdministrator(), fn ($query) => $query->whereHas('task.training', function ($query) use ($user) {
+                $query->where('teacher_id', $user->user_id);
+            }))
+            ->firstOrFail();
+    }
+
+    private function dateValidationError(Training $training, Carbon $dueDate, bool $validateStartDate = false): ?string
+    {
+        if ($validateStartDate && $training->start_date && $dueDate->lt(Carbon::parse($training->start_date)->startOfDay())) {
+            return 'La fecha de entrega no puede ser anterior al inicio del curso.';
+        }
+
+        if ($training->end_date && $dueDate->gt(Carbon::parse($training->end_date)->endOfDay())) {
+            return 'La fecha de entrega no puede ser posterior a la fecha de cierre del curso.';
+        }
+
+        return null;
+    }
+
+    private function storeAttachment(Request $request): ?string
+    {
+        if (! $request->hasFile('attachment')) {
+            return null;
+        }
+
+        return $request->file('attachment')->store('task-files', 'public');
+    }
+
+    private function deleteAttachment(?string $filePath): void
+    {
+        if (! $filePath) {
+            return;
+        }
+
+        try {
+            Storage::disk('public')->delete($filePath);
+        } catch (Throwable) {
+        }
     }
 }

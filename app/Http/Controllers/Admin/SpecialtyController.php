@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Specialty;
+use Illuminate\Http\Request;
 
 class SpecialtyController extends Controller
 {
@@ -46,7 +46,7 @@ class SpecialtyController extends Controller
         $specialty = Specialty::findOrFail($id);
 
         $request->validate([
-            'specialty' => 'required|string|max:100|unique:specialties,specialty,' . $id . ',specialty_id',
+            'specialty' => 'required|string|max:100|unique:specialties,specialty,'.$id.',specialty_id',
         ]);
 
         $specialty->update([

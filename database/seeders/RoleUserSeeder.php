@@ -94,7 +94,57 @@ class RoleUserSeeder extends Seeder
             [
                 'user_id' => 20,
                 'role_id' => 3,
-            ]
+            ],
+            [
+                'user_id' => 21,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 22,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 23,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 24,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 25,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 26,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 27,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 28,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 29,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 30,
+                'role_id' => 3,
+            ],
         ]);
+
+        $additionalStudentRoles = array_map(
+            fn ($userId) => [
+                'user_id' => $userId,
+                'role_id' => 3,
+            ],
+            range(31, 66)
+        );
+
+        DB::table('user_roles')->insert($additionalStudentRoles);
     }
 }

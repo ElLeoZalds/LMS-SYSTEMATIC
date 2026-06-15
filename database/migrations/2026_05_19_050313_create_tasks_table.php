@@ -10,20 +10,20 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             // Clave primaria
-            $table->id('task_id'); 
-            
+            $table->id('task_id');
+
             // Relación con trainings (restricción de llave foránea)
             $table->unsignedBigInteger('training_id');
             $table->foreign('training_id')
-                  ->references('training_id')
-                  ->on('trainings')
-                  ->onDelete('cascade');
+                ->references('training_id')
+                ->on('trainings')
+                ->onDelete('cascade');
 
             // Campos de la tarea
             $table->string('title', 150);
             $table->text('description')->nullable();
             $table->dateTime('due_date'); // Fecha de entrega
-            
+
             $table->timestamps();
         });
     }

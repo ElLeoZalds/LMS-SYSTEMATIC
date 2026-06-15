@@ -214,7 +214,7 @@ class CoursesSeeder extends Seeder
                 'reference_price' => 420,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

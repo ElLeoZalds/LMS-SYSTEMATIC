@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class TaskSubmission extends Model
 {
-    // Clave primaria personalizada
     protected $primaryKey = 'submission_id';
 
     protected $fillable = [
@@ -17,26 +16,20 @@ class TaskSubmission extends Model
         'submitted_at',
         'grade',
         'teacher_feedback',
-        'graded_at'
+        'graded_at',
     ];
 
     protected $casts = [
         'submitted_at' => 'datetime',
-        'graded_at'    => 'datetime',
-        'grade'        => 'decimal:2',
+        'graded_at' => 'datetime',
+        'grade' => 'decimal:2',
     ];
 
-    /**
-     * Relación: Una entrega pertenece a una tarea específica.
-     */
     public function task()
     {
         return $this->belongsTo(Task::class, 'task_id', 'task_id');
     }
 
-    /**
-     * Relación: Una entrega pertenece a un estudiante (User).
-     */
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id', 'user_id');

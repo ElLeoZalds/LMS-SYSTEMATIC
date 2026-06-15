@@ -15,7 +15,7 @@ class Progress extends Model
         'content_id',
         'percentage',
         'activity_date',
-        'status'
+        'status',
     ];
 
     public function enrollment()

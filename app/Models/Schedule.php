@@ -12,7 +12,7 @@ class Schedule extends Model
         'training_id',
         'date',
         'start_time',
-        'end_time'
+        'end_time',
     ];
 
     protected $casts = [

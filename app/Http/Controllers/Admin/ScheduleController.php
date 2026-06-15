@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use App\Models\Schedule;
 use App\Models\Training;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ScheduleController extends Controller
@@ -20,7 +20,7 @@ class ScheduleController extends Controller
         $schedules = Schedule::with(['training.course', 'training.teacher.person'])
             ->get()
             ->sortBy([
-                fn($schedule) => optional($schedule->training->course)->title ?? '',
+                fn ($schedule) => optional($schedule->training->course)->title ?? '',
                 'date',
             ]);
 
@@ -62,7 +62,7 @@ class ScheduleController extends Controller
             })
             ->where(function ($query) use ($request) {
                 $query->where('start_time', '<', $request->end_time)
-                      ->where('end_time', '>', $request->start_time);
+                    ->where('end_time', '>', $request->start_time);
             })
             ->exists();
 
@@ -125,10 +125,10 @@ class ScheduleController extends Controller
             // Validar que la fecha esté dentro del rango del entrenamiento
             if ($training->start_date && $training->end_date) {
                 $scheduleDate = Carbon::createFromFormat('Y-m-d', $scheduleData['date']);
-                
+
                 if ($scheduleDate->lt($training->start_date) || $scheduleDate->gt($training->end_date)) {
                     $validator->errors()->add(
-                        "schedules.$index.date", 
+                        "schedules.$index.date",
                         "La fecha debe estar entre {$training->start_date->format('d/m/Y')} y {$training->end_date->format('d/m/Y')}."
                     );
                 }
@@ -144,7 +144,7 @@ class ScheduleController extends Controller
                 })
                 ->where(function ($query) use ($scheduleData) {
                     $query->where('start_time', '<', $scheduleData['end_time'])
-                          ->where('end_time', '>', $scheduleData['start_time']);
+                        ->where('end_time', '>', $scheduleData['start_time']);
                 })
                 ->exists();
 
@@ -217,7 +217,7 @@ class ScheduleController extends Controller
             })
             ->where(function ($query) use ($request) {
                 $query->where('start_time', '<', $request->end_time)
-                      ->where('end_time', '>', $request->start_time);
+                    ->where('end_time', '>', $request->start_time);
             })
             ->exists();
 

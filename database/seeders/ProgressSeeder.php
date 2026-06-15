@@ -194,7 +194,7 @@ class ProgressSeeder extends Seeder
                 'status' => 'A',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

@@ -174,7 +174,7 @@ class SchedulesSeeder extends Seeder
                 'end_time' => '20:00:00',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

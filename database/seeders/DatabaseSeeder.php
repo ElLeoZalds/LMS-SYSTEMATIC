@@ -8,41 +8,69 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([
+        $this->call($this->userBaseSeeders());
+        $this->call($this->academicStructureSeeders());
+        $this->call($this->paymentAndEnrollmentSeeders());
+        $this->call($this->academicContentSeeders());
+        $this->call($this->classControlSeeders());
+        $this->call($this->trackingSeeders());
+    }
 
-            // USERS BASE
+    private function userBaseSeeders(): array
+    {
+        return [
             PeopleSeeder::class,
             RolesSeeder::class,
             UsersSeeder::class,
             RoleUserSeeder::class,
+        ];
+    }
 
-            // ACADEMIC STRUCTURE
+    private function academicStructureSeeders(): array
+    {
+        return [
             SpecialtiesSeeder::class,
             TeacherSpecialtiesSeeder::class,
             CoursesSeeder::class,
             TrainingsSeeder::class,
             AnnouncementsSeeder::class,
+        ];
+    }
 
-            // PAYMENTS & ENROLLMENT
+    private function paymentAndEnrollmentSeeders(): array
+    {
+        return [
             PaymentMethodsSeeder::class,
             EnrollmentsSeeder::class,
             PaymentsSeeder::class,
+        ];
+    }
 
-            // ACADEMIC CONTENT
+    private function academicContentSeeders(): array
+    {
+        return [
             AssessmentsSeeder::class,
             QuestionsSeeder::class,
             AlternativesSeeder::class,
             ContentsSeeder::class,
             ProgressSeeder::class,
+        ];
+    }
 
-            // CLASS CONTROL
+    private function classControlSeeders(): array
+    {
+        return [
             SchedulesSeeder::class,
             AttendancesSeeder::class,
+        ];
+    }
 
-            // EXAMS TRACKING
+    private function trackingSeeders(): array
+    {
+        return [
             AssessmentAttemptsSeeder::class,
             TaskSeeder::class,
             TaskSubmissionSeeder::class,
-        ]);
+        ];
     }
 }

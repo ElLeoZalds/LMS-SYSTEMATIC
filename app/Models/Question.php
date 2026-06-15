@@ -23,7 +23,6 @@ class Question extends Model
 
     public function alternatives()
     {
-        // Apuntamos al nuevo modelo y mantenemos el orden físico de la migración
         return $this->hasMany(Alternative::class, 'question_id', 'question_id')
             ->orderBy('option_id');
     }

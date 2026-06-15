@@ -11,20 +11,26 @@ class RoleMiddleware
     {
         $user = auth()->user();
 
-        // Si no está autenticado, redirigir a login
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
-        $hasRole = $user->roles->contains('name', $role);
-        $isAdministratorManagingTeacherArea = $role === 'Teacher'
-            && $user->roles->contains('name', 'Administrator');
-
-        // Si está autenticado pero sin el rol necesario
-        if (!$hasRole && !$isAdministratorManagingTeacherArea) {
+        if (! $this->canAccessRole($user, $role)) {
             abort(403, 'No autorizado');
         }
 
         return $next($request);
+    }
+
+    private function canAccessRole($user, string $role): bool
+    {
+        return $user->roles->contains('name', $role)
+            || $this->isAdministratorManagingTeacherArea($user, $role);
+    }
+
+    private function isAdministratorManagingTeacherArea($user, string $role): bool
+    {
+        return $role === 'Teacher'
+            && $user->roles->contains('name', 'Administrator');
     }
 }

@@ -14,13 +14,13 @@ class Payment extends Model
         'date',
         'installment',
         'amount',
-        'status'
+        'status',
     ];
 
     protected $casts = [
-        'date'        => 'date',
+        'date' => 'date',
         'installment' => 'decimal:2',
-        'amount'      => 'decimal:2',
+        'amount' => 'decimal:2',
     ];
 
     public function enrollment()

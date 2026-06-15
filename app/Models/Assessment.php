@@ -16,13 +16,13 @@ class Assessment extends Model
         'end_date',
         'allowed_attempts',
         'active',
-        'time_limit'
+        'time_limit',
     ];
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date'   => 'date',
-        'active'     => 'boolean',
+        'end_date' => 'date',
+        'active' => 'boolean',
     ];
 
     public function training()

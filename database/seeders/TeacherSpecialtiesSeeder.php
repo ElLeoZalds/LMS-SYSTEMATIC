@@ -94,7 +94,7 @@ class TeacherSpecialtiesSeeder extends Seeder
             [
                 'user_id' => 6,
                 'specialty_id' => 20,
-            ]
+            ],
         ]);
     }
 }

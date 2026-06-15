@@ -214,7 +214,7 @@ class PaymentsSeeder extends Seeder
                 'status' => 'A',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

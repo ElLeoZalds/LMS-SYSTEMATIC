@@ -14,7 +14,7 @@ class Course extends Model
         'title',
         'description',
         'hours_count',
-        'reference_price'
+        'reference_price',
     ];
 
     public function trainings()

@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
@@ -20,14 +20,14 @@ class StudentController extends Controller
             'training.contents',
             'training.tasks',
             'training.assessments',
-            'progress'
+            'progress',
         ])
             ->where('student_id', $studentId)
             ->get()
             ->map(function ($enrollment) {
                 $schedule = $enrollment->training?->schedules?->sortBy('date')->first();
                 if ($schedule && $schedule->start_time && $schedule->end_time) {
-                    $enrollment->schedule_label = Carbon::parse($schedule->start_time)->format('H:i') . ' - ' . Carbon::parse($schedule->end_time)->format('H:i');
+                    $enrollment->schedule_label = Carbon::parse($schedule->start_time)->format('H:i').' - '.Carbon::parse($schedule->end_time)->format('H:i');
                 } else {
                     $enrollment->schedule_label = 'Horario no disponible';
                 }
@@ -58,14 +58,14 @@ class StudentController extends Controller
             'training.contents',
             'training.tasks',
             'training.assessments',
-            'progress'
+            'progress',
         ])
             ->where('student_id', $studentId)
             ->get()
             ->map(function ($enrollment) {
                 $schedule = $enrollment->training?->schedules?->sortBy('date')->first();
                 if ($schedule && $schedule->start_time && $schedule->end_time) {
-                    $enrollment->schedule_label = Carbon::parse($schedule->start_time)->format('H:i') . ' - ' . Carbon::parse($schedule->end_time)->format('H:i');
+                    $enrollment->schedule_label = Carbon::parse($schedule->start_time)->format('H:i').' - '.Carbon::parse($schedule->end_time)->format('H:i');
                 } else {
                     $enrollment->schedule_label = 'Horario no disponible';
                 }

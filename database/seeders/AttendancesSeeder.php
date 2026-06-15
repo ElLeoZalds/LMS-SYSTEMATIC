@@ -154,7 +154,7 @@ class AttendancesSeeder extends Seeder
                 'attendance' => json_encode(['status' => 'justified']),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

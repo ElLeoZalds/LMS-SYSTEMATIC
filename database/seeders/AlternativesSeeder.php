@@ -154,7 +154,7 @@ class AlternativesSeeder extends Seeder
                 'is_correct' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

@@ -114,7 +114,7 @@ class SpecialtiesSeeder extends Seeder
                 'specialty' => 'Emprendimiento',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

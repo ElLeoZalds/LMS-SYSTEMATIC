@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Training;
+use App\Models\Alternative;
 use App\Models\Assessment;
 use App\Models\Question;
-use App\Models\Alternative;
-use Illuminate\Support\Facades\DB;
+use App\Models\Training;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class AssessmentController extends Controller
 {
@@ -24,7 +26,7 @@ class AssessmentController extends Controller
     {
         $user = auth()->user();
         $trainings = Training::with('course')
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->get();
 
         return view('teacher.assessments.index', compact('trainings'));
@@ -35,12 +37,12 @@ class AssessmentController extends Controller
         $user = auth()->user();
 
         $training = Training::with([
-                'course', 
-                'assessments.questions.alternatives',
-                'assessments.attempts.user'
-            ])
+            'course',
+            'assessments.questions.alternatives',
+            'assessments.attempts.user',
+        ])
             ->where('training_id', $training_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         return view('teacher.assessments.manage', compact('training'));
@@ -76,7 +78,7 @@ class AssessmentController extends Controller
 
         $user = auth()->user();
         $training = Training::where('training_id', $request->training_id)
-            ->when(! $this->isAdministrator(), fn($query) => $query->where('teacher_id', $user->user_id))
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
         $startDate = Carbon::parse($request->start_date);
@@ -149,8 +151,8 @@ class AssessmentController extends Controller
             foreach ($request->alternatives as $index => $alternativeData) {
                 Alternative::create([
                     'question_id' => $question->question_id,
-                    'option_text'  => $alternativeData['text'],
-                    'is_correct'   => $request->correct_alternative == $index,
+                    'option_text' => $alternativeData['text'],
+                    'is_correct' => $request->correct_alternative == $index,
                 ]);
             }
         });
@@ -177,15 +179,12 @@ class AssessmentController extends Controller
         }
 
         DB::transaction(function () use ($request, $question) {
-            // handle image replacement
             if ($request->hasFile('image')) {
-                // delete old image if exists
                 try {
                     if ($question->image_path) {
-                        \Storage::disk('public')->delete($question->image_path);
+                        Storage::disk('public')->delete($question->image_path);
                     }
-                } catch (\Exception $e) {
-                    // ignore deletion error
+                } catch (Throwable) {
                 }
                 $imagePath = $request->file('image')->store('question-images', 'public');
                 $question->image_path = $imagePath;
@@ -197,8 +196,8 @@ class AssessmentController extends Controller
             foreach ($request->alternatives as $index => $alternativeData) {
                 Alternative::create([
                     'question_id' => $question->question_id,
-                    'option_text'  => $alternativeData['text'],
-                    'is_correct'   => $request->correct_alternative == $index,
+                    'option_text' => $alternativeData['text'],
+                    'is_correct' => $request->correct_alternative == $index,
                 ]);
             }
         });
@@ -228,7 +227,8 @@ class AssessmentController extends Controller
                 if ($question->image_path) {
                     \Storage::disk('public')->delete($question->image_path);
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
             $question->delete();
         });
 
@@ -329,5 +329,4 @@ class AssessmentController extends Controller
         return redirect()->route('teacher.courses.show', ['id' => $trainingId, 'tab' => 'contenido'])
             ->with('success', 'Evaluación eliminada correctamente.');
     }
-
 }

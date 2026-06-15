@@ -10,10 +10,11 @@ use App\Models\Enrollment;
 use App\Models\Task;
 use App\Models\TaskSubmission;
 use App\Models\Training;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Throwable;
 
 class CourseController extends Controller
 {
@@ -60,7 +61,6 @@ class CourseController extends Controller
     {
         $studentId = auth()->id();
 
-        // Actualizado: Cambiado 'questions.options' a 'questions.alternatives'
         $assessment = Assessment::with(['training', 'questions.alternatives'])
             ->where('assessment_id', $assessment_id)
             ->firstOrFail();
@@ -101,7 +101,7 @@ class CourseController extends Controller
         } elseif ($request->query('start') === '1') {
             try {
                 $this->ensureAttemptAllowed($assessment, $enrollment);
-            } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            } catch (HttpException $e) {
                 return redirect()->route('student.courses.show', $assessment->training_id)
                     ->with('error', $e->getMessage());
             }
@@ -125,11 +125,10 @@ class CourseController extends Controller
             $assessment = $this->shuffleQuestionsForAttempt($assessment, $attempt->attempt_id);
         }
 
-        // Calcular y pasar datos para que el cliente calcule el tiempo restante de forma consistente
         $totalSeconds = max(0, ($assessment->time_limit ?: 60) * 60);
         $attemptCreatedTs = $attempt ? $attempt->created_at->timestamp : null;
         $serverNowTs = Carbon::now()->timestamp;
-        $startUrl = route('student.assessment.take', ['id' => $assessment_id]) . '?start=1';
+        $startUrl = route('student.assessment.take', ['id' => $assessment_id]).'?start=1';
 
         return view('student.courses.take', compact('assessment', 'totalSeconds', 'attemptCreatedTs', 'serverNowTs', 'enrollment', 'attempt', 'timerStarted', 'startUrl'));
     }
@@ -139,7 +138,7 @@ class CourseController extends Controller
         $sessionKey = "assessment_question_order.{$attemptId}";
         $questionIds = session($sessionKey);
 
-        if (!is_array($questionIds) || empty($questionIds)) {
+        if (! is_array($questionIds) || empty($questionIds)) {
             $questionIds = $assessment->questions->pluck('question_id')->shuffle()->values()->all();
             session([$sessionKey => $questionIds]);
         }
@@ -162,7 +161,6 @@ class CourseController extends Controller
     {
         $studentId = auth()->id();
 
-        // Actualizado: Cambiado 'questions.options' a 'questions.alternatives'
         $assessment = Assessment::with(['training', 'questions.alternatives'])
             ->where('assessment_id', $assessment_id)
             ->firstOrFail();
@@ -173,7 +171,6 @@ class CourseController extends Controller
 
         $this->validateAssessmentAvailability($assessment);
 
-        // Permitir que 'answers' sea nulo (enviar sin responder) y validar alternativas si las hay
         $validated = $request->validate([
             'attempt_id' => 'required|integer|exists:assessment_attempts,attempt_id',
             'answers' => 'nullable|array',
@@ -210,7 +207,6 @@ class CourseController extends Controller
             $selectedOptionId = $responses[$question->question_id] ?? null;
 
             if ($selectedOptionId) {
-                // Actualizado: Cambiado $question->options a $question->alternatives
                 $selectedOption = $question->alternatives->firstWhere('option_id', $selectedOptionId);
 
                 if ($selectedOption && $selectedOption->is_correct) {
@@ -220,9 +216,9 @@ class CourseController extends Controller
         }
 
         $attempt->score = $totalScore;
-    $attempt->timestamps = false;
-    $attempt->updated_at = Carbon::now()->addSecond();
-    $attempt->save();
+        $attempt->timestamps = false;
+        $attempt->updated_at = Carbon::now()->addSecond();
+        $attempt->save();
         $attempt->load('assessment');
 
         return view('student.assessments.result', compact('attempt'));
@@ -259,8 +255,7 @@ class CourseController extends Controller
                 if ($submission->file_path) {
                     Storage::disk('public')->delete($submission->file_path);
                 }
-            } catch (\Exception $e) {
-                // ignore deletion errors
+            } catch (Throwable) {
             }
 
             $submission->file_path = $request->file('attachment')->store('task-submissions', 'public');
@@ -281,7 +276,7 @@ class CourseController extends Controller
         $studentId = auth()->id();
         $user = auth()->user();
         $person = $user->person;
-        $fullName = trim(($person->last_names ?? '') . ' ' . ($person->first_names ?? '')) ?: ($user->username ?? 'Estudiante');
+        $fullName = trim(($person->last_names ?? '').' '.($person->first_names ?? '')) ?: ($user->username ?? 'Estudiante');
 
         $monthKey = $request->query('month', Carbon::now()->format('Y-m'));
         $selectedMonth = Carbon::createFromFormat('Y-m', $monthKey)->startOfMonth();
@@ -313,9 +308,9 @@ class CourseController extends Controller
                     'type' => 'assessment',
                     'title' => $assessment->title,
                     'training' => $training->course->title,
-                    'range' => $assessment->start_date->format('d/m/Y') . ' → ' . $assessment->end_date->format('d/m/Y'),
+                    'range' => $assessment->start_date->format('d/m/Y').' → '.$assessment->end_date->format('d/m/Y'),
                     'status' => $assessment->end_date->isToday() ? 'Vence hoy' : 'En curso',
-                    'url' => route('student.courses.show', $training->training_id) . '?tab=contenido',
+                    'url' => route('student.courses.show', $training->training_id).'?tab=contenido',
                 ];
             }
 
@@ -329,9 +324,9 @@ class CourseController extends Controller
                     'type' => 'task',
                     'title' => $task->title,
                     'training' => $training->course->title,
-                    'range' => 'Entrega: ' . $task->due_date->format('d/m/Y H:i'),
+                    'range' => 'Entrega: '.$task->due_date->format('d/m/Y H:i'),
                     'status' => $task->due_date->isToday() ? 'Vence hoy' : ($task->due_date->isPast() ? 'Atrasada' : 'Pendiente'),
-                    'url' => route('student.courses.show', ['id' => $training->training_id]) . '?tab=tareas#task-' . $task->task_id,
+                    'url' => route('student.courses.show', ['id' => $training->training_id]).'?tab=tareas#task-'.$task->task_id,
                 ];
             }
         }
@@ -350,7 +345,6 @@ class CourseController extends Controller
 
         $today = Carbon::today();
 
-        // Asegurarse de comparar objetos Carbon para evitar comparaciones tipo cadena
         $start = $assessment->start_date instanceof Carbon ? $assessment->start_date->copy()->startOfDay() : Carbon::createFromFormat('Y-m-d', $assessment->start_date)->startOfDay();
         $end = $assessment->end_date instanceof Carbon ? $assessment->end_date->copy()->endOfDay() : Carbon::createFromFormat('Y-m-d', $assessment->end_date)->endOfDay();
 
@@ -359,7 +353,7 @@ class CourseController extends Controller
         }
     }
 
-    private function ensureAttemptAllowed(Assessment $assessment, Enrollment $enrollment, AssessmentAttempt $currentAttempt = null)
+    private function ensureAttemptAllowed(Assessment $assessment, Enrollment $enrollment, ?AssessmentAttempt $currentAttempt = null)
     {
         $attemptQuery = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
             ->where('assessment_id', $assessment->assessment_id);

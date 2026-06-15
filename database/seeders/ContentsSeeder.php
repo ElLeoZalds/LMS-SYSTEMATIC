@@ -194,7 +194,7 @@ class ContentsSeeder extends Seeder
                 'order_index' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 }

@@ -9,173 +9,90 @@ use Illuminate\Support\Facades\Schema;
 
 class UsersSeeder extends Seeder
 {
+    private const DEFAULT_PASSWORD = '123456';
+
+    private const ACTIVE_STATUS = 'A';
+
+    private const FIRST_GENERATED_STUDENT_ID = 31;
+
+    private const LAST_GENERATED_STUDENT_ID = 66;
+
+    private const BASE_USERS = [
+        1 => 'juan.gomez.admin',
+        2 => 'maria.lopez.teacher',
+        3 => 'luis.torres.teacher',
+        4 => 'ana.rojas.teacher',
+        5 => 'carlos.martinez.teacher',
+        6 => 'laura.garcia.teacher',
+        7 => 'miguel.hernandez.student',
+        8 => 'isabel.jimenez.student',
+        9 => 'diego.perez.student',
+        10 => 'valentina.ramirez.student',
+        11 => 'andres.flores.student',
+        12 => 'camila.gutierrez.student',
+        13 => 'javier.reyes.student',
+        14 => 'gabriela.morales.student',
+        15 => 'roberto.ortiz.student',
+        16 => 'natalia.delgado.student',
+        17 => 'fernando.sanchez.student',
+        18 => 'monica.vargas.student',
+        19 => 'eduardo.castro.student',
+        20 => 'patricia.romero.student',
+        21 => 'sofia.mendoza.student',
+        22 => 'mateo.quispe.student',
+        23 => 'lucia.navarro.student',
+        24 => 'sebastian.vega.student',
+        25 => 'daniela.campos.student',
+        26 => 'ricardo.paredes.student',
+        27 => 'elena.salazar.student',
+        28 => 'piero.cardenas.student',
+        29 => 'mariana.soto.student',
+        30 => 'alonso.rivera.student',
+    ];
+
     public function run(): void
+    {
+        $this->truncateUsers();
+
+        DB::table('users')->insert($this->users());
+    }
+
+    private function truncateUsers(): void
     {
         Schema::disableForeignKeyConstraints();
         DB::table('users')->truncate();
         Schema::enableForeignKeyConstraints();
+    }
 
-        DB::table('users')->insert([
-            [
-                'person_id' => 1,
-                'username' => 'juan.gomez.admin',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 2,
-                'username' => 'maria.lopez.teacher',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 3,
-                'username' => 'luis.torres.teacher',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 4,
-                'username' => 'ana.rojas.teacher',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 5,
-                'username' => 'carlos.martinez.teacher',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 6,
-                'username' => 'laura.garcia.teacher',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 7,
-                'username' => 'miguel.hernandez.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 8,
-                'username' => 'isabel.jimenez.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 9,
-                'username' => 'diego.perez.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 10,
-                'username' => 'valentina.ramirez.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 11,
-                'username' => 'andres.flores.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 12,
-                'username' => 'camila.gutierrez.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 13,
-                'username' => 'javier.reyes.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 14,
-                'username' => 'gabriela.morales.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 15,
-                'username' => 'roberto.ortiz.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 16,
-                'username' => 'natalia.delgado.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 17,
-                'username' => 'fernando.sanchez.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 18,
-                'username' => 'monica.vargas.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 19,
-                'username' => 'eduardo.castro.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'person_id' => 20,
-                'username' => 'patricia.romero.student',
-                'password' => Hash::make('123456'),
-                'status' => 'A',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        ]);
+    private function users(): array
+    {
+        $password = Hash::make(self::DEFAULT_PASSWORD);
+        $timestamp = now();
+
+        return collect($this->usernames())
+            ->map(fn (string $username, int $personId) => [
+                'person_id' => $personId,
+                'username' => $username,
+                'password' => $password,
+                'status' => self::ACTIVE_STATUS,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function usernames(): array
+    {
+        return self::BASE_USERS + $this->generatedStudentUsers();
+    }
+
+    private function generatedStudentUsers(): array
+    {
+        return collect(range(self::FIRST_GENERATED_STUDENT_ID, self::LAST_GENERATED_STUDENT_ID))
+            ->mapWithKeys(fn (int $personId) => [
+                $personId => "estudiante{$personId}.student",
+            ])
+            ->all();
     }
 }
