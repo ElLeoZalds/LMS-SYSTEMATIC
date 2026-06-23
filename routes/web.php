@@ -111,4 +111,8 @@ Route::prefix('student')
         Route::post('/assessment/{id}/submit', [StudentCourseController::class, 'submitExam'])->name('assessment.submit');
 
         Route::post('/tasks/{task_id}/submit', [StudentCourseController::class, 'submitTask'])->name('tasks.submit');
+        Route::get('/courses/{id}/certificate', [StudentCourseController::class, 'downloadCertificate'])->name('courses.certificate');
+        Route::get('/courses/{id}/certificate/preview', [StudentCourseController::class, 'previewCertificate'])->name('courses.certificate.preview');
     });
+
+Route::get('/verify/certificate/{code}', [StudentCourseController::class, 'verifyCertificate'])->name('certificate.verify');

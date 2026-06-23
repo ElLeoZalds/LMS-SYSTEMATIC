@@ -17,7 +17,7 @@ class SchedulesSeeder extends Seeder
         DB::table('schedules')->insert([
             [
                 'training_id' => 1,
-                'date' => now()->addDays(1)->toDateString(),
+                'date' => now()->subDays(30)->toDateString(),
                 'start_time' => '18:00:00',
                 'end_time' => '20:00:00',
                 'created_at' => now(),
@@ -25,7 +25,7 @@ class SchedulesSeeder extends Seeder
             ],
             [
                 'training_id' => 2,
-                'date' => now()->addDays(2)->toDateString(),
+                'date' => now()->subDays(25)->toDateString(),
                 'start_time' => '18:00:00',
                 'end_time' => '20:00:00',
                 'created_at' => now(),
@@ -33,7 +33,7 @@ class SchedulesSeeder extends Seeder
             ],
             [
                 'training_id' => 3,
-                'date' => now()->addDays(3)->toDateString(),
+                'date' => now()->subDays(20)->toDateString(),
                 'start_time' => '18:00:00',
                 'end_time' => '20:00:00',
                 'created_at' => now(),

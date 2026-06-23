@@ -360,6 +360,43 @@
                         <h5 class="fw-bold text-dark mb-0">Mis calificaciones</h5>
                     </div>
 
+                    <!-- Card de Certificado -->
+                    <div class="card border-0 shadow-sm rounded-lg mb-4" style="background-color: @if($averageGrade >= 13) #d1e7dd @else #fff3cd @endif; border-left: 5px solid @if($averageGrade >= 13) #198754 @else #ffc107 @endif; color: @if($averageGrade >= 13) #0f5132 @else #664d03 @endif;">
+                        <div class="card-body p-4">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                                <div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        @if($averageGrade >= 13)
+                                            <span class="badge badge-success me-2 px-2 py-1">APROBADO</span>
+                                            <h5 class="fw-bold mb-0 text-success" style="display: inline-block; vertical-align: middle;">¡Curso Aprobado!</h5>
+                                        @else
+                                            <span class="badge badge-warning text-dark me-2 px-2 py-1">EN PROGRESO / PENDIENTE</span>
+                                            <h5 class="fw-bold mb-0 text-warning" style="display: inline-block; vertical-align: middle; color: #664d03 !important;">Certificado Pendiente</h5>
+                                        @endif
+                                    </div>
+                                    <p class="mb-0 text-dark">
+                                        Tu promedio acumulado es de <strong>{{ $averageGrade }}</strong>. 
+                                        @if($averageGrade >= 13)
+                                            Cumples con los requisitos para obtener la certificación digital de este curso.
+                                        @else
+                                            Se requiere una nota promedio mínima de <strong>13</strong> para generar el certificado.
+                                        @endif
+                                    </p>
+                                </div>
+                                @if($averageGrade >= 13)
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a href="{{ route('student.courses.certificate.preview', $training->training_id) }}" class="btn btn-outline-success btn-lg font-weight-bold px-4 py-2 shadow-sm rounded-pill">
+                                            <i class="bi bi-eye-fill me-2"></i>Vista Previa
+                                        </a>
+                                        <a href="{{ route('student.courses.certificate', $training->training_id) }}" class="btn btn-success btn-lg font-weight-bold px-4 py-2 shadow-sm rounded-pill">
+                                            <i class="bi bi-patch-check-fill me-2"></i>Descargar Certificado
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
                     @if($attempts->isNotEmpty())
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover align-middle">

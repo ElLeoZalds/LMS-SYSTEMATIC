@@ -15,6 +15,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
+use Barryvdh\DomPDF\Facade\Pdf;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Str;
 
 class CourseController extends Controller
 {
@@ -38,6 +41,8 @@ class CourseController extends Controller
             ->where('training_id', $id)
             ->firstOrFail();
 
+        $averageGrade = $enrollment->calculateAverage();
+
         $attempts = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
             ->with('assessment')
             ->orderByDesc('created_at')
@@ -54,7 +59,7 @@ class CourseController extends Controller
             ->get()
             ->keyBy('task_id');
 
-        return view('student.courses.show', compact('training', 'attempts', 'attendances', 'submissions'));
+        return view('student.courses.show', compact('training', 'attempts', 'attendances', 'submissions', 'averageGrade'));
     }
 
     public function takeExam(Request $request, $assessment_id)
@@ -366,6 +371,124 @@ class CourseController extends Controller
 
         if ($previousAttempts >= $assessment->allowed_attempts) {
             abort(403, 'Ha alcanzado el número máximo de intentos permitidos.');
+        }
+    }
+
+    public function previewCertificate($trainingId)
+    {
+        $studentId = auth()->id();
+
+        $enrollment = Enrollment::with([
+            'student.person',
+            'training.course.specialty'
+        ])
+        ->where('student_id', $studentId)
+        ->where('training_id', $trainingId)
+        ->firstOrFail();
+
+        $averageGrade = $enrollment->calculateAverage();
+
+        if ($averageGrade < 13) {
+            return redirect()->back()->with('error', 'No cumples con la nota mínima (13) para obtener el certificado. Tu nota actual es: ' . $averageGrade);
+        }
+
+        $certificateCode = 'SYS-' . str_pad($enrollment->enrollment_id, 6, '0', STR_PAD_LEFT);
+        $verificationUrl = route('certificate.verify', ['code' => $certificateCode]);
+
+        $qrCode = QrCode::format('svg')
+            ->size(110)
+            ->margin(1)
+            ->generate($verificationUrl);
+
+        $bgAnverso  = public_path('images/certificado-bg.jpg');
+        $bgReverso  = public_path('images/certificado-reverso-bg.jpg');
+
+        return view('student.certificates.preview', compact(
+            'enrollment',
+            'averageGrade',
+            'certificateCode',
+            'qrCode',
+            'bgAnverso',
+            'bgReverso',
+            'trainingId'
+        ));
+    }
+
+    public function downloadCertificate($trainingId)
+    {
+        $studentId = auth()->id();
+
+        $enrollment = Enrollment::with([
+            'student.person',
+            'training.course.specialty'
+        ])
+        ->where('student_id', $studentId)
+        ->where('training_id', $trainingId)
+        ->firstOrFail();
+
+        $averageGrade = $enrollment->calculateAverage();
+
+        if ($averageGrade < 13) {
+            return redirect()->back()->with('error', 'El curso no ha sido aprobado con la nota mínima requerida (13) para obtener el certificado. Tu nota promedio es: ' . $averageGrade);
+        }
+
+        // Generate certificate code: e.g. SYS-000042
+        $certificateCode = 'SYS-' . str_pad($enrollment->enrollment_id, 6, '0', STR_PAD_LEFT);
+
+        // Verification URL
+        $verificationUrl = route('certificate.verify', ['code' => $certificateCode]);
+
+        // Generate QR code as SVG
+        $qrCode = QrCode::format('svg')
+            ->size(110)
+            ->margin(1)
+            ->generate($verificationUrl);
+
+        // Image backgrounds
+        $bgAnverso = public_path('images/certificado-bg.jpg');
+        $bgReverso = public_path('images/certificado-reverso-bg.jpg');
+
+        $pdf = Pdf::loadView('student.certificates.template', compact(
+            'enrollment',
+            'averageGrade',
+            'certificateCode',
+            'qrCode',
+            'bgAnverso',
+            'bgReverso'
+        ));
+
+        // Configure PDF
+        $pdf->setPaper('a4', 'landscape');
+        $pdf->setWarnings(false);
+
+        return $pdf->download('Certificado-' . Str::slug($enrollment->training->course->title) . '.pdf');
+    }
+
+    public function verifyCertificate($code)
+    {
+        try {
+            // Parse code: e.g. SYS-000042
+            $cleanCode = str_replace('SYS-', '', $code);
+            $enrollmentId = (int) $cleanCode;
+
+            $enrollment = Enrollment::with([
+                'student.person',
+                'training.course.specialty'
+            ])->findOrFail($enrollmentId);
+
+            $averageGrade = $enrollment->calculateAverage();
+
+            if ($averageGrade < 13) {
+                return view('student.certificates.verify_error', [
+                    'message' => 'Este certificado no es válido porque el alumno no alcanzó la nota aprobatoria.'
+                ]);
+            }
+
+            return view('student.certificates.verify', compact('enrollment', 'averageGrade', 'code'));
+        } catch (Throwable $e) {
+            return view('student.certificates.verify_error', [
+                'message' => 'El código de certificado proporcionado no es válido o no existe.'
+            ]);
         }
     }
 }

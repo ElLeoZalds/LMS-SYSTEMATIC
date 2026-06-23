@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TaskSubmission;
+use App\Models\AssessmentAttempt;
 
 class Enrollment extends Model
 {
@@ -145,5 +147,47 @@ class Enrollment extends Model
     public function scopePending($query)
     {
         return $query->where('status', 'P');
+    }
+
+    public function calculateAverage()
+    {
+        $training = $this->training;
+        if (!$training) {
+            return 0;
+        }
+
+        $totalNotes = 0;
+        $notesCount = 0;
+
+        // Tasks grades
+        if ($training->tasks && $training->tasks->count() > 0) {
+            $taskIds = $training->tasks->pluck('task_id')->toArray();
+            $submissions = TaskSubmission::whereIn('task_id', $taskIds)
+                ->where('student_id', $this->student_id)
+                ->get();
+            
+            foreach ($submissions as $submission) {
+                if (!is_null($submission->grade)) {
+                    $totalNotes += $submission->grade;
+                    $notesCount++;
+                }
+            }
+        }
+
+        // Assessments attempts grades
+        if ($training->assessments && $training->assessments->count() > 0) {
+            foreach ($training->assessments as $assessment) {
+                $maxAttemptScore = AssessmentAttempt::where('enrollment_id', $this->enrollment_id)
+                    ->where('assessment_id', $assessment->assessment_id)
+                    ->max('score');
+
+                if (!is_null($maxAttemptScore)) {
+                    $totalNotes += $maxAttemptScore;
+                    $notesCount++;
+                }
+            }
+        }
+
+        return $notesCount > 0 ? round($totalNotes / $notesCount, 1) : 0;
     }
 }
