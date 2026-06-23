@@ -136,15 +136,151 @@ class RoleUserSeeder extends Seeder
                 'role_id' => 3,
             ],
         ]);
-
-        $additionalStudentRoles = array_map(
-            fn ($userId) => [
-                'user_id' => $userId,
+        DB::table('user_roles')->insert([
+            [
+                'user_id' => 31,
                 'role_id' => 3,
             ],
-            range(31, 66)
-        );
-
-        DB::table('user_roles')->insert($additionalStudentRoles);
+            [
+                'user_id' => 32,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 33,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 34,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 35,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 36,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 37,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 38,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 39,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 40,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 41,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 42,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 43,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 44,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 45,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 46,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 47,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 48,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 49,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 50,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 51,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 52,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 53,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 54,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 55,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 56,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 57,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 58,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 59,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 60,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 61,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 62,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 63,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 64,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 65,
+                'role_id' => 3,
+            ],
+            [
+                'user_id' => 66,
+                'role_id' => 3,
+            ],
+        ]);
     }
 }

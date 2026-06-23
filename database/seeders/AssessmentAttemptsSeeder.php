@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Carbon\Carbon;
 
 class AssessmentAttemptsSeeder extends Seeder
 {
@@ -15,44 +15,278 @@ class AssessmentAttemptsSeeder extends Seeder
         DB::table('assessment_attempts')->truncate();
         Schema::enableForeignKeyConstraints();
 
-        // Get enrollments for finished trainings (1, 2, 3)
-        $enrollments = DB::table('enrollments')
-            ->whereIn('training_id', [1, 2, 3])
-            ->get();
-
-        $attempts = [];
-
-        foreach ($enrollments as $enrollment) {
-            // Get assessments for this training
-            $assessments = DB::table('assessments')
-                ->where('training_id', $enrollment->training_id)
-                ->get();
-
-            foreach ($assessments as $assessment) {
-                // Determine if this student passes or fails based on student_id parity
-                $passes = ($enrollment->student_id % 2 === 0);
-
-                if ($passes) {
-                    // Passed score: 14 to 20
-                    $score = 14 + (($enrollment->student_id * 3) % 7);
-                } else {
-                    // Failed score: 5 to 10
-                    $score = 5 + (($enrollment->student_id * 2) % 6);
-                    $score = min($score, 10);
-                }
-
-                $attempts[] = [
-                    'enrollment_id' => $enrollment->enrollment_id,
-                    'assessment_id' => $assessment->assessment_id,
+        DB::table('assessment_attempts')->insert([
+                [
+                    'enrollment_id' => 1,
+                    'assessment_id' => 1,
                     'number' => 1,
-                    'date' => Carbon::parse($enrollment->enrollment_date)->addDays(10)->toDateString(),
-                    'score' => $score,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 7,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ];
-            }
-        }
-
-        DB::table('assessment_attempts')->insert($attempts);
+                ],
+                [
+                    'enrollment_id' => 2,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 17,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 3,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 5,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 21,
+                    'assessment_id' => 1,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 5,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 22,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 17,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 23,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 9,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 41,
+                    'assessment_id' => 1,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 7,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 42,
+                    'assessment_id' => 1,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 19,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 43,
+                    'assessment_id' => 1,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 5,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 44,
+                    'assessment_id' => 1,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 18,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 45,
+                    'assessment_id' => 1,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 9,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 46,
+                    'assessment_id' => 1,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 17,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 47,
+                    'assessment_id' => 1,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 7,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 48,
+                    'assessment_id' => 1,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 16,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 49,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 5,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 50,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 15,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 51,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 9,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 52,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 14,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 53,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 7,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 54,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 20,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 55,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 5,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 56,
+                    'assessment_id' => 2,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 19,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 57,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 9,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 58,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 18,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 59,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 7,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 60,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 17,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 61,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 5,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 62,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 16,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 63,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 9,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'enrollment_id' => 64,
+                    'assessment_id' => 3,
+                    'number' => 1,
+                    'date' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(10)->toDateString(),
+                    'score' => 15,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ]
+        );
     }
 }

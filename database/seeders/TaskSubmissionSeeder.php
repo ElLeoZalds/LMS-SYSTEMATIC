@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Carbon\Carbon;
 
 class TaskSubmissionSeeder extends Seeder
 {
@@ -15,48 +15,368 @@ class TaskSubmissionSeeder extends Seeder
         DB::table('task_submissions')->truncate();
         Schema::enableForeignKeyConstraints();
 
-        // Get enrollments for finished trainings (1, 2, 3)
-        $enrollments = DB::table('enrollments')
-            ->whereIn('training_id', [1, 2, 3])
-            ->get();
-
-        $submissions = [];
-
-        foreach ($enrollments as $enrollment) {
-            // Get tasks for this training
-            $tasks = DB::table('tasks')
-                ->where('training_id', $enrollment->training_id)
-                ->get();
-
-            foreach ($tasks as $task) {
-                // Determine if this student passes or fails based on student_id parity
-                $passes = ($enrollment->student_id % 2 === 0);
-
-                if ($passes) {
-                    // Passed grade: 13 to 19
-                    $grade = 13 + (($enrollment->student_id * 4) % 7);
-                    $feedback = 'Excelente trabajo. Sigue así.';
-                } else {
-                    // Failed grade: 4 to 9.5
-                    $grade = 4 + (($enrollment->student_id * 3) % 6);
-                    $feedback = 'Falta desarrollar más los puntos clave de la tarea.';
-                }
-
-                $submissions[] = [
-                    'task_id' => $task->task_id,
-                    'student_id' => $enrollment->student_id,
-                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-' . $task->task_id,
+        DB::table('task_submissions')->insert([
+                [
+                    'task_id' => 1,
+                    'student_id' => 7,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
                     'file_path' => null,
-                    'submitted_at' => Carbon::parse($enrollment->enrollment_date)->addDays(8)->toDateTimeString(),
-                    'grade' => $grade,
-                    'teacher_feedback' => $feedback,
-                    'graded_at' => Carbon::parse($enrollment->enrollment_date)->addDays(9)->toDateTimeString(),
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
                     'created_at' => now(),
                     'updated_at' => now(),
-                ];
-            }
-        }
-
-        DB::table('task_submissions')->insert($submissions);
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 8,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 17,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 9,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 1,
+                    'student_id' => 21,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 22,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 17,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 23,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 1,
+                    'student_id' => 31,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 1,
+                    'student_id' => 32,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 15,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 1,
+                    'student_id' => 33,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 1,
+                    'student_id' => 34,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 16,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 1,
+                    'student_id' => 35,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 1,
+                    'student_id' => 36,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 17,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 1,
+                    'student_id' => 37,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 1,
+                    'student_id' => 38,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-1',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 18,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(61)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 39,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 40,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 19,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 41,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 42,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 13,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 43,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 44,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 14,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 45,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 2,
+                    'student_id' => 46,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-2',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 15,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(51)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 47,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 48,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 16,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 49,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 50,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 17,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 51,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 52,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 18,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 53,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 7,
+                    'teacher_feedback' => 'Falta desarrollar más los puntos clave de la tarea.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'task_id' => 3,
+                    'student_id' => 54,
+                    'submission_text' => 'Enlace al proyecto de la tarea: https://github.com/student/project-3',
+                    'file_path' => null,
+                    'submitted_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(8)->toDateTimeString(),
+                    'grade' => 19,
+                    'teacher_feedback' => 'Excelente trabajo. Sigue así.',
+                    'graded_at' => Carbon::parse(now()->subDays(46)->toDateString())->addDays(9)->toDateTimeString(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ]
+        );
     }
 }
