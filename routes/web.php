@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SpecialtyController;
+use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\TrainingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
@@ -46,6 +47,8 @@ Route::prefix('admin')
         Route::resource('courses', CourseController::class);
         Route::resource('specialties', SpecialtyController::class);
         Route::resource('users', UserController::class);
+        Route::get('students', [AdminStudentController::class, 'index'])->name('students.index');
+        Route::get('students/{user}', [AdminStudentController::class, 'show'])->name('students.show');
         Route::resource('contents', ContentController::class);
         Route::resource('payments', PaymentController::class);
 

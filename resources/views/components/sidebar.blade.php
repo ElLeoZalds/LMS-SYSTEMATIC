@@ -67,6 +67,13 @@
             </a>
         </li>
 
+        <li class="nav-item {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.students.index') }}">
+                <i class="fas fa-fw fa-user-graduate"></i>
+                <span>Estudiantes</span>
+            </a>
+        </li>
+
         <li class="nav-item {{ request()->routeIs('admin.specialties.*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('admin.specialties.index') }}">
                 <i class="fas fa-fw fa-tags"></i>
