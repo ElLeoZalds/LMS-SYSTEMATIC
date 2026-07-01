@@ -389,7 +389,7 @@
                         {{ $enrollment->student->person->first_names ?? '' }}
                         {{ $enrollment->student->person->last_names ?? '' }}
                     </div>
-                    <div class="anverso-course">{{ $enrollment->training->course->title ?? '' }}</div>
+                    <div class="anverso-course">{{ optional($enrollment->training->course)->title ?? '' }}{{ optional($enrollment->training->start_date)->format(' (Y-m)') }}</div>
                     <div class="anverso-code">{{ $certificateCode }}</div>
                     <div class="anverso-date">
                         Otorgado el {{ \Carbon\Carbon::parse($enrollment->enrollment_date)->translatedFormat('d \d\e F \d\e Y') }}
@@ -401,7 +401,7 @@
             <div class="flip-back">
                 <div class="cert-face">
                     <img src="{{ asset('images/certificado-reverso-bg.jpg') }}" class="bg-img" alt="Reverso del certificado">
-                    <div class="reverso-actividad">{{ $enrollment->training->course->title ?? '' }}</div>
+                    <div class="reverso-actividad">{{ optional($enrollment->training->course)->title ?? '' }}{{ optional($enrollment->training->start_date)->format(' (Y-m)') }}</div>
                     <div class="reverso-modulo">{{ $enrollment->training->course->specialty->specialty ?? 'General' }}</div>
                     <div class="reverso-duracion">{{ $enrollment->training->course->hours_count ?? 0 }} horas académicas</div>
                     <div class="reverso-fecha">{{ \Carbon\Carbon::parse($enrollment->enrollment_date)->format('d/m/Y') }}</div>
@@ -431,7 +431,7 @@
         </div>
         <div class="info-card">
             <div class="label">Curso</div>
-            <div class="value">{{ $enrollment->training->course->title ?? '' }}</div>
+            <div class="value">{{ optional($enrollment->training->course)->title ?? '' }}{{ optional($enrollment->training->start_date)->format(' (Y-m)') }}</div>
         </div>
         <div class="info-card">
             <div class="label">Especialidad</div>

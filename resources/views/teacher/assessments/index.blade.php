@@ -22,7 +22,7 @@
                                 <div class="card-body d-flex flex-column">
                                     <div>
                                         <h5 class="card-title fw-bold text-dark mb-2 line-clamp-2" style="font-size: 1.1rem;">
-                                            {{ $training->course->title }}
+                                            {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}
                                         </h5>
                                         <p class="text-muted small mb-0">Código: {{ $training->code ?? 'N/A' }}</p>
                                     </div>

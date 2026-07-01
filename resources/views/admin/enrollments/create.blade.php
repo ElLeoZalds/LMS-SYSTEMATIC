@@ -40,7 +40,7 @@
                                 <input type="hidden" name="training_id" value="{{ $selectedTraining->training_id }}">
                                 <div class="mb-4 p-3 border rounded bg-light">
                                     <div class="fw-bold mb-1">Capacitación seleccionada</div>
-                                    <div>{{ $selectedTraining->course->title ?? 'Sin curso' }}</div>
+                                    <div>{{ optional($selectedTraining->course)->title ?? 'Sin curso' }}{{ optional($selectedTraining->start_date)->format(' (Y-m)') }}</div>
                                     <div class="text-muted small">
                                         {{ $selectedTraining->teacher->person->first_names ?? 'Sin docente' }}
                                         {{ $selectedTraining->teacher->person->last_names ?? '' }}
@@ -90,7 +90,7 @@
                                         <option value="">-- Selecciona una capacitación --</option>
                                         @foreach($trainings as $training)
                                             <option value="{{ $training->training_id }}" @selected(old('training_id') == $training->training_id)>
-                                                {{ $training->course->title ?? 'Sin curso' }}
+                                                {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}
                                                 - {{ $training->teacher->person->first_names ?? 'Sin docente' }}
                                                 ({{ $training->start_date?->format('d/m/Y') ?? 'Sin fecha' }})
                                             </option>

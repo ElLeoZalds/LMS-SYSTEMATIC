@@ -69,7 +69,7 @@
                             <div class="card-body d-flex flex-column p-4">
                                 <div class="mb-3">
                                     <h5 class="card-title fw-bold text-dark mb-2 line-clamp-2" style="font-size: 1.1rem;">
-                                        {{ $enrollment->training->course->title }}
+                                        {{ optional($enrollment->training->course)->title ?? 'Sin curso' }}{{ optional($enrollment->training->start_date)->format(' (Y-m)') }}
                                     </h5>
 
                                     <div style="font-size: 0.8rem;">

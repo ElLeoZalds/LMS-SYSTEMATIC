@@ -104,7 +104,7 @@
                 <div class="row mb-3">
                     <div class="col-12 col-md-6 mb-2">
                         <p class="mb-1"><strong>Docente:</strong> {{ $training->teacher->person->first_names ?? '' }} {{ $training->teacher->person->last_names ?? '' }}</p>
-                        <p class="mb-1"><strong>Curso:</strong> {{ $training->course->title }}</p>
+                        <p class="mb-1"><strong>Curso:</strong> {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</p>
                         <p class="mb-0"><strong>Código:</strong> {{ $training->code ?? 'N/A' }}</p>
                     </div>
                     <div class="col-12 col-md-6 mb-2">

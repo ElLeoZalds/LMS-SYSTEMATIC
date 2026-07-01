@@ -59,7 +59,7 @@
                         @forelse($recentActivities as $activity)
                             <tr>
                                 <td class="small">{{ $activity->title }}</td>
-                                <td class="small">{{ $activity->training->course->title ?? 'N/A' }}</td>
+                                <td class="small">{{ optional($activity->training->course)->title ?? 'N/A' }}{{ optional($activity->training->start_date)->format(' (Y-m)') }}</td>
                                 <td class="small">{{ $activity->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <span class="badge {{ $activity->active ? 'bg-success' : 'bg-secondary' }} small">

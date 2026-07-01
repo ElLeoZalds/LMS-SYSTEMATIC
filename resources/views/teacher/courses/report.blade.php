@@ -117,7 +117,7 @@
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-3">
                     <div>
                         <h1 class="h4 mb-1">Reporte de Calificaciones</h1>
-                        <p class="mb-1">Curso: <strong>{{ $training->course->title }}</strong></p>
+                        <p class="mb-1">Curso: <strong>{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</strong></p>
                         <p class="mb-1">Docente: <strong>{{ $training->teacher->person->first_names ?? '' }} {{ $training->teacher->person->last_names ?? '' }}</strong></p>
                         <p class="mb-1">Código: <strong>{{ $training->code ?? 'N/A' }}</strong> | Modalidad: <strong>{{ ucfirst($training->modality) }}</strong></p>
                         <p class="mb-1">Estudiantes registrados: <strong>{{ $students->count() }}</strong></p>

@@ -5,7 +5,7 @@
     <div class="container-fluid px-4 py-1">
 
         <h1 class="h3 mb-4 text-gray-800">
-            Estudiantes del curso: {{ $training->course->title }}
+            Estudiantes del curso: {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}
         </h1>
 
         <div class="card shadow mb-4">

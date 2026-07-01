@@ -10,7 +10,7 @@
 
         <div class="card shadow mb-4">
             <div class="card-body p-4">
-                <h1 class="h3 mb-4 text-gray-800">Crear Tarea - {{ $training->course->title }}</h1>
+                <h1 class="h3 mb-4 text-gray-800">Crear Tarea - {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</h1>
 
                 <form action="{{ route('teacher.tasks.store') }}" method="POST" class="row g-3"> {{-- Grid con gap reducido
                     --}}

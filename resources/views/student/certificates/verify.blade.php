@@ -114,7 +114,7 @@
         
         <div class="detail-item">
             <div class="detail-label">Actividad / Curso</div>
-            <div class="detail-value">{{ $enrollment->training->course->title }}</div>
+            <div class="detail-value">{{ optional($enrollment->training->course)->title ?? '' }}{{ optional($enrollment->training->start_date)->format(' (Y-m)') }}</div>
         </div>
 
         <div class="detail-item">

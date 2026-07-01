@@ -162,7 +162,7 @@
             {{ $enrollment->student->person->first_names ?? '' }} {{ $enrollment->student->person->last_names ?? '' }}
         </div>
         <div class="course-title">
-            {{ $enrollment->training->course->title ?? '' }}
+            {{ optional($enrollment->training->course)->title ?? '' }}{{ optional($enrollment->training->start_date)->format(' (Y-m)') }}
         </div>
         <div class="cert-code">{{ $certificateCode }}</div>
         <div class="cert-date">
@@ -177,7 +177,7 @@
         @endif
         
         <div class="reverso-field actividad">
-            {{ $enrollment->training->course->title ?? '' }}
+            {{ optional($enrollment->training->course)->title ?? '' }}{{ optional($enrollment->training->start_date)->format(' (Y-m)') }}
         </div>
         <div class="reverso-field modulo">
             {{ $enrollment->training->course->specialty->specialty ?? 'General' }}

@@ -8,7 +8,7 @@
     <div class="container-fluid px-4 py-1">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="h3 mb-2 text-gray-800">Evaluaciones de {{ $training->course->title }}</h1>
+                <h1 class="h3 mb-2 text-gray-800">Evaluaciones de {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</h1>
                 <p class="text-muted">Gestiona las evaluaciones del curso y crea preguntas para cada evaluación.</p>
             </div>
         </div>
@@ -37,7 +37,7 @@
                 <div class="card shadow border-left-primary h-100 py-2">
                     <div class="card-body">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Capacitación</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $training->course->title }}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</div>
                         <div class="small text-muted mt-1">Código: {{ $training->code ?? 'N/A' }}</div>
                     </div>
                 </div>

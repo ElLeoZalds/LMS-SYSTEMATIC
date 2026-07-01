@@ -9,7 +9,7 @@
         <div class="container-fluid px-4 py-1">
             <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="h3 mb-2 text-gray-800">{{ $training->course->title }}</h1>
+                <h1 class="h3 mb-2 text-gray-800">{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</h1>
                 <small class="text-muted">Código: {{ $training->code ?? 'N/A' }} | Modalidad:
                     <strong>{{ ucfirst($training->modality) }}</strong></small>
             </div>
@@ -630,7 +630,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3 print-report-header">
                         <div>
                             <h5 class="fw-bold text-dark mb-1">Consolidado de Calificaciones</h5>
-                            <p class="text-muted mb-0">Curso: {{ $training->course->title }} | Código: {{ $training->code ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
+                            <p class="text-muted mb-0">Curso: {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }} | Código: {{ $training->code ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
                         </div>
                         <a href="{{ route('teacher.courses.report', $training->training_id) }}" class="btn btn-sm btn-outline-success">
                             <i class="bi bi-printer me-1"></i> Imprimir Registro

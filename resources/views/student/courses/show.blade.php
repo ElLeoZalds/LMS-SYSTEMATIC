@@ -4,7 +4,7 @@
     <div class="container-fluid px-4 py-1">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
             <div>
-                <h1 class="h3 mb-2 text-gray-800">{{ $training->course->title }}</h1>
+                <h1 class="h3 mb-2 text-gray-800">{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</h1>
                 <p class="text-muted mb-0">Capacitación con acceso a evaluaciones, tareas, asistencia, calificaciones y anuncios.</p>
             </div>
             <div class="text-end">
@@ -92,7 +92,7 @@
                         <div class="col-md-6">
                             <div class="card border-start border-primary border-3 shadow-sm h-100">
                                 <div class="card-body">
-                                    <h5 class="card-title fw-bold text-dark mb-2">{{ $training->course->title }}</h5>
+                                    <h5 class="card-title fw-bold text-dark mb-2">{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</h5>
                                     <p class="text-muted small mb-2">Instructor: {{ $training->teacher->person->first_names ?? $training->teacher->name ?? 'Sin profesor' }}</p>
                                     <p class="text-muted small mb-0">{{ $training->course->description ?? 'Sin descripción del curso.' }}</p>
                                 </div>

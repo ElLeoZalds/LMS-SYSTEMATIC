@@ -20,12 +20,12 @@
                         <label for="training_id" class="form-label fw-bold small text-muted">Capacitación</label>
                         @if(isset($training))
                             <input type="hidden" name="training_id" value="{{ $training->training_id }}">
-                            <input type="text" id="training_id" class="form-control" value="{{ $training->course->title }}" readonly>
+                            <input type="text" id="training_id" class="form-control" value="{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}" readonly>
                         @else
                             <select id="training_id" name="training_id" class="form-select" required>
                                 <option value="">Seleccione una capacitación</option>
                                 @foreach($trainings as $item)
-                                    <option value="{{ $item->training_id }}">{{ $item->course->title }}</option>
+                                    <option value="{{ $item->training_id }}">{{ optional($item->course)->title ?? 'Sin curso' }}{{ optional($item->start_date)->format(' (Y-m)') }}</option>
                                 @endforeach
                             </select>
                         @endif
@@ -75,7 +75,7 @@
 
                         <div class="row align-items-center mb-4">
                             <div class="col-md-8">
-                                <h2 class="h5 mb-0">{{ $training->course->title }}</h2>
+                                <h2 class="h5 mb-0">{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</h2>
                                 <p class="text-muted small mb-0">Fecha de asistencia: {{ $date ?? date('Y-m-d') }}</p>
                             </div>
                             <div class="col-md-4 text-md-end mt-3 mt-md-0 d-flex justify-content-end gap-2">
