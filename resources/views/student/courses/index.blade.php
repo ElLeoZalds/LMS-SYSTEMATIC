@@ -10,9 +10,10 @@
     @if($courses->isEmpty())
         <div class="card shadow-sm rounded-3 border-0">
             <div class="card-body text-center py-5">
-                <i class="bi bi-journal-x text-muted" style="font-size: 3rem;"></i>
-                <h5 class="card-title mt-4 text-dark fw-bold">Sin matrículas activas</h5>
-                <p class="text-muted">Actualmente no te encuentras registrado en ninguna capacitación. Contacta con el administrador.</p>
+                <i class="bi bi-journal-bookmark text-primary" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-4 text-dark fw-bold">Aún no tienes cursos inscritos</h5>
+                <p class="text-muted">Cuando te inscribas en un curso, aparecerá aquí para que puedas comenzar tu aprendizaje.</p>
+                <a href="{{ route('student.dashboard') }}" class="btn btn-primary mt-3">Explorar cursos</a>
             </div>
         </div>
     @else

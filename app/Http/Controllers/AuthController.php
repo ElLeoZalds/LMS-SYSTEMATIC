@@ -26,15 +26,15 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'full_name' => 'required|string|max:255',
+            'first_names' => 'required|string|max:255',
+            'last_names' => 'required|string|max:255',
             'email' => 'required|email|unique:people,email',
             'password' => 'required|string|min:6|confirmed',
+            'terms' => 'accepted',
         ]);
 
-        [$firstName, $lastName] = $this->splitFullName($data['full_name']);
-
         try {
-            $user = DB::transaction(fn () => $this->createStudentAccount($data, $firstName, $lastName));
+            $user = DB::transaction(fn () => $this->createStudentAccount($data));
 
             if (method_exists($user, 'sendEmailVerificationNotification')) {
                 $user->sendEmailVerificationNotification();
@@ -81,20 +81,11 @@ class AuthController extends Controller
         return redirect('/login');
     }
 
-    private function splitFullName(string $fullName): array
-    {
-        $nameParts = preg_split('/\s+/', trim($fullName));
-        $lastName = count($nameParts) > 1 ? array_pop($nameParts) : '';
-        $firstName = implode(' ', $nameParts);
-
-        return [$firstName, $lastName];
-    }
-
-    private function createStudentAccount(array $data, string $firstName, string $lastName): User
+    private function createStudentAccount(array $data): User
     {
         $person = Person::create([
-            'first_names' => $firstName,
-            'last_names' => $lastName,
+            'first_names' => $data['first_names'],
+            'last_names' => $data['last_names'],
             'email' => $data['email'],
         ]);
 

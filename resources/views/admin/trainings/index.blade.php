@@ -70,9 +70,6 @@
                                         <a href="{{ route('teacher.courses.show', $training->training_id) }}" class="btn btn-sm btn-info text-white">
                                             <i class="fas fa-chalkboard-teacher"></i> Gestionar
                                         </a>
-                                        <a href="{{ route('admin.enrollments.create', ['training_id' => $training->training_id]) }}" class="btn btn-sm btn-success">
-                                            <i class="fas fa-user-plus"></i>
-                                        </a>
                                         <button class="btn btn-sm btn-info schedule-btn" data-training-id="{{ $training->training_id }}" data-training-name="{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}" data-teacher-name="{{ optional($training->teacher->person)->first_names ?? 'Sin nombre' }} {{ optional($training->teacher->person)->last_names ?? '' }}" data-start-date="{{ $training->start_date ? $training->start_date->format('Y-m-d') : '' }}" data-end-date="{{ $training->end_date ? $training->end_date->format('Y-m-d') : '' }}">
                                             <i class="fas fa-calendar-plus"></i>
                                         </button>
@@ -256,40 +253,6 @@
             </div>
         </div>
 
-        <!-- Enroll Student Modal -->
-        <div class="modal fade" id="enrollStudentModal" tabindex="-1" role="dialog"
-             aria-labelledby="enrollStudentModalLabel" aria-hidden="true"
-             data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 rounded-3">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title fw-bold" id="enrollStudentModalLabel">Inscribir alumno en: [Nombre del curso]</h5>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" id="enrollStudentForm">
-                            @csrf
-                            <input type="hidden" name="training_id" id="enroll_training_id">
-                            <div class="mb-3">
-                                <label for="student_id" class="form-label">Seleccionar alumno</label>
-                                <select name="student_id" id="student_id" class="form-control" required>
-                                    <option value="">Seleccionar alumno</option>
-                                    @foreach($students as $student)
-                                        <option value="{{ $student->user_id }}">
-                                            {{ $student->person->first_names ?? 'Sin nombre' }} {{ $student->person->last_names ?? '' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-3">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" form="enrollStudentForm" class="btn btn-success">Inscribir</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     @push('scripts')
@@ -458,18 +421,6 @@
                     document.getElementById('editForm').action = `/admin/trainings/${id}`;
 
                     $('#editModal').modal({backdrop: 'static', keyboard: false});
-                });
-            });
-
-            document.querySelectorAll('.enroll-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const trainingId = this.getAttribute('data-training-id');
-                    const trainingName = this.getAttribute('data-training-name');
-
-                    document.getElementById('enroll_training_id').value = trainingId;
-                    document.getElementById('enrollStudentModalLabel').textContent = `Inscribir Alumno en: ${trainingName}`;
-
-                    $('#enrollStudentModal').modal({backdrop: 'static', keyboard: false});
                 });
             });
 
@@ -703,57 +654,6 @@
                 });
             });
 
-            $('#enrollStudentForm').on('submit', function (e) {
-                e.preventDefault();
-
-                const $form = $(this);
-                const $submitBtn = $form.find('button[type="submit"]');
-                const originalText = $submitBtn.html();
-                const trainingId = document.getElementById('enroll_training_id').value;
-
-                $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Inscribiendo...');
-
-                $.ajax({
-                    url: `/admin/trainings/${trainingId}/enroll`,
-                    method: 'POST',
-                    data: $form.serialize(),
-                    success: function (response) {
-                        $('#enrollStudentModal').modal('hide');
-
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: response.success ? 'success' : 'error',
-                            title: response.message,
-                            showConfirmButton: false,
-                            timer: 1500,
-                            timerProgressBar: true
-                        });
-
-                        if (response.success) {
-                            setTimeout(function () {
-                                location.reload();
-                            }, 1500);
-                        }
-                    },
-                    error: function (xhr) {
-                        const message = xhr.responseJSON?.message || 'Error al inscribir al alumno';
-
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'error',
-                            title: message,
-                            showConfirmButton: false,
-                            timer: 2500,
-                            timerProgressBar: true
-                        });
-                    },
-                    complete: function () {
-                        $submitBtn.prop('disabled', false).html(originalText);
-                    }
-                });
-            });
         });
     </script>
     @endpush

@@ -4,56 +4,56 @@
 
     <div class="container-fluid px-4 py-1">
 
-        <h1 class="h3 mb-4 text-gray-800 fw-bold"><i class="bi bi-mortarboard-fill me-2"></i>Resumen de Actividad</h1>
+        @if($hasEnrollments)
+            <h1 class="h3 mb-4 text-gray-800 fw-bold"><i class="bi bi-mortarboard-fill me-2"></i>Resumen de Actividad</h1>
 
-        <div class="row g-3 mb-4">
+            <div class="row g-3 mb-4">
 
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <i class="bi bi-book-fill text-primary h4 mb-2"></i>
-                        <h5 class="h6 fw-bold text-gray-800">{{ $totalCourses }}</h5>
-                        <small class="text-muted">Cursos inscritos</small>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <i class="bi bi-book-fill text-primary h4 mb-2"></i>
+                            <h5 class="h6 fw-bold text-gray-800">{{ $totalCourses }}</h5>
+                            <small class="text-muted">Cursos inscritos</small>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <i class="bi bi-hourglass-split text-warning h4 mb-2"></i>
-                        <h5 class="h6 fw-bold text-gray-800">{{ $inProgress }}</h5>
-                        <small class="text-muted">En progreso</small>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <i class="bi bi-hourglass-split text-warning h4 mb-2"></i>
+                            <h5 class="h6 fw-bold text-gray-800">{{ $inProgress }}</h5>
+                            <small class="text-muted">En progreso</small>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <i class="bi bi-check-circle-fill text-success h4 mb-2"></i>
-                        <h5 class="h6 fw-bold text-gray-800">{{ $completed }}</h5>
-                        <small class="text-muted">Completados</small>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <i class="bi bi-check-circle-fill text-success h4 mb-2"></i>
+                            <h5 class="h6 fw-bold text-gray-800">{{ $completed }}</h5>
+                            <small class="text-muted">Completados</small>
+                        </div>
                     </div>
                 </div>
+
             </div>
 
-        </div>
+            <div class="mb-4">
+                <h3 class="text-gray-800 fw-bold h5">
+                    <i class="bi bi-journal-text me-2"></i>Mis Cursos Recientes
+                </h3>
+            </div>
 
-        <div class="mb-4">
-            <h3 class="text-gray-800 fw-bold h5">
-                <i class="bi bi-journal-text me-2"></i>Mis Cursos Recientes
-            </h3>
-        </div>
-
-        @if($enrollments->count() > 0)
             <div class="row g-4">
 
                 @foreach($enrollments as $enrollment)
 
                     <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                         <div class="card h-100 shadow-sm rounded-3 border-0 position-relative overflow-hidden transition-all course-card-clickable" data-url="{{ route('student.courses.show', $enrollment->training->training_id) }}">
-                            
+
                             <div class="course-banner position-relative">
                                 @if(!empty($enrollment->training->course->banner_path))
                                     <div class="course-banner-image" style="background-image: url('{{ asset('storage/'.$enrollment->training->course->banner_path) }}?v={{ file_exists(storage_path('app/public/'.$enrollment->training->course->banner_path)) ? filemtime(storage_path('app/public/'.$enrollment->training->course->banner_path)) : time() }}'); height:120px;"></div>
@@ -109,8 +109,77 @@
 
             </div>
         @else
-            <div class="alert alert-info text-center border-0 shadow-sm" role="alert">
-                <i class="bi bi-inbox me-2"></i>No tienes cursos inscritos aún.
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-mortarboard-fill text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <h2 class="h4 fw-bold mb-1 text-gray-800">Hola, {{ $studentName ?: 'estudiante' }}</h2>
+                            <p class="text-muted mb-0">Aún no estás inscrito en ningún curso.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="h5 fw-bold text-gray-800 mb-4">
+                        <i class="bi bi-grid-fill me-2"></i>Explora nuestros cursos
+                    </h3>
+
+                    @if($featuredCourses->isNotEmpty())
+                        <div class="row g-4">
+                            @foreach($featuredCourses as $course)
+                                @php
+                                    $courseTraining = $course->trainings()->where('status', 1)->first();
+                                @endphp
+
+                                <div class="col-12 col-sm-6 col-md-4">
+                                    <div class="card h-100 shadow-sm rounded-3 border-0 overflow-hidden">
+                                        @if(!empty($course->banner_path))
+                                            <img src="{{ asset('storage/'.$course->banner_path) }}?v={{ file_exists(storage_path('app/public/'.$course->banner_path)) ? filemtime(storage_path('app/public/'.$course->banner_path)) : time() }}"
+                                                 class="card-img-top"
+                                                 alt="{{ $course->title }}"
+                                                 style="height: 140px; object-fit: cover;">
+                                        @endif
+
+                                        <div class="card-body d-flex flex-column p-4">
+                                            <h5 class="card-title fw-bold text-dark mb-3">{{ $course->title }}</h5>
+
+                                            @if(!empty(optional($course->specialty)->specialty))
+                                                <p class="text-muted small mb-2">
+                                                    <i class="bi bi-tag-fill me-1"></i>{{ $course->specialty->specialty }}
+                                                </p>
+                                            @endif
+
+                                            @if(!empty($courseTraining?->modality))
+                                                <p class="text-muted small mb-2">
+                                                    <i class="bi bi-laptop me-1"></i>{{ $courseTraining->modality }}
+                                                </p>
+                                            @endif
+
+                                            @if(!empty($course->reference_price))
+                                                <p class="text-muted small mb-3">
+                                                    <i class="bi bi-cash-stack me-1"></i>{{ $course->reference_price }}
+                                                </p>
+                                            @endif
+
+                                            @if($courseTraining)
+                                                <a href="{{ route('student.courses.show', $courseTraining->training_id) }}" class="btn btn-primary btn-sm mt-auto">
+                                                    Ver detalles
+                                                </a>
+                                            @else
+                                                <button type="button" class="btn btn-primary btn-sm mt-auto" disabled>
+                                                    Ver detalles
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-muted">No hay cursos disponibles por ahora.</div>
+                    @endif
+                </div>
             </div>
         @endif
 

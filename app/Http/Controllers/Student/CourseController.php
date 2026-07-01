@@ -25,41 +25,52 @@ class CourseController extends Controller
     {
         $studentId = auth()->id();
 
+        $training = Training::with([
+            'course.specialty',
+            'teacher.person',
+            'assessments',
+            'tasks',
+            'contents',
+            'announcements',
+            'enrollments.student.person',
+        ])
+            ->where('training_id', $id)
+            ->firstOrFail();
+
+        $course = $training->course;
         $isEnrolled = Enrollment::where('student_id', $studentId)
             ->where('training_id', $id)
             ->exists();
 
-        if (! $isEnrolled) {
-            abort(403, 'No estás inscrito en esta capacitación.');
+        if ($isEnrolled) {
+            $enrollment = Enrollment::where('student_id', $studentId)
+                ->where('training_id', $id)
+                ->first();
+
+            $attendances = $training->attendances()->with('schedule')->get();
+            $attempts = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
+                ->with('assessment')
+                ->orderByDesc('created_at')
+                ->get();
+            $taskIds = $training->tasks->pluck('task_id')->all();
+            $submissions = TaskSubmission::where('student_id', $studentId)
+                ->whereIn('task_id', $taskIds)
+                ->get()
+                ->keyBy('task_id');
+            $averageGrade = $enrollment->calculateAverage();
+
+            return view('student.courses.show', compact(
+                'training',
+                'course',
+                'isEnrolled',
+                'attendances',
+                'attempts',
+                'submissions',
+                'averageGrade'
+            ));
         }
 
-        $training = Training::with(['course', 'teacher.person', 'assessments', 'tasks', 'announcements'])
-            ->where('training_id', $id)
-            ->firstOrFail();
-
-        $enrollment = Enrollment::where('student_id', $studentId)
-            ->where('training_id', $id)
-            ->firstOrFail();
-
-        $averageGrade = $enrollment->calculateAverage();
-
-        $attempts = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
-            ->with('assessment')
-            ->orderByDesc('created_at')
-            ->get();
-
-        $attendances = Attendance::with('schedule')
-            ->where('enrollment_id', $enrollment->enrollment_id)
-            ->orderByDesc('created_at')
-            ->get();
-
-        $taskIds = $training->tasks->pluck('task_id')->toArray();
-        $submissions = TaskSubmission::whereIn('task_id', $taskIds)
-            ->where('student_id', $studentId)
-            ->get()
-            ->keyBy('task_id');
-
-        return view('student.courses.show', compact('training', 'attempts', 'attendances', 'submissions', 'averageGrade'));
+        return view('student.courses.detail', compact('training', 'course', 'isEnrolled'));
     }
 
     public function takeExam(Request $request, $assessment_id)
@@ -300,6 +311,7 @@ class CourseController extends Controller
             ->where('student_id', $studentId)
             ->get();
 
+        $hasEnrollments = $enrollments->isNotEmpty();
         $events = [];
         foreach ($enrollments as $enrollment) {
             $training = $enrollment->training;
@@ -339,7 +351,7 @@ class CourseController extends Controller
         $calendar = array_chunk($days, 7);
         $today = Carbon::today();
 
-        return view('teacher.calendar', compact('fullName', 'selectedMonth', 'calendar', 'events', 'today'));
+        return view('teacher.calendar', compact('fullName', 'selectedMonth', 'calendar', 'events', 'today', 'hasEnrollments'));
     }
 
     private function validateAssessmentAvailability(Assessment $assessment)
