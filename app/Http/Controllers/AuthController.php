@@ -34,10 +34,16 @@ class AuthController extends Controller
         [$firstName, $lastName] = $this->splitFullName($data['full_name']);
 
         try {
-            DB::transaction(fn () => $this->createStudentAccount($data, $firstName, $lastName));
+            $user = DB::transaction(fn () => $this->createStudentAccount($data, $firstName, $lastName));
 
-            return redirect()->route('login')
-                ->with('success', '¡Registro completado con éxito! Ahora puedes iniciar sesión.');
+            if (method_exists($user, 'sendEmailVerificationNotification')) {
+                $user->sendEmailVerificationNotification();
+            }
+
+            Auth::login($user);
+            $request->session()->regenerate();
+
+            return $this->redirectAuthenticatedUser('¡Registro completado con éxito! Bienvenido a la plataforma.');
         } catch (Throwable) {
             return back()->withInput()->withErrors([
                 'email' => 'Ocurrió un error al procesar el registro. Inténtelo de nuevo.',
@@ -84,7 +90,7 @@ class AuthController extends Controller
         return [$firstName, $lastName];
     }
 
-    private function createStudentAccount(array $data, string $firstName, string $lastName): void
+    private function createStudentAccount(array $data, string $firstName, string $lastName): User
     {
         $person = Person::create([
             'first_names' => $firstName,
@@ -102,28 +108,55 @@ class AuthController extends Controller
         $studentRole = Role::where('name', 'Student')->firstOrFail();
 
         $user->roles()->attach($studentRole->role_id);
+
+        return $user;
     }
 
-    private function redirectAuthenticatedUser()
+    public function showVerificationNotice()
+    {
+        return redirect()->route('login')->with('success', 'Verifica tu correo para completar tu cuenta.');
+    }
+
+    public function verifyEmail(Request $request, int $id, string $hash)
+    {
+        $user = User::findOrFail($id);
+
+        if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+            abort(403);
+        }
+
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
+
+        Auth::login($user);
+
+        return redirect()->route('student.dashboard')
+            ->with('success', 'Tu correo electrónico ha sido verificado correctamente.');
+    }
+
+    private function redirectAuthenticatedUser(?string $message = null)
     {
         $roles = Auth::user()->roles;
 
         if ($roles->contains('name', 'Administrator')) {
-            return redirect()->route('admin.dashboard');
+            $response = redirect()->route('admin.dashboard');
+        } elseif ($roles->contains('name', 'Teacher')) {
+            $response = redirect()->route('teacher.dashboard');
+        } elseif ($roles->contains('name', 'Student')) {
+            $response = redirect()->route('student.dashboard');
+        } else {
+            Auth::logout();
+
+            return back()->withErrors([
+                'username' => 'Usuario sin rol válido asignado. Contacte al administrador.',
+            ]);
         }
 
-        if ($roles->contains('name', 'Teacher')) {
-            return redirect()->route('teacher.dashboard');
+        if ($message) {
+            return $response->with('success', $message);
         }
 
-        if ($roles->contains('name', 'Student')) {
-            return redirect()->route('student.dashboard');
-        }
-
-        Auth::logout();
-
-        return back()->withErrors([
-            'username' => 'Usuario sin rol válido asignado. Contacte al administrador.',
-        ]);
+        return $response;
     }
 }

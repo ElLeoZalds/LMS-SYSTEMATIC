@@ -3,156 +3,215 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Person;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
+        $searchName = trim((string) $request->input('search_name', ''));
+        $searchEmail = trim((string) $request->input('search_email', ''));
+        $roleFilter = $request->input('role_filter');
+        $statusFilter = $request->input('status_filter');
+
         $query = User::with(['person', 'roles'])
-            ->when($request->search, function ($query) use ($request) {
-                $query->whereHas('person', function ($q) use ($request) {
-                    $q->where('first_names', 'like', '%'.$request->search.'%')
-                        ->orWhere('last_names', 'like', '%'.$request->search.'%')
-                        ->orWhere('document_number', 'like', '%'.$request->search.'%');
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('name', ['Administrator', 'Teacher']);
+            })
+            ->when($searchName !== '', function ($query) use ($searchName) {
+                $query->whereHas('person', function ($q) use ($searchName) {
+                    $q->where('first_names', 'like', '%'.$searchName.'%')
+                        ->orWhere('last_names', 'like', '%'.$searchName.'%');
                 });
             })
-            ->when($request->role, function ($query) use ($request) {
-                $query->whereHas('roles', function ($q) use ($request) {
-                    $q->where('name', $request->role);
+            ->when($searchEmail !== '', function ($query) use ($searchEmail) {
+                $query->whereHas('person', function ($q) use ($searchEmail) {
+                    $q->where('email', 'like', '%'.$searchEmail.'%');
                 });
             })
-            ->when($request->year, function ($query) use ($request) {
-                $query->whereHas('person', function ($q) use ($request) {
-                    $q->whereYear('birth_date', $request->year);
+            ->when(in_array($roleFilter, ['Administrator', 'Teacher'], true), function ($query) use ($roleFilter) {
+                $query->whereHas('roles', function ($q) use ($roleFilter) {
+                    $q->where('name', $roleFilter);
                 });
-            });
+            })
+            ->when(in_array($statusFilter, ['A', 'I'], true), function ($query) use ($statusFilter) {
+                $query->where('status', $statusFilter);
+            })
+            ->orderByDesc('user_id');
 
-        $users = $query->get();
-
-        $roles = Role::all();
-        $currentYear = date('Y');
-        $years = range($currentYear, $currentYear - 5);
-
-        return view('admin.users.index', compact('users', 'roles', 'years'));
-    }
-
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'first_names' => 'required|string|max:20',
-            'last_names' => 'required|string|max:20',
-            'document_type' => 'nullable|string|max:20',
-            'document_number' => 'nullable|string|max:20|unique:people,document_number',
-            'email' => 'required|email|max:150|unique:people,email',
-            'phone' => 'nullable|string|max:9',
-            'address' => 'nullable|string|max:255',
-            'gender' => 'nullable|in:M,F',
-            'birth_date' => 'nullable|date',
-            'username' => 'required|string|max:50|unique:users,username',
-            'password' => 'required|string|min:6|confirmed',
-            'status' => 'sometimes|in:A,I',
-            'role_id' => 'required|exists:roles,role_id',
+        $users = $query->paginate(10, ['*'], 'users_page')->appends([
+            'search_name' => $searchName,
+            'search_email' => $searchEmail,
+            'role_filter' => $roleFilter,
+            'status_filter' => $statusFilter,
         ]);
 
-        DB::transaction(fn () => $this->createUserWithPerson($data));
+        $administratorsCount = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Administrator');
+        })->count();
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario creado correctamente.');
+        $teachersCount = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Teacher');
+        })->count();
+
+        $roles = $this->allowedRoles();
+
+        return view('admin.users.index', compact(
+            'users',
+            'searchName',
+            'searchEmail',
+            'roleFilter',
+            'statusFilter',
+            'administratorsCount',
+            'teachersCount',
+            'roles'
+        ));
     }
 
-    public function update(Request $request, $id)
+    public function edit(User $user)
     {
-        $user = User::with('person', 'roles')->findOrFail($id);
+        $user->load(['person', 'roles']);
 
+        return view('admin.users.edit', [
+            'user' => $user,
+            'roles' => $this->allowedRoles(),
+        ]);
+    }
+
+    public function update(Request $request, User $user)
+    {
         $data = $request->validate([
-            'first_names' => 'required|string|max:20',
-            'last_names' => 'required|string|max:20',
-            'document_type' => 'nullable|string|max:20',
-            'document_number' => 'nullable|string|max:20|unique:people,document_number,'.$user->person_id.',person_id',
+            'full_name' => 'required|string|max:255',
             'email' => 'required|email|max:150|unique:people,email,'.$user->person_id.',person_id',
-            'phone' => 'nullable|string|max:9',
-            'address' => 'nullable|string|max:255',
-            'gender' => 'nullable|in:M,F',
-            'birth_date' => 'nullable|date',
-            'username' => 'required|string|max:50|unique:users,username,'.$user->user_id.',user_id',
             'password' => 'nullable|string|min:6|confirmed',
             'status' => 'sometimes|in:A,I',
-            'role_id' => 'required|exists:roles,role_id',
+            'role_id' => ['required', Rule::in($this->allowedRoleIds())],
         ]);
 
-        DB::transaction(fn () => $this->updateUserWithPerson($user, $data));
+        if ($this->shouldPreventStatusChange($user, $data['status'] ?? $user->status)) {
+            return back()->withErrors([
+                'status' => 'No se puede desactivar al último administrador activo ni al usuario autenticado.',
+            ])->withInput();
+        }
+
+        [$firstName, $lastName] = $this->splitFullName($data['full_name']);
+
+        DB::transaction(function () use ($user, $data, $firstName, $lastName) {
+            $user->person->update([
+                'first_names' => $firstName,
+                'last_names' => $lastName,
+                'email' => $data['email'],
+            ]);
+
+            $userData = [
+                'status' => $data['status'] ?? $user->status,
+            ];
+
+            if (! empty($data['password'])) {
+                $userData['password'] = Hash::make($data['password']);
+            }
+
+            $user->update($userData);
+            $user->roles()->sync([$data['role_id']]);
+        });
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario actualizado correctamente.');
     }
 
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        $user = User::with('person')->findOrFail($id);
+        if ($this->shouldPreventStatusChange($user, 'I')) {
+            return back()->withErrors([
+                'status' => 'No se puede desactivar al último administrador activo ni al usuario autenticado.',
+            ]);
+        }
 
-        DB::transaction(function () use ($user) {
-            $personId = $user->person_id;
-            $user->delete();
-            Person::where('person_id', $personId)->delete();
-        });
+        $user->update(['status' => 'I']);
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario eliminado correctamente.');
+            ->with('success', 'Usuario desactivado correctamente.');
     }
 
-    private function createUserWithPerson(array $data): User
+    private function usersForRole(string $roleName, string $searchName, string $searchEmail, $page = null)
     {
-        $person = Person::create($this->personData($data));
+        $query = User::with(['person', 'roles'])
+            ->whereHas('roles', function ($query) use ($roleName) {
+                $query->where('name', $roleName);
+            })
+            ->when($searchName !== '', function ($query) use ($searchName) {
+                $query->whereHas('person', function ($q) use ($searchName) {
+                    $q->where('first_names', 'like', '%'.$searchName.'%')
+                        ->orWhere('last_names', 'like', '%'.$searchName.'%');
+                });
+            })
+            ->when($searchEmail !== '', function ($query) use ($searchEmail) {
+                $query->whereHas('person', function ($q) use ($searchEmail) {
+                    $q->where('email', 'like', '%'.$searchEmail.'%');
+                });
+            })
+            ->orderByDesc('user_id');
 
-        $user = User::create($this->userData($data, $person->person_id));
-        $user->roles()->attach($data['role_id']);
+        $pageName = $roleName === 'Administrator' ? 'admin_page' : 'teacher_page';
 
-        return $user;
+        return $query->paginate(10, ['*'], $pageName, $page)->appends([
+            'search_name' => $searchName,
+            'search_email' => $searchEmail,
+        ]);
     }
 
-    private function updateUserWithPerson(User $user, array $data): void
+    private function allowedRoles()
     {
-        $user->person->update($this->personData($data));
-        $user->update($this->userData($data));
-        $user->roles()->sync([$data['role_id']]);
+        return Role::whereIn('name', ['Administrator', 'Teacher'])->get();
     }
 
-    private function personData(array $data): array
+    private function allowedRoleIds(): array
     {
-        return [
-            'first_names' => $data['first_names'],
-            'last_names' => $data['last_names'],
-            'document_type' => $data['document_type'] ?? null,
-            'document_number' => $data['document_number'] ?? null,
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'address' => $data['address'] ?? null,
-            'gender' => $data['gender'] ?? null,
-            'birth_date' => $data['birth_date'] ?? null,
-        ];
+        return $this->allowedRoles()->pluck('role_id')->map(fn ($id) => (int) $id)->all();
     }
 
-    private function userData(array $data, ?int $personId = null): array
+    private function splitFullName(string $fullName): array
     {
-        $userData = [
-            'username' => $data['username'],
-            'status' => $data['status'] ?? 'A',
-        ];
+        $parts = preg_split('/\s+/', trim($fullName)) ?: [];
 
-        if ($personId) {
-            $userData['person_id'] = $personId;
+        if (count($parts) <= 1) {
+            return [$parts[0] ?? '', ''];
         }
 
-        if (! empty($data['password'])) {
-            $userData['password'] = Hash::make($data['password']);
+        $firstName = array_shift($parts);
+        $lastName = implode(' ', $parts);
+
+        return [$firstName, $lastName];
+    }
+
+    private function shouldPreventStatusChange(User $user, string $targetStatus): bool
+    {
+        if ($targetStatus !== 'I') {
+            return false;
         }
 
-        return $userData;
+        if (Auth::id() === $user->user_id) {
+            return true;
+        }
+
+        $isAdministrator = $user->roles()->where('name', 'Administrator')->exists();
+
+        if (! $isAdministrator) {
+            return false;
+        }
+
+        $activeAdministrators = User::where('status', 'A')
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'Administrator');
+            })
+            ->count();
+
+        return $activeAdministrators <= 1;
     }
 }

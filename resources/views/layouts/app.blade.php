@@ -391,6 +391,25 @@
                         </script>
                     @endif
 
+                    @if($errors->any())
+                        <script>
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: '{{ $errors->first() }}',
+                                showConfirmButton: false,
+                                timer: 4000,
+                                timerProgressBar: true,
+                                backdrop: false,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            });
+                        </script>
+                    @endif
+
                     @yield('content')
 
                 </div>
