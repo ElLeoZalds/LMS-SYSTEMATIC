@@ -21,7 +21,7 @@
                             <option value="">Seleccionar capacitación</option>
                             @foreach($trainings as $training)
                                 <option value="{{ $training->training_id }}" {{ old('training_id', $schedule->training_id) == $training->training_id ? 'selected' : '' }}>
-                                    {{ optional($training->course)->title }}
+                                    {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}
                                     @if(optional($training->teacher->person)->first_names)
                                         - {{ optional($training->teacher->person)->first_names }} {{ optional($training->teacher->person)->last_names }}
                                     @endif

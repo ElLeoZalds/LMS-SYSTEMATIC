@@ -49,7 +49,7 @@
                                         </div>
                                     </td>
                                     <td class="align-middle">
-                                        <div class="fw-bold">{{ optional($training->course)->title ?? 'Sin curso' }}</div>
+                                        <div class="fw-bold">{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</div>
                                         <div class="text-muted small">
                                             Código: {{ $training->code }}<br>
                                             {{ optional($training->teacher->person)->first_names ?? 'Sin nombre' }}
@@ -86,7 +86,7 @@
                                         <a href="{{ route('admin.enrollments.create', ['training_id' => $training->training_id]) }}" class="btn btn-sm btn-success">
                                             <i class="fas fa-user-plus"></i>
                                         </a>
-                                        <button class="btn btn-sm btn-info schedule-btn" data-training-id="{{ $training->training_id }}" data-training-name="{{ optional($training->course)->title ?? 'Sin curso' }}" data-teacher-name="{{ optional($training->teacher->person)->first_names ?? 'Sin nombre' }} {{ optional($training->teacher->person)->last_names ?? '' }}" data-start-date="{{ $training->start_date ? $training->start_date->format('Y-m-d') : '' }}" data-end-date="{{ $training->end_date ? $training->end_date->format('Y-m-d') : '' }}">
+                                        <button class="btn btn-sm btn-info schedule-btn" data-training-id="{{ $training->training_id }}" data-training-name="{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}" data-teacher-name="{{ optional($training->teacher->person)->first_names ?? 'Sin nombre' }} {{ optional($training->teacher->person)->last_names ?? '' }}" data-start-date="{{ $training->start_date ? $training->start_date->format('Y-m-d') : '' }}" data-end-date="{{ $training->end_date ? $training->end_date->format('Y-m-d') : '' }}">
                                             <i class="fas fa-calendar-plus"></i>
                                         </button>
                                         <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $training->training_id }}"

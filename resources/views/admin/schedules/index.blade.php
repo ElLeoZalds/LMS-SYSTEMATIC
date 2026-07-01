@@ -13,7 +13,7 @@
             <div class="card-body p-0">
                 @php
                     $schedulesByTraining = $schedules->groupBy(function ($schedule) {
-                        return optional($schedule->training->course)->title ?? 'Sin capacitación';
+                        return trim((optional($schedule->training->course)->title ?? 'Sin capacitación') . optional($schedule->training->start_date)->format(' (Y-m)'));
                     });
                 @endphp
 
@@ -101,7 +101,7 @@
                                 <option value="">Seleccionar capacitación</option>
                                 @foreach($trainings as $training)
                                     <option value="{{ $training->training_id }}" {{ old('training_id') == $training->training_id ? 'selected' : '' }}>
-                                        {{ optional($training->course)->title }}
+                                        {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}
                                         @if(optional($training->teacher->person)->first_names)
                                             - {{ optional($training->teacher->person)->first_names }} {{ optional($training->teacher->person)->last_names }}
                                         @endif
@@ -165,7 +165,7 @@
                                 <option value="">Seleccionar capacitación</option>
                                 @foreach($trainings as $training)
                                     <option value="{{ $training->training_id }}" {{ old('training_id') == $training->training_id ? 'selected' : '' }}>
-                                        {{ optional($training->course)->title }}
+                                        {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}
                                         @if(optional($training->teacher->person)->first_names)
                                             - {{ optional($training->teacher->person)->first_names }} {{ optional($training->teacher->person)->last_names }}
                                         @endif
