@@ -32,36 +32,84 @@
             height: 210mm;
             z-index: -1;
         }
-        /* Anverso styles */
+        /*
+         * ─── Posicionamiento del anverso (PDF A4 landscape 297×210mm) ─────
+         * Conversión desde porcentajes medidos sobre la imagen 1024×723 px:
+         *   top_mm  = %Y / 100 × 210mm
+         *   left_mm = %X / 100 × 297mm
+         *
+         * Se usan mm en lugar de px para independencia de DPI.
+         * wkhtmltopdf procesa la página en unidades de punto tipográfico;
+         * px arbitrarios en el código anterior provocaban desplazamiento
+         * sistemático porque el escalado DPI no coincidía con el PDF.
+         * ─────────────────────────────────────────────────────────────────
+         */
+
+        /* NOMBRE DEL ESTUDIANTE
+         * %Y medido = 42.10%  →  88.41mm
+         * Centrado en X: left:50%, transform translateX(-50%) */
         .student-name {
             position: absolute;
-            top: 330px;
-            left: 0;
-            width: 100%;
+            top: 88.41mm;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
             text-align: center;
-            font-size: 38px;
+            font-size: 28px;
             font-weight: bold;
             color: #0b1a30;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+
+        /* NOMBRE DEL CURSO
+         * %Y medido = 62.50%  →  131.25mm
+         * Zona horizontal izquierda: 24%-68% (ancho 44%)
+         * left:24%, width:44%, text-align:center */
         .course-title {
             position: absolute;
-            top: 440px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 26px;
-            font-weight: bold;
-            color: #0b1a30;
-        }
-        .cert-date {
-            position: absolute;
-            top: 525px;
-            left: 0;
-            width: 100%;
+            top: 131.25mm;
+            left: 24%;
+            width: 44%;
             text-align: center;
             font-size: 16px;
+            font-weight: bold;
+            color: #0b1a30;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* CÓDIGO DEL CERTIFICADO
+         * Mismo Y que el curso (131.25mm).
+         * Zona horizontal derecha desde 63%. */
+        .cert-code {
+            position: absolute;
+            top: 131.25mm;
+            left: 63%;
+            font-size: 10px;
+            font-weight: 600;
             color: #444;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        /* FECHA
+         * %Y medido = 92.15%  →  193.52mm
+         * Centrada en X. */
+        .cert-date {
+            position: absolute;
+            top: 193.52mm;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55%;
+            text-align: center;
+            font-size: 11px;
+            color: #444;
+            white-space: nowrap;
         }
         /* Reverso styles */
         .reverso-field {
@@ -116,6 +164,7 @@
         <div class="course-title">
             {{ $enrollment->training->course->title ?? '' }}
         </div>
+        <div class="cert-code">{{ $certificateCode }}</div>
         <div class="cert-date">
             Otorgado el {{ \Carbon\Carbon::parse($enrollment->enrollment_date)->format('d \d\e F \d\e Y') }}
         </div>

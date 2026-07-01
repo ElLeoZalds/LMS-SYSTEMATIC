@@ -57,7 +57,7 @@
     .flip-card {
         position: relative;
         width: 100%;
-        padding-top: 70.74%;
+        padding-top: 70.69%;
         transform-style: preserve-3d;
         transition: transform 0.85s cubic-bezier(.45,.05,.55,.95);
         border-radius: 18px;
@@ -87,38 +87,101 @@
     .cert-face img.bg-img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: fill;
         display: block;
     }
+    /*
+     * ─── Posicionamiento del anverso ───────────────────────────────────────
+     * Imagen real en disco: 1024×723 px  (ratio h/w = 0.7061)
+     * Plantilla de referencia declarada: 1600×1131 px (ratio 0.7069 ≈ igual)
+     * Los %Y son transferibles directamente entre ambas resoluciones.
+     *
+     * Mediciones por análisis de masa de píxeles sobre la imagen real:
+     *   NOMBRE  → centro-Y = 42.10%  (px 304/723)
+     *   CURSO   → centro-Y = 62.50%  (px 452/723), grupo izq 40-52% horz.
+     *   CÓDIGO  → mismo Y que curso,  grupo der 63-85% horz.
+     *   FECHA   → centro-Y = 92.15%  (px 666/723), centrada
+     * ─────────────────────────────────────────────────────────────────────
+     */
+
+    /* NOMBRE DEL ESTUDIANTE
+     * La plantilla tiene una línea subrayada (38-45%) donde va el nombre.
+     * El centro de masa del bloque cae en 42.10%.
+     * Usamos transform:-50% para anclar el punto de referencia al centro
+     * del elemento, no a su borde superior. */
     .anverso-name {
         position: absolute;
-        top: 41.5%;
-        left: 0; right: 0;
+        top: 42.10%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 70%;
         text-align: center;
-        font-size: clamp(14px, 3.5vw, 30px);
+        font-size: clamp(11px, 2.6vw, 22px);
         font-weight: 800;
         color: #0b1a30;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        padding: 0 10%;
+        letter-spacing: 1.5px;
+        line-height: 1.15;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
+
+    /* NOMBRE DEL CURSO
+     * El cuerpo descriptivo ocupa 59-67%. Dentro de esa franja existen
+     * tres líneas de texto: la primera (59.8-61%) es texto estático de
+     * la plantilla; la segunda (62-63.5%) contiene el nombre del curso
+     * (grupo izquierdo, centrado en ~46.5% horizontal) y el código
+     * (grupo derecho, desde ~63%); la tercera es otra línea estática.
+     * Posicionamos el curso en top:62.50% ancla centro, con un bloque
+     * de 44% de ancho centrado horizontalmente en la mitad izquierda. */
     .anverso-course {
         position: absolute;
-        top: 55%;
-        left: 0; right: 0;
+        top: 62.50%;
+        left: 24%;
+        width: 44%;
+        transform: translateY(-50%);
         text-align: center;
-        font-size: clamp(10px, 2.2vw, 20px);
+        font-size: clamp(7px, 1.6vw, 14px);
         font-weight: 700;
         color: #0b1a30;
-        padding: 0 12%;
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
+
+    /* CÓDIGO DEL CERTIFICADO
+     * Mismo Y que el curso. Arranc desde el 63% horizontal
+     * donde el análisis detectó el segundo grupo de texto en esa línea. */
+    .anverso-code {
+        position: absolute;
+        top: 62.50%;
+        left: 63%;
+        transform: translateY(-50%);
+        font-size: clamp(6px, 1.1vw, 10px);
+        font-weight: 600;
+        color: #444;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    /* FECHA
+     * Centro de masa medido en 92.15%. El texto está centrado
+     * horizontalmente (solo zona central activa en el análisis).
+     * No hay elementos del diseño entre 85% y 92%, por lo que
+     * no hay riesgo de superposición con las firmas (74-82%). */
     .anverso-date {
         position: absolute;
-        top: 66%;
-        left: 0; right: 0;
+        top: 92.15%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 58%;
         text-align: center;
-        font-size: clamp(8px, 1.5vw, 14px);
-        color: #444;
+        font-size: clamp(6px, 1.1vw, 10px);
+        color: #333;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
     }
     .reverso-actividad {
         position: absolute;
@@ -327,6 +390,7 @@
                         {{ $enrollment->student->person->last_names ?? '' }}
                     </div>
                     <div class="anverso-course">{{ $enrollment->training->course->title ?? '' }}</div>
+                    <div class="anverso-code">{{ $certificateCode }}</div>
                     <div class="anverso-date">
                         Otorgado el {{ \Carbon\Carbon::parse($enrollment->enrollment_date)->translatedFormat('d \d\e F \d\e Y') }}
                     </div>
