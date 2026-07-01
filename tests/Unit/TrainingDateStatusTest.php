@@ -20,7 +20,7 @@ class TrainingDateStatusTest extends TestCase
     {
         Carbon::setTestNow(Carbon::create(2026, 6, 15));
 
-        $training = new Training(['status' => 'A']);
+        $training = new Training(['status' => 0]);
         $training->setRelation('schedules', collect([
             new Schedule(['date' => '2026-06-01']),
             new Schedule(['date' => '2026-06-10']),
@@ -34,7 +34,7 @@ class TrainingDateStatusTest extends TestCase
     {
         Carbon::setTestNow(Carbon::create(2026, 6, 5));
 
-        $training = new Training(['status' => 'A']);
+        $training = new Training(['status' => 1]);
         $training->setRelation('schedules', collect([
             new Schedule(['date' => '2026-06-01']),
             new Schedule(['date' => '2026-06-10']),
