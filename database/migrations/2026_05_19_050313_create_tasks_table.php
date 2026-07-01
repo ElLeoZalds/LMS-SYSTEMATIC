@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('title', 150);
             $table->text('description')->nullable();
             $table->dateTime('due_date'); // Fecha de entrega
+            $table->string('file_path')->nullable();
 
             $table->timestamps();
         });

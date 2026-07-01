@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('assessment_id');
             $table->foreign('assessment_id')->references('assessment_id')->on('assessments')->onDelete('cascade');
             $table->text('question_text');
+            $table->string('image_path')->nullable();
             $table->integer('score');
             $table->integer('order_index');
             $table->timestamps();
