@@ -41,7 +41,7 @@
                                     {{ $training->course->title }}
                                 </h5>
                                 <p class="text-muted small mb-0">
-                                    NRC: <strong class="text-dark">{{ $training->nrc ?? 'N/A' }}</strong>
+                                    Código: <strong class="text-dark">{{ $training->code ?? 'N/A' }}</strong>
                                 </p>
                             </div>
 

@@ -16,7 +16,7 @@ class TrainingController extends Controller
     {
         $trainings = Training::with(['course', 'teacher.person', 'administrator.person'])
             ->where('status', 1)
-            ->when(request('nrc'), fn ($query, $nrc) => $query->where('nrc', 'like', '%'.$nrc.'%'))
+            ->when(request('code'), fn ($query, $code) => $query->where('code', 'like', '%'.$code.'%'))
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -109,12 +109,12 @@ class TrainingController extends Controller
         $data = $request->validate([
             'course_id' => 'required|exists:courses,course_id',
             'teacher_id' => 'required|exists:users,user_id',
-            'nrc' => [
+            'code' => [
                 'required',
-                'digits:5',
+                'max:50',
                 $trainingId
-                    ? Rule::unique('trainings', 'nrc')->ignore($trainingId, 'training_id')
-                    : Rule::unique('trainings', 'nrc'),
+                    ? Rule::unique('trainings', 'code')->ignore($trainingId, 'training_id')
+                    : Rule::unique('trainings', 'code'),
             ],
             'modality' => 'required|in:virtual,presential,hybrid',
             'start_date' => 'required|date',

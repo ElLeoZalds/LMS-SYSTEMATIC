@@ -38,7 +38,7 @@
                     <div class="card-body">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Capacitación</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $training->course->title }}</div>
-                        <div class="small text-muted mt-1">NRC: {{ $training->nrc ?? 'N/A' }}</div>
+                        <div class="small text-muted mt-1">Código: {{ $training->code ?? 'N/A' }}</div>
                     </div>
                 </div>
             </div>

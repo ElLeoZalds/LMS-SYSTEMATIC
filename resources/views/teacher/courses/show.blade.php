@@ -10,7 +10,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="h3 mb-2 text-gray-800">{{ $training->course->title }}</h1>
-                <small class="text-muted">NRC: {{ $training->nrc ?? 'N/A' }} | Modalidad:
+                <small class="text-muted">Código: {{ $training->code ?? 'N/A' }} | Modalidad:
                     <strong>{{ ucfirst($training->modality) }}</strong></small>
             </div>
             <a href="{{ route('teacher.courses') }}" class="btn btn-sm btn-outline-secondary">
@@ -630,7 +630,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3 print-report-header">
                         <div>
                             <h5 class="fw-bold text-dark mb-1">Consolidado de Calificaciones</h5>
-                            <p class="text-muted mb-0">Curso: {{ $training->course->title }} | NRC: {{ $training->nrc ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
+                            <p class="text-muted mb-0">Curso: {{ $training->course->title }} | Código: {{ $training->code ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
                         </div>
                         <a href="{{ route('teacher.courses.report', $training->training_id) }}" class="btn btn-sm btn-outline-success">
                             <i class="bi bi-printer me-1"></i> Imprimir Registro

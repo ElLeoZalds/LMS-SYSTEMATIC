@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('course_id');
             $table->unsignedBigInteger('teacher_id');
             $table->unsignedBigInteger('administrator_id');
-            $table->char('nrc', 5)->unique();
+            $table->string('code', 50)->unique();
             $table->foreign('course_id')->references('course_id')->on('courses')->onDelete('cascade');
             $table->foreign('teacher_id')->references('user_id')->on('users')->onDelete('restrict');
             $table->foreign('administrator_id')->references('user_id')->on('users')->onDelete('restrict');

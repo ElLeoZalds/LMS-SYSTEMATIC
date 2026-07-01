@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreign('specialty_id')->references('specialty_id')->on('specialties')->onDelete('restrict');
             $table->string('banner_path')->nullable();
             $table->string('title', 150);
+            $table->string('abbreviation', 10)->unique();
             $table->text('description')->nullable();
             $table->integer('hours_count')->nullable();
             $table->decimal('reference_price', 10, 2)->nullable();

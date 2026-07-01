@@ -14,12 +14,14 @@ class TrainingsSeeder extends Seeder
         DB::table('trainings')->truncate();
         Schema::enableForeignKeyConstraints();
 
-        DB::table('trainings')->insert([
+        $courseAbbreviations = DB::table('courses')->pluck('abbreviation', 'course_id')->map(fn ($abbreviation) => strtoupper($abbreviation))->all();
+        $codeCounters = [];
+
+        $trainings = [
             [
                 'course_id' => 1,
                 'teacher_id' => 2,
                 'administrator_id' => 1,
-                'nrc' => '10001',
                 'modality' => 'virtual',
                 'start_date' => now()->subDays(60)->toDateString(),
                 'end_date' => now()->subDays(15)->toDateString(),
@@ -31,7 +33,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 2,
                 'teacher_id' => 3,
                 'administrator_id' => 1,
-                'nrc' => '10002',
                 'modality' => 'presential',
                 'start_date' => now()->subDays(50)->toDateString(),
                 'end_date' => now()->subDays(5)->toDateString(),
@@ -43,7 +44,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 3,
                 'teacher_id' => 4,
                 'administrator_id' => 1,
-                'nrc' => '10003',
                 'modality' => 'hybrid',
                 'start_date' => now()->subDays(45)->toDateString(),
                 'end_date' => now()->subDays(2)->toDateString(),
@@ -55,7 +55,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 4,
                 'teacher_id' => 5,
                 'administrator_id' => 1,
-                'nrc' => '10004',
                 'modality' => 'virtual',
                 'start_date' => now()->startOfMonth()->addDays(3)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(3)->addDays(45)->toDateString(),
@@ -67,7 +66,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 5,
                 'teacher_id' => 6,
                 'administrator_id' => 1,
-                'nrc' => '10005',
                 'modality' => 'presential',
                 'start_date' => now()->startOfMonth()->addDays(4)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(4)->addDays(45)->toDateString(),
@@ -79,7 +77,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 6,
                 'teacher_id' => 2,
                 'administrator_id' => 1,
-                'nrc' => '10006',
                 'modality' => 'hybrid',
                 'start_date' => now()->startOfMonth()->addDays(5)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(5)->addDays(45)->toDateString(),
@@ -91,7 +88,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 7,
                 'teacher_id' => 3,
                 'administrator_id' => 1,
-                'nrc' => '10007',
                 'modality' => 'virtual',
                 'start_date' => now()->startOfMonth()->addDays(6)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(6)->addDays(45)->toDateString(),
@@ -103,7 +99,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 8,
                 'teacher_id' => 4,
                 'administrator_id' => 1,
-                'nrc' => '10008',
                 'modality' => 'presential',
                 'start_date' => now()->startOfMonth()->addDays(7)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(7)->addDays(45)->toDateString(),
@@ -115,7 +110,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 9,
                 'teacher_id' => 5,
                 'administrator_id' => 1,
-                'nrc' => '10009',
                 'modality' => 'hybrid',
                 'start_date' => now()->startOfMonth()->addDays(8)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(8)->addDays(45)->toDateString(),
@@ -127,7 +121,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 10,
                 'teacher_id' => 6,
                 'administrator_id' => 1,
-                'nrc' => '10010',
                 'modality' => 'virtual',
                 'start_date' => now()->startOfMonth()->addDays(9)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(9)->addDays(45)->toDateString(),
@@ -139,7 +132,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 11,
                 'teacher_id' => 2,
                 'administrator_id' => 1,
-                'nrc' => '10011',
                 'modality' => 'presential',
                 'start_date' => now()->startOfMonth()->addDays(10)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(10)->addDays(45)->toDateString(),
@@ -151,7 +143,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 12,
                 'teacher_id' => 3,
                 'administrator_id' => 1,
-                'nrc' => '10012',
                 'modality' => 'hybrid',
                 'start_date' => now()->startOfMonth()->addDays(11)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(11)->addDays(45)->toDateString(),
@@ -163,7 +154,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 13,
                 'teacher_id' => 4,
                 'administrator_id' => 1,
-                'nrc' => '10013',
                 'modality' => 'virtual',
                 'start_date' => now()->startOfMonth()->addDays(12)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(12)->addDays(45)->toDateString(),
@@ -175,7 +165,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 14,
                 'teacher_id' => 5,
                 'administrator_id' => 1,
-                'nrc' => '10014',
                 'modality' => 'presential',
                 'start_date' => now()->startOfMonth()->addDays(13)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(13)->addDays(45)->toDateString(),
@@ -187,7 +176,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 15,
                 'teacher_id' => 6,
                 'administrator_id' => 1,
-                'nrc' => '10015',
                 'modality' => 'hybrid',
                 'start_date' => now()->startOfMonth()->addDays(14)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(14)->addDays(45)->toDateString(),
@@ -199,7 +187,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 16,
                 'teacher_id' => 2,
                 'administrator_id' => 1,
-                'nrc' => '10016',
                 'modality' => 'virtual',
                 'start_date' => now()->startOfMonth()->addDays(15)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(15)->addDays(45)->toDateString(),
@@ -211,7 +198,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 17,
                 'teacher_id' => 3,
                 'administrator_id' => 1,
-                'nrc' => '10017',
                 'modality' => 'presential',
                 'start_date' => now()->startOfMonth()->addDays(16)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(16)->addDays(45)->toDateString(),
@@ -223,7 +209,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 18,
                 'teacher_id' => 4,
                 'administrator_id' => 1,
-                'nrc' => '10018',
                 'modality' => 'hybrid',
                 'start_date' => now()->startOfMonth()->addDays(17)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(17)->addDays(45)->toDateString(),
@@ -235,7 +220,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 19,
                 'teacher_id' => 5,
                 'administrator_id' => 1,
-                'nrc' => '10019',
                 'modality' => 'virtual',
                 'start_date' => now()->startOfMonth()->addDays(18)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(18)->addDays(45)->toDateString(),
@@ -247,7 +231,6 @@ class TrainingsSeeder extends Seeder
                 'course_id' => 20,
                 'teacher_id' => 6,
                 'administrator_id' => 1,
-                'nrc' => '10020',
                 'modality' => 'presential',
                 'start_date' => now()->startOfMonth()->addDays(19)->toDateString(),
                 'end_date' => now()->startOfMonth()->addDays(19)->addDays(45)->toDateString(),
@@ -255,6 +238,19 @@ class TrainingsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ];
+
+        foreach ($trainings as &$training) {
+            $courseId = $training['course_id'];
+            $abbreviation = $courseAbbreviations[$courseId] ?? 'COURSE';
+            $year = date('Y', strtotime($training['start_date']));
+            $counterKey = strtoupper($abbreviation) . '-' . $year;
+            $counter = $codeCounters[$counterKey] ?? 0;
+            $counter++;
+            $codeCounters[$counterKey] = $counter;
+            $training['code'] = sprintf('%s-%s-%03d', strtoupper($abbreviation), $year, $counter);
+        }
+
+        DB::table('trainings')->insert($trainings);
     }
 }
