@@ -12,6 +12,7 @@ class Course extends Model
         'specialty_id',
         'banner_path',
         'title',
+        'abbreviation',
         'description',
         'hours_count',
         'reference_price',

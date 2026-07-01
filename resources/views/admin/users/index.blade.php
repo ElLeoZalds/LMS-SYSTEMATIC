@@ -8,51 +8,6 @@
         </div>
 
         <div class="card shadow mb-4">
-            <div class="card-header bg-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Usuarios</h5>
-                    <button class="btn btn-outline-primary btn-sm" type="button" data-toggle="collapse" data-target="#filtersCollapse" aria-expanded="false">
-                        <i class="fas fa-filter"></i> Filtros
-                    </button>
-                </div>
-                <div class="collapse mt-3" id="filtersCollapse">
-                    <form method="GET" action="{{ route('admin.users.index') }}" class="row g-2 align-items-end">
-                        <div class="col-md-4">
-                            <label class="form-label small">Buscar</label>
-                            <div class="input-group">
-                                <input type="text" name="search" class="form-control" placeholder="Nombre o DNI" value="{{ request('search') }}">
-                                <button class="btn btn-outline-secondary" type="submit">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small">Rol</label>
-                            <select name="role" class="form-select">
-                                <option value="">Todos</option>
-                                @foreach($roles as $role)
-                                    <option value="{{ $role->name }}" {{ request('role') == $role->name ? 'selected' : '' }}>{{ $role->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small">Año</label>
-                            <select name="year" class="form-select">
-                                <option value="">Todos</option>
-                                @foreach($years as $year)
-                                    <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-primary me-2">Aplicar</button>
-                            @if(request()->hasAny(['search', 'role', 'year']))
-                                <a href="{{ route('admin.users.index') }}" class="btn btn-outline-danger">Limpiar</a>
-                            @endif
-                        </div>
-                    </form>
-                </div>
-            </div>
             <div class="card-body p-0">
                 @php
                     $usersByRole = $users->groupBy(function($user) {

@@ -14,19 +14,6 @@
             </button>
         </div>
 
-        <form method="GET" action="{{ route('admin.trainings.index') }}" class="row g-2 align-items-end mb-3">
-            <div class="col-12 col-md-4 col-lg-3">
-                <label for="search_code" class="form-label">Buscar por Código</label>
-                <input type="text" name="code" id="search_code" value="{{ request('code') }}" class="form-control" maxlength="50" placeholder="Ej. EXPRO-2026-001">
-            </div>
-            <div class="col-12 col-md-auto">
-                <button type="submit" class="btn btn-outline-primary">Buscar</button>
-                @if(request('code'))
-                    <a href="{{ route('admin.trainings.index') }}" class="btn btn-outline-secondary">Limpiar</a>
-                @endif
-            </div>
-        </form>
-
         <div class="card shadow mb-4">
             <div class="card-body p-3">
                 <div class="table-responsive">
@@ -49,16 +36,16 @@
                                         </div>
                                     </td>
                                     <td class="align-middle">
-                                        <div class="fw-bold">{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</div>
+                                        <div class="fw-bold">{{ optional($training->course)->title ?? 'Sin curso asignado' }}{{ optional($training->start_date)->format(' (Y-m)') }}</div>
                                         <div class="text-muted small">
                                             Código: {{ $training->code }}<br>
-                                            {{ optional($training->teacher->person)->first_names ?? 'Sin nombre' }}
+                                            {{ optional($training->teacher->person)->first_names ?? 'Sin nombre registrado' }}
                                             {{ optional($training->teacher->person)->last_names ?? '' }}
                                         </div>
                                     </td>
                                     <td class="align-middle">
                                         @if(!$training->start_date && !$training->end_date && !$training->schedule)
-                                            <span class="badge bg-light text-secondary border">Pendiente de Programación</span>
+                                            <span class="badge bg-light text-secondary border">Pendiente de programación</span>
                                         @else
                                             <div class="text-muted small">
                                                 @if($training->start_date)
@@ -91,7 +78,6 @@
                                         </button>
                                         <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $training->training_id }}"
                                             data-course="{{ $training->course_id }}" data-teacher="{{ $training->teacher_id }}"
-                                            data-code="{{ $training->code }}"
                                             data-start-date="{{ $training->start_date ? $training->start_date->format('Y-m-d') : '' }}"
                                             data-end-date="{{ $training->end_date ? $training->end_date->format('Y-m-d') : '' }}"
                                             data-modality="{{ $training->modality }}">
@@ -121,7 +107,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-3">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title fw-bold" id="createTrainingModalLabel">Crear Capacitación</h5>
+                        <h5 class="modal-title fw-bold" id="createTrainingModalLabel">Crear capacitación</h5>
                     </div>
                     <div class="modal-body">
                         <form method="POST" action="{{ route('admin.trainings.store') }}" id="createTrainingForm">
@@ -134,10 +120,6 @@
                                         <option value="{{ $course->course_id }}">{{ $course->title }}</option>
                                     @endforeach
                                 </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="code" class="form-label">Código</label>
-                                <input type="text" name="code" id="code" class="form-control" maxlength="50" required>
                             </div>
                             <div class="mb-3">
                                 <label for="teacher_id" class="form-label">Profesor</label>
@@ -185,7 +167,7 @@
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content border-0 rounded-3">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title fw-bold" id="bulkScheduleModalLabel">Agregar Horarios</h5>
+                        <h5 class="modal-title fw-bold" id="bulkScheduleModalLabel">Agregar horarios</h5>
                     </div>
                     <div class="modal-body">
                         <form id="bulkScheduleForm" method="POST" action="{{ route('admin.schedules.bulk-store') }}">
@@ -221,7 +203,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-3">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title fw-bold" id="editModalLabel">Editar Capacitación</h5>
+                        <h5 class="modal-title fw-bold" id="editModalLabel">Editar capacitación</h5>
                     </div>
                     <div class="modal-body">
                         <form id="editForm" method="POST">
@@ -245,10 +227,6 @@
                                             {{ $teacher->person->first_names ?? 'Sin nombre' }}</option>
                                     @endforeach
                                 </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="edit_code" class="form-label">Código</label>
-                                <input type="text" name="code" id="edit_code" class="form-control" maxlength="50" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -285,14 +263,14 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-3">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title fw-bold" id="enrollStudentModalLabel">Inscribir Alumno en: [Nombre del Curso]</h5>
+                        <h5 class="modal-title fw-bold" id="enrollStudentModalLabel">Inscribir alumno en: [Nombre del curso]</h5>
                     </div>
                     <div class="modal-body">
                         <form method="POST" id="enrollStudentForm">
                             @csrf
                             <input type="hidden" name="training_id" id="enroll_training_id">
                             <div class="mb-3">
-                                <label for="student_id" class="form-label">Seleccionar Alumno</label>
+                                <label for="student_id" class="form-label">Seleccionar alumno</label>
                                 <select name="student_id" id="student_id" class="form-control" required>
                                     <option value="">Seleccionar alumno</option>
                                     @foreach($students as $student)
@@ -320,6 +298,48 @@
             let scheduleRowIndex = 0;
             let trainingStartDate = '';
             let trainingEndDate = '';
+
+            function getLocalDateString(date) {
+                const offset = date.getTimezoneOffset();
+                const localDate = new Date(date.getTime() - offset * 60000);
+                return localDate.toISOString().slice(0, 10);
+            }
+
+            function applyTrainingDateLimits(startInput, endInput) {
+                const today = getLocalDateString(new Date());
+                startInput.min = today;
+
+                if (startInput.value && startInput.value < today) {
+                    startInput.value = today;
+                }
+
+                const effectiveStart = startInput.value || today;
+                endInput.min = effectiveStart;
+
+                if (endInput.value && endInput.value < effectiveStart) {
+                    endInput.value = effectiveStart;
+                }
+            }
+
+            function validateTrainingDateRange(startInput, endInput) {
+                const today = getLocalDateString(new Date());
+                const startValue = startInput.value;
+                const endValue = endInput.value;
+
+                if (!startValue || !endValue) {
+                    return { valid: false, message: 'Debe completar ambas fechas.' };
+                }
+
+                if (startValue < today) {
+                    return { valid: false, message: 'La fecha de inicio no puede ser anterior a la fecha actual.' };
+                }
+
+                if (endValue < startValue) {
+                    return { valid: false, message: 'La fecha de fin no puede ser anterior a la fecha de inicio.' };
+                }
+
+                return { valid: true };
+            }
 
             function buildScheduleRow(index) {
                 const minAttr = trainingStartDate ? `min="${trainingStartDate}"` : '';
@@ -390,19 +410,47 @@
                 });
             });
 
+            const createStartDate = document.getElementById('start_date');
+            const createEndDate = document.getElementById('end_date');
+
+            if (createStartDate && createEndDate) {
+                applyTrainingDateLimits(createStartDate, createEndDate);
+                createStartDate.addEventListener('change', function () {
+                    applyTrainingDateLimits(createStartDate, createEndDate);
+                });
+                createEndDate.addEventListener('change', function () {
+                    if (createStartDate.value) {
+                        createEndDate.min = createStartDate.value;
+                    }
+                });
+            }
+
+            const editStartDate = document.getElementById('edit_start_date');
+            const editEndDate = document.getElementById('edit_end_date');
+
+            if (editStartDate && editEndDate) {
+                applyTrainingDateLimits(editStartDate, editEndDate);
+                editStartDate.addEventListener('change', function () {
+                    applyTrainingDateLimits(editStartDate, editEndDate);
+                });
+                editEndDate.addEventListener('change', function () {
+                    if (editStartDate.value) {
+                        editEndDate.min = editStartDate.value;
+                    }
+                });
+            }
+
             document.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
                     const id = this.getAttribute('data-id');
                     const course = this.getAttribute('data-course');
                     const teacher = this.getAttribute('data-teacher');
-                    const code = this.getAttribute('data-code');
                     const startDate = this.getAttribute('data-start-date');
                     const endDate = this.getAttribute('data-end-date');
                     const modality = this.getAttribute('data-modality');
 
                     document.getElementById('edit_course_id').value = course;
                     document.getElementById('edit_teacher_id').value = teacher;
-                    document.getElementById('edit_code').value = code;
                     document.getElementById('edit_start_date').value = startDate;
                     document.getElementById('edit_end_date').value = endDate;
                     document.getElementById('edit_modality').value = modality;
@@ -503,8 +551,7 @@
                             title: response.message || 'Horarios guardados correctamente',
                             showConfirmButton: false,
                             timer: 1500,
-                            timerProgressBar: true,
-                            backdrop: false
+                            timerProgressBar: true
                         });
 
                         setTimeout(function () {
@@ -521,8 +568,7 @@
                             title: message,
                             showConfirmButton: false,
                             timer: 2500,
-                            timerProgressBar: true,
-                            backdrop: false
+                            timerProgressBar: true
                         });
                     },
                     complete: function () {
@@ -533,6 +579,20 @@
 
             $('#createTrainingForm').on('submit', function (e) {
                 e.preventDefault();
+
+                const startInput = document.getElementById('start_date');
+                const endInput = document.getElementById('end_date');
+                const validation = validateTrainingDateRange(startInput, endInput);
+
+                if (!validation.valid) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Fechas inválidas',
+                        text: validation.message,
+                        confirmButtonText: 'Entendido'
+                    });
+                    return;
+                }
 
                 const $form = $(this);
                 const $submitBtn = $form.find('button[type="submit"]');
@@ -554,8 +614,7 @@
                             title: response.message || 'Capacitación creada correctamente',
                             showConfirmButton: false,
                             timer: 1500,
-                            timerProgressBar: true,
-                            backdrop: false
+                            timerProgressBar: true
                         });
 
                         setTimeout(function () {
@@ -572,8 +631,70 @@
                             title: message,
                             showConfirmButton: false,
                             timer: 2500,
-                            timerProgressBar: true,
-                            backdrop: false
+                            timerProgressBar: true
+                        });
+                    },
+                    complete: function () {
+                        $submitBtn.prop('disabled', false).html(originalText);
+                    }
+                });
+            });
+
+            $('#editForm').on('submit', function (e) {
+                e.preventDefault();
+
+                const startInput = document.getElementById('edit_start_date');
+                const endInput = document.getElementById('edit_end_date');
+                const validation = validateTrainingDateRange(startInput, endInput);
+
+                if (!validation.valid) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Fechas inválidas',
+                        text: validation.message,
+                        confirmButtonText: 'Entendido'
+                    });
+                    return;
+                }
+
+                const $form = $(this);
+                const $submitBtn = $form.find('button[type="submit"]');
+                const originalText = $submitBtn.html();
+
+                $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Actualizando...');
+
+                $.ajax({
+                    url: $form.attr('action'),
+                    method: 'POST',
+                    data: $form.serialize(),
+                    success: function (response) {
+                        $('#editModal').modal('hide');
+
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: response.message || 'Capacitación actualizada correctamente',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true
+                        });
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1500);
+                    },
+                    error: function (xhr) {
+                        const message = xhr.responseJSON?.message || 'Error al actualizar la capacitación';
+
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: message,
+                            showConfirmButton: false,
+                            timer: 2500,
+                            timerProgressBar: true
                         });
                     },
                     complete: function () {
@@ -606,8 +727,7 @@
                             title: response.message,
                             showConfirmButton: false,
                             timer: 1500,
-                            timerProgressBar: true,
-                            backdrop: false
+                            timerProgressBar: true
                         });
 
                         if (response.success) {
@@ -626,8 +746,7 @@
                             title: message,
                             showConfirmButton: false,
                             timer: 2500,
-                            timerProgressBar: true,
-                            backdrop: false
+                            timerProgressBar: true
                         });
                     },
                     complete: function () {
