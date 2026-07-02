@@ -66,6 +66,7 @@
                 <div class="modal-content border-0 rounded-3">
                     <div class="modal-header border-0">
                         <h5 class="modal-title fw-bold" id="createSpecialtyModalLabel">Crear Especialidad</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <form method="POST" action="{{ route('admin.specialties.store') }}" id="createSpecialtyForm">
@@ -92,6 +93,7 @@
                 <div class="modal-content border-0 rounded-3">
                     <div class="modal-header border-0">
                         <h5 class="modal-title fw-bold" id="editModalLabel">Editar Especialidad</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <form id="editForm" method="POST">

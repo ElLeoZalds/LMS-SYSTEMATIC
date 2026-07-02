@@ -105,6 +105,7 @@
                 <div class="modal-content border-0 rounded-3">
                     <div class="modal-header border-0">
                         <h5 class="modal-title fw-bold" id="createTrainingModalLabel">Crear capacitación</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <form method="POST" action="{{ route('admin.trainings.store') }}" id="createTrainingForm">
@@ -165,6 +166,7 @@
                 <div class="modal-content border-0 rounded-3">
                     <div class="modal-header border-0">
                         <h5 class="modal-title fw-bold" id="bulkScheduleModalLabel">Agregar horarios</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <form id="bulkScheduleForm" method="POST" action="{{ route('admin.schedules.bulk-store') }}">
@@ -201,6 +203,7 @@
                 <div class="modal-content border-0 rounded-3">
                     <div class="modal-header border-0">
                         <h5 class="modal-title fw-bold" id="editModalLabel">Editar capacitación</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <form id="editForm" method="POST">
@@ -495,15 +498,7 @@
                     success: function (response) {
                         $('#bulkScheduleModal').modal('hide');
 
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'success',
-                            title: response.message || 'Horarios guardados correctamente',
-                            showConfirmButton: false,
-                            timer: 1500,
-                            timerProgressBar: true
-                        });
+                        SwalToast.fire({ icon: 'success', title: response.message || 'Horarios guardados correctamente' });
 
                         setTimeout(function () {
                             location.reload();
@@ -512,15 +507,7 @@
                     error: function (xhr) {
                         const message = xhr.responseJSON?.message || 'Error al guardar los horarios';
 
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'error',
-                            title: message,
-                            showConfirmButton: false,
-                            timer: 2500,
-                            timerProgressBar: true
-                        });
+                        SwalToast.fire({ icon: 'error', title: message });
                     },
                     complete: function () {
                         $submitBtn.prop('disabled', false).html(originalText);
@@ -558,15 +545,7 @@
                     success: function (response) {
                         $('#createTrainingModal').modal('hide');
 
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'success',
-                            title: response.message || 'Capacitación creada correctamente',
-                            showConfirmButton: false,
-                            timer: 1500,
-                            timerProgressBar: true
-                        });
+                        SwalToast.fire({ icon: 'success', title: response.message || 'Capacitación creada correctamente' });
 
                         setTimeout(function () {
                             location.reload();
@@ -575,15 +554,7 @@
                     error: function (xhr) {
                         const message = xhr.responseJSON?.message || 'Error al crear la capacitación';
 
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'error',
-                            title: message,
-                            showConfirmButton: false,
-                            timer: 2500,
-                            timerProgressBar: true
-                        });
+                        SwalToast.fire({ icon: 'error', title: message });
                     },
                     complete: function () {
                         $submitBtn.prop('disabled', false).html(originalText);
@@ -621,15 +592,7 @@
                     success: function (response) {
                         $('#editModal').modal('hide');
 
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'success',
-                            title: response.message || 'Capacitación actualizada correctamente',
-                            showConfirmButton: false,
-                            timer: 1500,
-                            timerProgressBar: true
-                        });
+                        SwalToast.fire({ icon: 'success', title: response.message || 'Capacitación actualizada correctamente' });
 
                         setTimeout(function () {
                             location.reload();
@@ -638,15 +601,7 @@
                     error: function (xhr) {
                         const message = xhr.responseJSON?.message || 'Error al actualizar la capacitación';
 
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'error',
-                            title: message,
-                            showConfirmButton: false,
-                            timer: 2500,
-                            timerProgressBar: true
-                        });
+                        SwalToast.fire({ icon: 'error', title: message });
                     },
                     complete: function () {
                         $submitBtn.prop('disabled', false).html(originalText);

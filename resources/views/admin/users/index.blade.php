@@ -103,7 +103,7 @@
                         $modalFullName = trim(($userModal->person->first_names ?? 'Sin nombre') . ' ' . ($userModal->person->last_names ?? ''));
                         $modalRoleId = optional($userModal->roles->first())->role_id;
                     @endphp
-                    <div class="modal fade" id="editUserModal{{ $userModal->user_id }}" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel{{ $userModal->user_id }}" aria-hidden="true">
+                    <div class="modal fade" id="editUserModal{{ $userModal->user_id }}" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel{{ $userModal->user_id }}" aria-hidden="true" data-backdrop="static" data-keyboard="false">
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content">
                                 <form method="POST" action="{{ route('admin.users.update', $userModal->user_id) }}">

@@ -93,6 +93,7 @@
                     <input type="hidden" name="modal_type" value="create">
                     <div class="modal-header border-0">
                         <h5 class="modal-title fw-bold" id="createScheduleModalLabel">Crear Horario</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -157,6 +158,7 @@
                     <input type="hidden" name="schedule_id" id="edit_schedule_id" value="{{ old('schedule_id') }}">
                     <div class="modal-header border-0">
                         <h5 class="modal-title fw-bold" id="editScheduleModalLabel">Editar Horario</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">

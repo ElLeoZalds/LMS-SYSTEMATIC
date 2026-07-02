@@ -21,6 +21,21 @@
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Configuración global de Toast — usar SwalToast.fire({icon, title}) en todo el proyecto
+        const SwalToast = Swal.mixin({
+            toast: true,
+            position: 'top-start',
+            showConfirmButton: false,
+            timer: 1000,
+            timerProgressBar: true,
+            backdrop: false,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+    </script>
 
     <style>
         .avatar-circle {
@@ -351,62 +366,19 @@
                     {{-- ALERTAS TOAST CON SWEETALERT --}}
                     @if(session('success'))
                         <script>
-                            (function() {
-                                const short = {{ session('short_toast') ? 'true' : 'false' }};
-                                const timerValue = short ? 1400 : 3000;
-                                Swal.fire({
-                                    toast: true,
-                                    position: 'top-end',
-                                    icon: 'success',
-                                    title: '{{ session('success') }}',
-                                    showConfirmButton: false,
-                                    timer: timerValue,
-                                    timerProgressBar: true,
-                                    backdrop: false,
-                                    didOpen: (toast) => {
-                                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                    }
-                                });
-                            })();
+                            SwalToast.fire({ icon: 'success', title: '{{ session('success') }}' });
                         </script>
                     @endif
 
                     @if(session('error'))
                         <script>
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'error',
-                                title: '{{ session('error') }}',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true,
-                                backdrop: false,
-                                didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                }
-                            });
+                            SwalToast.fire({ icon: 'error', title: '{{ session('error') }}' });
                         </script>
                     @endif
 
                     @if($errors->any())
                         <script>
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'error',
-                                title: '{{ $errors->first() }}',
-                                showConfirmButton: false,
-                                timer: 4000,
-                                timerProgressBar: true,
-                                backdrop: false,
-                                didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                }
-                            });
+                            SwalToast.fire({ icon: 'error', title: '{{ $errors->first() }}' });
                         </script>
                     @endif
 
