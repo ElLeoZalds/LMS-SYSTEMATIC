@@ -83,6 +83,19 @@ class AttendanceController extends Controller
             return back()->with('error', 'No se puede tomar asistencia para una fecha futura.')->withInput();
         }
 
+        $studentIds = array_unique(array_column($data['attendances'], 'student_id'));
+        $invalidStudentIds = $this->unenrolledStudentIds($training->training_id, $studentIds);
+
+        if (! empty($invalidStudentIds)) {
+            $message = 'No se puede registrar asistencia. Los siguientes estudiantes no están matriculados en esta capacitación: '.implode(', ', $invalidStudentIds);
+
+            if ($request->wantsJson() || $request->isJson()) {
+                return response()->json(['success' => false, 'message' => $message], 422);
+            }
+
+            return back()->with('error', $message)->withInput();
+        }
+
         DB::transaction(fn () => $this->saveAttendances($data['attendances'], $scheduleId, $training->training_id));
 
         $redirectUrl = route('teacher.attendance.create', ['training_id' => $training->training_id, 'schedule_id' => $scheduleId]);
@@ -194,11 +207,16 @@ class AttendanceController extends Controller
 
     private function saveAttendances(array $attendances, int $scheduleId, int $trainingId): void
     {
+        $enrollments = $this->enrollmentIdsByStudent($trainingId, array_unique(array_column($attendances, 'student_id')));
+
         foreach ($attendances as $attendanceData) {
+            $studentId = $attendanceData['student_id'];
+            $enrollmentId = $enrollments[$studentId] ?? null;
+
             Attendance::updateOrCreate(
                 [
                     'schedule_id' => $scheduleId,
-                    'enrollment_id' => $this->enrollmentId($trainingId, $attendanceData['student_id']),
+                    'enrollment_id' => $enrollmentId,
                 ],
                 [
                     'attendance' => ['status' => $this->attendanceStatus($attendanceData['status'])],
@@ -207,12 +225,20 @@ class AttendanceController extends Controller
         }
     }
 
-    private function enrollmentId(int $trainingId, int $studentId): int
+    private function enrollmentIdsByStudent(int $trainingId, array $studentIds): array
     {
         return DB::table('enrollments')
             ->where('training_id', $trainingId)
-            ->where('student_id', $studentId)
-            ->value('enrollment_id') ?? $studentId;
+            ->whereIn('student_id', $studentIds)
+            ->pluck('enrollment_id', 'student_id')
+            ->toArray();
+    }
+
+    private function unenrolledStudentIds(int $trainingId, array $studentIds): array
+    {
+        $enrollments = $this->enrollmentIdsByStudent($trainingId, $studentIds);
+
+        return array_values(array_diff($studentIds, array_keys($enrollments)));
     }
 
     private function attendanceStatus(string $status): string

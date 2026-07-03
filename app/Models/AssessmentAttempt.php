@@ -16,11 +16,13 @@ class AssessmentAttempt extends Model
         'number',
         'date',
         'score',
+        'submitted_at',
     ];
 
     protected $casts = [
         'date' => 'date',
         'score' => 'decimal:2',
+        'submitted_at' => 'datetime',
     ];
 
     public function enrollment()
@@ -43,5 +45,20 @@ class AssessmentAttempt extends Model
     public function assessment()
     {
         return $this->belongsTo(Assessment::class, 'assessment_id', 'assessment_id');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->whereNull('submitted_at');
+    }
+
+    public function isPending(): bool
+    {
+        return $this->submitted_at === null;
+    }
+
+    public function isSubmitted(): bool
+    {
+        return ! $this->isPending();
     }
 }

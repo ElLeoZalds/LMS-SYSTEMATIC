@@ -231,10 +231,14 @@
                                         @php
                                             $assessmentAttempts = $attempts->where('assessment_id', $assessment->assessment_id);
                                             $pendingAttempt = $assessmentAttempts->first(function ($attempt) {
-                                                return $attempt->created_at && $attempt->updated_at && $attempt->created_at->equalTo($attempt->updated_at);
+                                                return is_null($attempt->submitted_at);
                                             });
                                             $attemptsUsed = $assessmentAttempts->count();
                                             $remainingAttempts = max(0, $assessment->allowed_attempts - $attemptsUsed);
+                                            $assessmentAvailable = $assessment->active
+                                                && (! $assessment->start_date || \Carbon\Carbon::today()->gte(\Carbon\Carbon::parse($assessment->start_date)->startOfDay()))
+                                                && (! $assessment->end_date || \Carbon\Carbon::today()->lte(\Carbon\Carbon::parse($assessment->end_date)->endOfDay()))
+                                                && ! $assessment->training->isClosed();
                                         @endphp
                                         <div class="list-group-item mb-2 rounded-3 shadow-sm">
                                             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
@@ -257,16 +261,18 @@
                                                     <span class="badge bg-{{ $assessment->active ? 'success' : 'secondary' }} mb-2">
                                                         {{ $assessment->active ? 'Activo' : 'Inactivo' }}
                                                     </span>
-                                                    @if($assessment->active && $pendingAttempt)
+                                                    @if($assessmentAvailable && $pendingAttempt)
                                                         <a href="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" data-start-url="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" class="btn btn-sm btn-primary exam-start-btn">
                                                             Continuar examen
                                                         </a>
-                                                    @elseif($assessment->active && $remainingAttempts > 0)
+                                                    @elseif($assessmentAvailable && $remainingAttempts > 0)
                                                         <a href="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" data-start-url="{{ route('student.assessment.take', $assessment->assessment_id) }}?start=1" class="btn btn-sm btn-primary exam-start-btn">
                                                             Tomar examen
                                                         </a>
-                                                    @elseif($assessment->active)
+                                                    @elseif($assessmentAvailable)
                                                         <span class="badge bg-danger">Intentos agotados</span>
+                                                    @elseif(! $assessmentAvailable && $assessment->active)
+                                                        <span class="badge bg-secondary">No disponible</span>
                                                     @endif
                                                 </div>
                                             </div>
@@ -410,16 +416,25 @@
                                 </thead>
                                 <tbody>
                                     @foreach($attempts as $attempt)
+                                        @php
+                                            $isSubmitted = ! is_null($attempt->submitted_at);
+                                            $statusLabel = $isSubmitted
+                                                ? ($attempt->score > 0 ? 'Aprobado' : 'Reprobado')
+                                                : 'En curso';
+                                            $statusClass = $isSubmitted
+                                                ? ($attempt->score > 0 ? 'bg-success' : 'bg-danger')
+                                                : 'bg-info';
+                                        @endphp
                                         <tr>
                                             <td>{{ $attempt->assessment->title ?? 'Sin evaluación' }}</td>
-                                            <td class="text-center">{{ optional($attempt->created_at)->format('d/m/Y H:i') }}</td>
-                                            <td class="text-center">{{ $attempt->score }}</td>
                                             <td class="text-center">
-                                                @if($attempt->score > 0)
-                                                    <span class="badge bg-success">Aprobado</span>
-                                                @else
-                                                    <span class="badge bg-danger">Reprobado</span>
-                                                @endif
+                                                {{ optional($attempt->submitted_at ?? $attempt->created_at)->format('d/m/Y H:i') }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ $isSubmitted ? $attempt->score : '-' }}
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
                                             </td>
                                         </tr>
                                     @endforeach

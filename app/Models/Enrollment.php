@@ -75,6 +75,7 @@ class Enrollment extends Model
 
         return TaskSubmission::where('student_id', $this->student_id)
             ->whereIn('task_id', $taskIds)
+            ->whereNotNull('submitted_at')
             ->distinct('task_id')
             ->count('task_id');
     }
@@ -82,7 +83,7 @@ class Enrollment extends Model
     public function completedAssessmentsCount()
     {
         return AssessmentAttempt::where('enrollment_id', $this->enrollment_id)
-            ->whereColumn('created_at', '!=', 'updated_at')
+            ->whereNotNull('submitted_at')
             ->distinct('assessment_id')
             ->count('assessment_id');
     }
@@ -164,6 +165,7 @@ class Enrollment extends Model
             $taskIds = $training->tasks->pluck('task_id')->toArray();
             $submissions = TaskSubmission::whereIn('task_id', $taskIds)
                 ->where('student_id', $this->student_id)
+                ->whereNotNull('submitted_at')
                 ->get();
             
             foreach ($submissions as $submission) {
@@ -179,6 +181,7 @@ class Enrollment extends Model
             foreach ($training->assessments as $assessment) {
                 $maxAttemptScore = AssessmentAttempt::where('enrollment_id', $this->enrollment_id)
                     ->where('assessment_id', $assessment->assessment_id)
+                    ->whereNotNull('submitted_at')
                     ->max('score');
 
                 if (!is_null($maxAttemptScore)) {

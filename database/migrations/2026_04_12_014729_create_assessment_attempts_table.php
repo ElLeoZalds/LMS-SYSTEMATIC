@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('number');
             $table->date('date');
             $table->decimal('score', 5, 2);
+            $table->dateTime('submitted_at')->nullable();
             $table->timestamps();
         });
     }

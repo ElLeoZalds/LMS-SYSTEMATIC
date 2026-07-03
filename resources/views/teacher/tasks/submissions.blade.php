@@ -8,7 +8,7 @@
             <span style="font-size: 12px; font-weight: bold; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em;">Revisión de Tareas</span>
             <h1 style="font-size: 24px; font-weight: bold; color: #1f2937; margin: 5px 0 0 0;">{{ $task->title }}</h1>
             <p style="font-size: 14px; color: #6b7280; margin: 5px 0 0 0;">
-                Curso: <span style="font-weight: 500; color: #374151;">{{ $task->training->name ?? 'Curso' }}</span> 
+                Curso: <span style="font-weight: 500; color: #374151;">{{ $task->training->course->title ?? 'Curso' }}</span> 
                 | Fecha de fin: <span style="font-weight: 500; color: #ef4444;">{{ $task->due_date->format('d/m/Y H:i') }}</span>
             </p>
         </div>
@@ -47,7 +47,7 @@
                                 {{ trim(($submission->student->person->first_names ?? '') . ' ' . ($submission->student->person->last_names ?? '')) ?: ($submission->student->username ?? 'Estudiante') }}
                             </td>
                             <td style="padding: 15px 20px; color: #6b7280;">
-                                {{ $submission->created_at ? $submission->created_at->format('d/m/Y H:i') : '-' }}
+                                {{ $submission->submitted_at ? $submission->submitted_at->format('d/m/Y H:i') : '-' }}
                             </td>
                             <td style="padding: 15px 20px;">
                                 <div style="max-w: 250px;">
@@ -58,9 +58,9 @@
                                             Ver Archivo
                                         </a>
                                     @endif
-                                    @if($submission->comments)
+                                    @if($submission->submission_text)
                                         <p style="font-size: 12px; color: #6b7280; font-style: italic; margin: 4px 0 0 0;">
-                                            "{{ $submission->comments }}"
+                                            "{{ $submission->submission_text }}"
                                         </p>
                                     @endif
                                 </div>

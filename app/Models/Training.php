@@ -83,54 +83,50 @@ class Training extends Model
         return $this->hasMany(Content::class, 'training_id', 'training_id');
     }
 
-    public function normalizedStatus(): string
+    public function normalizedStatus(): int
     {
-        return trim((string) $this->status);
+        return is_numeric($this->status) ? (int) $this->status : 0;
     }
 
     public function isDraft(): bool
     {
-        return in_array($this->normalizedStatus(), ['0', 'DRAFT', 'D'], true);
+        return $this->normalizedStatus() === 0;
     }
 
     public function isActive(): bool
     {
-        $startDate = $this->start_date ? Carbon::parse($this->start_date)->startOfDay() : null;
-        $endDate = $this->end_date ? Carbon::parse($this->end_date)->endOfDay() : null;
+        if ($this->normalizedStatus() !== 1) {
+            return false;
+        }
+
         $today = Carbon::today();
 
-        if ($startDate && $today->lt($startDate)) {
+        if ($this->start_date && $today->lt(Carbon::parse($this->start_date)->startOfDay())) {
             return false;
         }
 
-        if ($endDate && $today->gt($endDate)) {
+        if ($this->end_date && $today->gt(Carbon::parse($this->end_date)->endOfDay())) {
             return false;
         }
 
-        if (in_array($this->normalizedStatus(), ['0', 'C', 'CLOSED'], true)) {
-            return false;
-        }
-
-        if ($startDate || $endDate) {
-            return ! $this->isClosed();
-        }
-
-        return in_array($this->normalizedStatus(), ['1', 'ACTIVE', 'A'], true);
+        return true;
     }
 
     public function isClosed(): bool
     {
-        $endDate = $this->end_date ? Carbon::parse($this->end_date)->endOfDay() : null;
-
-        if ($endDate && Carbon::now()->gt($endDate)) {
+        if ($this->normalizedStatus() === 0) {
             return true;
         }
 
-        return in_array($this->normalizedStatus(), ['0', 'CLOSED', 'C'], true);
+        if ($this->end_date && Carbon::now()->gt(Carbon::parse($this->end_date)->endOfDay())) {
+            return true;
+        }
+
+        return false;
     }
 
     public function canModifyActivities(): bool
     {
-        return $this->isActive() && ! $this->isClosed();
+        return $this->isActive();
     }
 }

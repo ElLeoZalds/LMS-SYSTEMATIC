@@ -9,6 +9,7 @@ use App\Models\AssessmentAttempt;
 use App\Models\Attendance;
 use App\Models\Enrollment;
 use App\Models\Schedule;
+use App\Models\Task;
 use App\Models\Training;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -26,11 +27,15 @@ class TeacherController extends Controller
         $user = auth()->user();
 
         $totalStudents = Enrollment::whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))->count();
-        $totalActiveTrainings = $user->trainings->where('status', 'A')->count();
-        $totalTasks = Assessment::whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))->count();
+        $totalActiveTrainings = Training::where('teacher_id', $user->user_id)
+            ->where('status', 1)
+            ->count();
+        $totalTasks = Task::whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))->count();
 
         $totalAttempts = AssessmentAttempt::whereHas('assessment.training', fn ($q) => $q->where('teacher_id', $user->user_id))->count();
-        $averageScore = AssessmentAttempt::whereHas('assessment.training', fn ($q) => $q->where('teacher_id', $user->user_id))->avg('score');
+        $averageScore = AssessmentAttempt::whereHas('assessment.training', fn ($q) => $q->where('teacher_id', $user->user_id))
+            ->whereNotNull('submitted_at')
+            ->avg('score');
         $averageScore = $averageScore !== null ? round($averageScore, 2) : 0;
 
         $recentActivities = Assessment::with('training.course')
@@ -62,7 +67,13 @@ class TeacherController extends Controller
 
         // Soportar filtrado por estado: ?status=A para activos
         if ($request->query('status')) {
-            $status = $request->query('status');
+            $status = strtoupper($request->query('status'));
+            $status = match ($status) {
+                'A', 'ACTIVE' => 1,
+                'C', 'CLOSED', '0' => 0,
+                default => $status,
+            };
+
             $query->where('status', $status);
         }
 
@@ -269,18 +280,16 @@ class TeacherController extends Controller
                 $status = $attendance ? ($attendance->attendance_status ?? $attendance->attendance) : null;
                 $status = is_string($status) ? strtolower($status) : null;
 
-                if ($status === 'p') {
-                    $status = 'present';
-                } elseif ($status === 'a') {
-                    $status = 'absent';
-                } elseif ($status === 'j') {
-                    $status = 'justified';
-                } elseif ($status === 't') {
-                    $status = 'late';
-                }
+                $normalizedStatus = match ($status) {
+                    'p', 'present' => 'present',
+                    'a', 'absent' => 'absent',
+                    'j', 'justified' => 'justified',
+                    't', 'late' => 'late',
+                    default => null,
+                };
 
-                if (isset($counts[$status])) {
-                    $counts[$status]++;
+                if (isset($counts[$normalizedStatus])) {
+                    $counts[$normalizedStatus]++;
                 }
             }
 
@@ -439,7 +448,9 @@ class TeacherController extends Controller
             ->withCount(['attempts as attempts_count'])
             ->get()
             ->map(function ($a) {
-                $avg = AssessmentAttempt::whereHas('assessment', fn ($q) => $q->where('assessment_id', $a->assessment_id))->avg('score');
+                $avg = AssessmentAttempt::whereHas('assessment', fn ($q) => $q->where('assessment_id', $a->assessment_id))
+                    ->whereNotNull('submitted_at')
+                    ->avg('score');
 
                 return [
                     'assessment_id' => $a->assessment_id,
@@ -471,8 +482,7 @@ class TeacherController extends Controller
             'training_id' => 'required|exists:trainings,training_id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string',
-            'start_date' => 'nullable|date|before_or_equal:end_date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'delivery_date' => 'required|date|after_or_equal:today',
         ]);
 
         $user = auth()->user();
@@ -485,14 +495,11 @@ class TeacherController extends Controller
             abort(403, 'No autorizado: Este training no te pertenece.');
         }
 
-        Assessment::create([
+        Task::create([
             'training_id' => $request->training_id,
             'title' => $request->title,
             'description' => $request->description,
-            'start_date' => $request->start_date ?: now()->toDateString(),
-            'end_date' => $request->end_date,
-            'allowed_attempts' => 1,
-            'active' => true,
+            'due_date' => Carbon::parse($request->delivery_date)->endOfDay(),
         ]);
 
         return redirect()->route('teacher.courses.show', $request->training_id)

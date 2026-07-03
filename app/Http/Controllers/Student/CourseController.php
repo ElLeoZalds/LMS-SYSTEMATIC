@@ -47,7 +47,9 @@ class CourseController extends Controller
                 ->where('training_id', $id)
                 ->first();
 
-            $attendances = $training->attendances()->with('schedule')->get();
+            $attendances = Attendance::where('enrollment_id', $enrollment->enrollment_id)
+                ->with('schedule')
+                ->get();
             $attempts = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
                 ->with('assessment')
                 ->orderByDesc('created_at')
@@ -55,7 +57,9 @@ class CourseController extends Controller
             $taskIds = $training->tasks->pluck('task_id')->all();
             $submissions = TaskSubmission::where('student_id', $studentId)
                 ->whereIn('task_id', $taskIds)
+                ->orderByDesc('submitted_at')
                 ->get()
+                ->unique('task_id')
                 ->keyBy('task_id');
             $averageGrade = $enrollment->calculateAverage();
 
@@ -93,7 +97,7 @@ class CourseController extends Controller
 
         $pendingAttempt = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
             ->where('assessment_id', $assessment_id)
-            ->whereColumn('created_at', 'updated_at')
+            ->whereNull('submitted_at')
             ->latest('attempt_id')
             ->first();
 
@@ -185,6 +189,10 @@ class CourseController extends Controller
             ->where('training_id', $assessment->training_id)
             ->firstOrFail();
 
+        if ($assessment->training->isClosed()) {
+            abort(403, 'El curso ya se cerró y no se pueden responder evaluaciones.');
+        }
+
         $this->validateAssessmentAvailability($assessment);
 
         $validated = $request->validate([
@@ -196,11 +204,8 @@ class CourseController extends Controller
         $attempt = AssessmentAttempt::where('attempt_id', $validated['attempt_id'])
             ->where('enrollment_id', $enrollment->enrollment_id)
             ->where('assessment_id', $assessment_id)
+            ->whereNull('submitted_at')
             ->firstOrFail();
-
-        if ($attempt->created_at->ne($attempt->updated_at)) {
-            abort(403, 'Este intento ya fue enviado.');
-        }
 
         $timeLimit = $assessment->time_limit;
         $elapsedSeconds = Carbon::now()->diffInSeconds($attempt->created_at);
@@ -208,8 +213,8 @@ class CourseController extends Controller
 
         if ($elapsedSeconds > $maxSeconds) {
             $attempt->score = 0;
+            $attempt->submitted_at = Carbon::now();
             $attempt->timestamps = false;
-            $attempt->updated_at = Carbon::now()->addSecond();
             $attempt->save();
             $attempt->load('assessment');
 
@@ -232,8 +237,8 @@ class CourseController extends Controller
         }
 
         $attempt->score = $totalScore;
+        $attempt->submitted_at = Carbon::now();
         $attempt->timestamps = false;
-        $attempt->updated_at = Carbon::now()->addSecond();
         $attempt->save();
         $attempt->load('assessment');
 
@@ -362,10 +367,14 @@ class CourseController extends Controller
 
         $today = Carbon::today();
 
-        $start = $assessment->start_date instanceof Carbon ? $assessment->start_date->copy()->startOfDay() : Carbon::createFromFormat('Y-m-d', $assessment->start_date)->startOfDay();
-        $end = $assessment->end_date instanceof Carbon ? $assessment->end_date->copy()->endOfDay() : Carbon::createFromFormat('Y-m-d', $assessment->end_date)->endOfDay();
+        $start = $assessment->start_date instanceof Carbon
+            ? $assessment->start_date->copy()->startOfDay()
+            : ($assessment->start_date ? Carbon::createFromFormat('Y-m-d', $assessment->start_date)->startOfDay() : null);
+        $end = $assessment->end_date instanceof Carbon
+            ? $assessment->end_date->copy()->endOfDay()
+            : ($assessment->end_date ? Carbon::createFromFormat('Y-m-d', $assessment->end_date)->endOfDay() : null);
 
-        if ($today->lt($start) || $today->gt($end)) {
+        if (($start && $today->lt($start)) || ($end && $today->gt($end))) {
             abort(403, 'Esta evaluación está fuera de las fechas permitidas.');
         }
     }
