@@ -215,6 +215,403 @@
             color: #fff !important;
         }
 
+        .btn,
+        .btn-primary,
+        .btn-secondary,
+        .btn-success,
+        .btn-danger,
+        .btn-info,
+        .btn-warning,
+        .btn-light,
+        .btn-dark,
+        .btn-outline-primary,
+        .btn-outline-secondary,
+        .btn-outline-success,
+        .btn-outline-danger,
+        .btn-outline-info,
+        .btn-outline-warning,
+        .btn-outline-light,
+        .btn-outline-dark {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.875rem !important;
+            font-weight: 600 !important;
+            line-height: 1.4 !important;
+            border-radius: 0.2rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.25rem !important;
+            text-decoration: none !important;
+        }
+
+        .btn i,
+        .btn svg,
+        .btn .fas,
+        .btn .far,
+        .btn .fab,
+        .btn .fa,
+        .btn-primary i,
+        .btn-primary svg,
+        .btn-primary .fas,
+        .btn-primary .far,
+        .btn-primary .fab,
+        .btn-primary .fa,
+        .btn-secondary i,
+        .btn-secondary svg,
+        .btn-secondary .fas,
+        .btn-secondary .far,
+        .btn-secondary .fab,
+        .btn-secondary .fa,
+        .btn-success i,
+        .btn-success svg,
+        .btn-success .fas,
+        .btn-success .far,
+        .btn-success .fab,
+        .btn-success .fa,
+        .btn-danger i,
+        .btn-danger svg,
+        .btn-danger .fas,
+        .btn-danger .far,
+        .btn-danger .fab,
+        .btn-danger .fa,
+        .btn-info i,
+        .btn-info svg,
+        .btn-info .fas,
+        .btn-info .far,
+        .btn-info .fab,
+        .btn-info .fa,
+        .btn-warning i,
+        .btn-warning svg,
+        .btn-warning .fas,
+        .btn-warning .far,
+        .btn-warning .fab,
+        .btn-warning .fa,
+        .btn-light i,
+        .btn-light svg,
+        .btn-light .fas,
+        .btn-light .far,
+        .btn-light .fab,
+        .btn-light .fa,
+        .btn-dark i,
+        .btn-dark svg,
+        .btn-dark .fas,
+        .btn-dark .far,
+        .btn-dark .fab,
+        .btn-dark .fa,
+        .btn-outline-primary i,
+        .btn-outline-primary svg,
+        .btn-outline-primary .fas,
+        .btn-outline-primary .far,
+        .btn-outline-primary .fab,
+        .btn-outline-primary .fa,
+        .btn-outline-secondary i,
+        .btn-outline-secondary svg,
+        .btn-outline-secondary .fas,
+        .btn-outline-secondary .far,
+        .btn-outline-secondary .fab,
+        .btn-outline-secondary .fa,
+        .btn-outline-success i,
+        .btn-outline-success svg,
+        .btn-outline-success .fas,
+        .btn-outline-success .far,
+        .btn-outline-success .fab,
+        .btn-outline-success .fa,
+        .btn-outline-danger i,
+        .btn-outline-danger svg,
+        .btn-outline-danger .fas,
+        .btn-outline-danger .far,
+        .btn-outline-danger .fab,
+        .btn-outline-danger .fa,
+        .btn-outline-info i,
+        .btn-outline-info svg,
+        .btn-outline-info .fas,
+        .btn-outline-info .far,
+        .btn-outline-info .fab,
+        .btn-outline-info .fa,
+        .btn-outline-warning i,
+        .btn-outline-warning svg,
+        .btn-outline-warning .fas,
+        .btn-outline-warning .far,
+        .btn-outline-warning .fab,
+        .btn-outline-warning .fa,
+        .btn-outline-light i,
+        .btn-outline-light svg,
+        .btn-outline-light .fas,
+        .btn-outline-light .far,
+        .btn-outline-light .fab,
+        .btn-outline-light .fa,
+        .btn-outline-dark i,
+        .btn-outline-dark svg,
+        .btn-outline-dark .fas,
+        .btn-outline-dark .far,
+        .btn-outline-dark .fab,
+        .btn-outline-dark .fa {
+            color: rgba(255, 255, 255, 0.92) !important;
+        }
+
+        .btn:hover,
+        .btn:focus,
+        .btn:active,
+        .btn.focus,
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active,
+        .btn-primary.focus,
+        .btn-secondary:hover,
+        .btn-secondary:focus,
+        .btn-secondary:active,
+        .btn-secondary.focus,
+        .btn-success:hover,
+        .btn-success:focus,
+        .btn-success:active,
+        .btn-success.focus,
+        .btn-danger:hover,
+        .btn-danger:focus,
+        .btn-danger:active,
+        .btn-danger.focus,
+        .btn-info:hover,
+        .btn-info:focus,
+        .btn-info:active,
+        .btn-info.focus,
+        .btn-warning:hover,
+        .btn-warning:focus,
+        .btn-warning:active,
+        .btn-warning.focus,
+        .btn-light:hover,
+        .btn-light:focus,
+        .btn-light:active,
+        .btn-light.focus,
+        .btn-dark:hover,
+        .btn-dark:focus,
+        .btn-dark:active,
+        .btn-dark.focus,
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus,
+        .btn-outline-primary:active,
+        .btn-outline-primary.focus,
+        .btn-outline-secondary:hover,
+        .btn-outline-secondary:focus,
+        .btn-outline-secondary:active,
+        .btn-outline-secondary.focus,
+        .btn-outline-success:hover,
+        .btn-outline-success:focus,
+        .btn-outline-success:active,
+        .btn-outline-success.focus,
+        .btn-outline-danger:hover,
+        .btn-outline-danger:focus,
+        .btn-outline-danger:active,
+        .btn-outline-danger.focus,
+        .btn-outline-info:hover,
+        .btn-outline-info:focus,
+        .btn-outline-info:active,
+        .btn-outline-info.focus,
+        .btn-outline-warning:hover,
+        .btn-outline-warning:focus,
+        .btn-outline-warning:active,
+        .btn-outline-warning.focus,
+        .btn-outline-light:hover,
+        .btn-outline-light:focus,
+        .btn-outline-light:active,
+        .btn-outline-light.focus,
+        .btn-outline-dark:hover,
+        .btn-outline-dark:focus,
+        .btn-outline-dark:active,
+        .btn-outline-dark.focus {
+            box-shadow: none !important;
+            outline: none !important;
+            transform: none !important;
+        }
+
+        .btn-primary,
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active,
+        .btn-primary.focus {
+            background-color: #4e73df !important;
+            border-color: #4e73df !important;
+            color: #fff !important;
+        }
+
+        .btn-secondary,
+        .btn-secondary:hover,
+        .btn-secondary:focus,
+        .btn-secondary:active,
+        .btn-secondary.focus {
+            background-color: #858796 !important;
+            border-color: #858796 !important;
+            color: #fff !important;
+        }
+
+        .btn-success,
+        .btn-success:hover,
+        .btn-success:focus,
+        .btn-success:active,
+        .btn-success.focus {
+            background-color: #1cc88a !important;
+            border-color: #1cc88a !important;
+            color: #fff !important;
+        }
+
+        .btn-danger,
+        .btn-danger:hover,
+        .btn-danger:focus,
+        .btn-danger:active,
+        .btn-danger.focus {
+            background-color: #e74a3b !important;
+            border-color: #e74a3b !important;
+            color: #fff !important;
+        }
+
+        .btn-info,
+        .btn-info:hover,
+        .btn-info:focus,
+        .btn-info:active,
+        .btn-info.focus {
+            background-color: #36b9cc !important;
+            border-color: #36b9cc !important;
+            color: #fff !important;
+        }
+
+        .btn-warning,
+        .btn-warning:hover,
+        .btn-warning:focus,
+        .btn-warning:active,
+        .btn-warning.focus {
+            background-color: #f6c23e !important;
+            border-color: #f6c23e !important;
+            color: #212529 !important;
+        }
+
+        .btn-light,
+        .btn-light:hover,
+        .btn-light:focus,
+        .btn-light:active,
+        .btn-light.focus {
+            background-color: #f8f9fc !important;
+            border-color: #f8f9fc !important;
+            color: #212529 !important;
+        }
+
+        .btn-dark,
+        .btn-dark:hover,
+        .btn-dark:focus,
+        .btn-dark:active,
+        .btn-dark.focus {
+            background-color: #5a5c69 !important;
+            border-color: #5a5c69 !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-primary,
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus,
+        .btn-outline-primary:active,
+        .btn-outline-primary.focus {
+            background-color: #4e73df !important;
+            border-color: #4e73df !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-secondary,
+        .btn-outline-secondary:hover,
+        .btn-outline-secondary:focus,
+        .btn-outline-secondary:active,
+        .btn-outline-secondary.focus {
+            background-color: #858796 !important;
+            border-color: #858796 !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-success,
+        .btn-outline-success:hover,
+        .btn-outline-success:focus,
+        .btn-outline-success:active,
+        .btn-outline-success.focus {
+            background-color: #1cc88a !important;
+            border-color: #1cc88a !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-danger,
+        .btn-outline-danger:hover,
+        .btn-outline-danger:focus,
+        .btn-outline-danger:active,
+        .btn-outline-danger.focus {
+            background-color: #e74a3b !important;
+            border-color: #e74a3b !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-info,
+        .btn-outline-info:hover,
+        .btn-outline-info:focus,
+        .btn-outline-info:active,
+        .btn-outline-info.focus {
+            background-color: #36b9cc !important;
+            border-color: #36b9cc !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-warning,
+        .btn-outline-warning:hover,
+        .btn-outline-warning:focus,
+        .btn-outline-warning:active,
+        .btn-outline-warning.focus {
+            background-color: #f6c23e !important;
+            border-color: #f6c23e !important;
+            color: #212529 !important;
+        }
+
+        .btn-outline-light,
+        .btn-outline-light:hover,
+        .btn-outline-light:focus,
+        .btn-outline-light:active,
+        .btn-outline-light.focus {
+            background-color: #f8f9fc !important;
+            border-color: #f8f9fc !important;
+            color: #212529 !important;
+        }
+
+        .btn-outline-dark,
+        .btn-outline-dark:hover,
+        .btn-outline-dark:focus,
+        .btn-outline-dark:active,
+        .btn-outline-dark.focus {
+            background-color: #5a5c69 !important;
+            border-color: #5a5c69 !important;
+            color: #fff !important;
+        }
+
+        .bg-gradient-1 {
+            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%) !important;
+        }
+
+        .bg-gradient-2 {
+            background: linear-gradient(135deg, #0b4f8a 0%, #3b82f6 100%) !important;
+        }
+
+        .bg-gradient-3 {
+            background: linear-gradient(135deg, #2563eb 0%, #93c5fd 100%) !important;
+        }
+
+        .sidebar .nav-item.active > .nav-link,
+        .sidebar .nav-item .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.12) !important;
+            color: #fff !important;
+        }
+
+        .sidebar-brand {
+            color: #fff !important;
+        }
+
+        .sidebar-brand-icon {
+            color: #fff !important;
+        }
+
+        .sidebar .sidebar-heading {
+            color: rgba(255, 255, 255, 0.75) !important;
+        }
+
         .container-fluid h1.h3 {
             margin-bottom: 1rem !important;
             font-weight: 700 !important;

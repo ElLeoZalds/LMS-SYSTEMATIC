@@ -38,16 +38,21 @@
                                         <div class="text-muted small">Cursos: {{ $specialty->courses->count() ?? 0 }}</div>
                                     </td>
                                     <td class="align-middle">
-                                        <span class="badge bg-success">Activo</span>
+                                        @php
+                                            $specialtyStatus = (string) ($specialty->status ?? 'A');
+                                            $specialtyBadgeClass = $specialtyStatus === 'A' ? 'bg-success' : 'bg-secondary';
+                                            $specialtyBadgeText = $specialtyStatus === 'A' ? 'Activo' : 'Inactivo';
+                                        @endphp
+                                        <span class="badge {{ $specialtyBadgeClass }}">{{ $specialtyBadgeText }}</span>
                                     </td>
                                     <td class="align-middle text-end">
                                         <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $specialty->specialty_id }}"
                                             data-specialty="{{ $specialty->specialty }}">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-danger"
-                                            onclick="confirmDelete('{{ route('admin.specialties.destroy', $specialty->specialty_id) }}')">
-                                            <i class="fas fa-trash"></i>
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="confirmDeactivate('{{ route('admin.specialties.destroy', $specialty->specialty_id) }}')">
+                                            <i class="fas fa-toggle-off"></i> Desactivar
                                         </button>
                                     </td>
                                 </tr>
@@ -127,15 +132,15 @@
             });
         });
 
-        function confirmDelete(url) {
+        function confirmDeactivate(url) {
             Swal.fire({
-                title: '¿Estás seguro?',
-                text: 'Esta acción no se puede deshacer.',
+                title: '¿Desactivar esta especialidad?',
+                text: 'La especialidad dejará de estar disponible para nuevos cursos y capacitaciones.',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar',
+                confirmButtonColor: '#f6c23e',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, desactivar',
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {

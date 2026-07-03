@@ -28,6 +28,7 @@ class SpecialtyController extends Controller
 
         Specialty::create([
             'specialty' => $request->specialty,
+            'status' => Specialty::STATUS_ACTIVE,
         ]);
 
         return redirect()->route('admin.specialties.index')
@@ -60,9 +61,9 @@ class SpecialtyController extends Controller
     public function destroy($id)
     {
         $specialty = Specialty::findOrFail($id);
-        $specialty->delete();
+        $specialty->update(['status' => Specialty::STATUS_INACTIVE]);
 
         return redirect()->route('admin.specialties.index')
-            ->with('success', 'Especialidad eliminada correctamente');
+            ->with('success', 'Especialidad desactivada correctamente');
     }
 }

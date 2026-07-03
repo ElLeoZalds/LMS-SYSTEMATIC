@@ -42,6 +42,7 @@ class CourseController extends Controller
             'hours_count' => $data['hours_count'],
             'reference_price' => $data['reference_price'],
             'banner_path' => $data['banner_path'] ?? null,
+            'status' => Course::STATUS_ACTIVE,
         ]);
 
         return redirect()->route('admin.courses.index')
@@ -75,10 +76,10 @@ class CourseController extends Controller
     public function destroy($id)
     {
         $course = Course::findOrFail($id);
-        $course->delete();
+        $course->update(['status' => Course::STATUS_INACTIVE]);
 
         return redirect()->route('admin.courses.index')
-            ->with('success', 'Curso eliminado correctamente');
+            ->with('success', 'Curso desactivado correctamente');
     }
 
     private function courseValidationRules(): array

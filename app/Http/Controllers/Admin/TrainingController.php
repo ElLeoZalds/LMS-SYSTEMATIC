@@ -15,7 +15,6 @@ class TrainingController extends Controller
     public function index()
     {
         $trainings = Training::with(['course', 'teacher.person', 'administrator.person'])
-            ->where('status', Training::STATUS_ACTIVE)
             ->when(request('code'), fn ($query, $code) => $query->where('code', 'like', '%'.$code.'%'))
             ->orderBy('created_at', 'desc')
             ->get();
@@ -77,11 +76,11 @@ class TrainingController extends Controller
     public function destroy($id)
     {
         $training = Training::findOrFail($id);
-        $training->delete();
+        $training->update(['status' => Training::STATUS_DRAFT]);
 
         return redirect()
             ->route('admin.trainings.index')
-            ->with('success', 'Capacitación eliminada correctamente.');
+            ->with('success', 'Capacitación desactivada correctamente.');
     }
 
     public function enroll(Request $request, Training $training)

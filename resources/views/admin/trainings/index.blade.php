@@ -80,9 +80,9 @@
                                             data-modality="{{ $training->modality }}">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-danger"
-                                            onclick="confirmDelete('{{ route('admin.trainings.destroy', $training->training_id) }}')">
-                                            <i class="fas fa-trash"></i>
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="confirmDeactivate('{{ route('admin.trainings.destroy', $training->training_id) }}')">
+                                            <i class="fas fa-toggle-off"></i> Desactivar
                                         </button>
                                     </td>
                                 </tr>
@@ -427,15 +427,15 @@
                 });
             });
 
-            function confirmDelete(url) {
-                Swal.fire({
-                    title: '¿Estás seguro?',
-                    text: 'Esta acción no se puede deshacer.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Sí, eliminar',
+function confirmDeactivate(url) {
+            Swal.fire({
+                title: '¿Desactivar esta capacitación?',
+                text: 'La capacitación dejará de estar activa para los usuarios.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f6c23e',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, desactivar',
                     cancelButtonText: 'Cancelar'
                 }).then((result) => {
                     if (result.isConfirmed) {

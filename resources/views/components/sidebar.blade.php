@@ -4,12 +4,12 @@
     $fullName = trim(($person->last_names ? $person->last_names . ' ' : '') . ($person->first_names ?? ''));
     $displayRole = 'Usuario';
     $sidebarTheme = [
-        'Administrator' => ['bg-gradient-warning', 'sidebar-light', 'text-dark'],
-        'Teacher' => ['bg-gradient-success', 'sidebar-dark', 'text-light'],
-        'Student' => ['bg-gradient-primary', 'sidebar-dark', 'text-light'],
-    ][$role] ?? ['bg-gradient-primary', 'sidebar-dark', 'text-light'];
+        'Administrator' => ['bg-gradient-1', 'sidebar-dark', 'text-light', '#14132e00'],
+        'Teacher' => ['bg-gradient-2', 'sidebar-dark', 'text-light', '#0d4aa600'],
+        'Student' => ['bg-gradient-3', 'sidebar-dark', 'text-light', '#1b183800'],
+    ][$role] ?? ['bg-gradient-3', 'sidebar-dark', 'text-light', '#1b183800'];
 
-    [$sidebarBackgroundClass, $sidebarTextClass, $sidebarInfoTextClass] = $sidebarTheme;
+    [$sidebarBackgroundClass, $sidebarTextClass, $sidebarInfoTextClass, $sidebarAccentColor] = $sidebarTheme;
 
     if ($role === 'Administrator') {
         $displayRole = 'Administrador';
