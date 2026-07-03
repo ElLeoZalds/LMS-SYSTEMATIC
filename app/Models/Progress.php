@@ -18,8 +18,18 @@ class Progress extends Model
         'status',
     ];
 
+    protected $casts = [
+        'activity_date' => 'date',
+        'percentage' => 'decimal:2',
+    ];
+
     public function enrollment()
     {
         return $this->belongsTo(Enrollment::class, 'enrollment_id', 'enrollment_id');
+    }
+
+    public function isCompleted(): bool
+    {
+        return (float) $this->percentage >= 100;
     }
 }

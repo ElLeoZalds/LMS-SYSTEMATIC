@@ -67,6 +67,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->password;
     }
 
+    public function hasRole(string $roleName): bool
+    {
+        return $this->roles->contains(fn ($role) => strcasecmp((string) $role->name, $roleName) === 0);
+    }
+
+    public function isAdministrator(): bool
+    {
+        return $this->hasRole('Administrator');
+    }
+
+    public function isTeacher(): bool
+    {
+        return $this->hasRole('Teacher');
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->hasRole('Student');
+    }
+
     public function getEmailForVerification(): string
     {
         return $this->person?->email ?? $this->username;

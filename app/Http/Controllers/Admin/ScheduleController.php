@@ -24,7 +24,7 @@ class ScheduleController extends Controller
                 'date',
             ]);
 
-        $trainings = Training::where('status', 1)->get();
+        $trainings = Training::where('status', Training::STATUS_ACTIVE)->get();
 
         return view('admin.schedules.index', compact('schedules', 'trainings'));
     }
@@ -34,7 +34,7 @@ class ScheduleController extends Controller
      */
     public function create()
     {
-        $trainings = Training::where('status', 1)->with('course')->get();
+        $trainings = Training::where('status', Training::STATUS_ACTIVE)->with('course')->get();
 
         return view('admin.schedules.create', compact('trainings'));
     }
@@ -89,7 +89,7 @@ class ScheduleController extends Controller
     public function edit($id)
     {
         $schedule = Schedule::findOrFail($id);
-        $trainings = Training::where('status', 1)->with('course')->get();
+        $trainings = Training::where('status', Training::STATUS_ACTIVE)->with('course')->get();
 
         return view('admin.schedules.edit', compact('schedule', 'trainings'));
     }
@@ -129,7 +129,7 @@ class ScheduleController extends Controller
                 if ($scheduleDate->lt($training->start_date) || $scheduleDate->gt($training->end_date)) {
                     $validator->errors()->add(
                         "schedules.$index.date",
-                        "La fecha debe estar entre {$training->start_date->format('d/m/Y')} y {$training->end_date->format('d/m/Y')}."
+                        "La fecha debe estar entre " . Carbon::parse($training->start_date)->format('d/m/Y') . " y " . Carbon::parse($training->end_date)->format('d/m/Y') . "."
                     );
                 }
             }

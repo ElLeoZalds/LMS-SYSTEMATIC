@@ -64,7 +64,7 @@ class ContentController extends Controller
 
     private function activeTrainings()
     {
-        return Training::where('status', 'A')->with('course')->get();
+        return Training::where('status', Training::STATUS_ACTIVE)->with('course')->get();
     }
 
     private function validatedData(Request $request): array

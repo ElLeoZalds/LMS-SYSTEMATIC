@@ -20,4 +20,15 @@ class Content extends Model
     {
         return $this->belongsTo(Training::class, 'training_id', 'training_id');
     }
+
+    public function canBeAccessed(): bool
+    {
+        $training = $this->training;
+
+        if (! $training) {
+            return false;
+        }
+
+        return $training->isActive();
+    }
 }

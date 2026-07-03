@@ -40,4 +40,40 @@ class Assessment extends Model
     {
         return $this->hasMany(AssessmentAttempt::class, 'assessment_id', 'assessment_id');
     }
+
+    public function averageSubmittedScore(): float
+    {
+        $submittedAttempts = $this->attempts->filter(fn ($attempt) => $attempt->isSubmitted());
+
+        if ($submittedAttempts->isEmpty()) {
+            return 0.0;
+        }
+
+        return round($submittedAttempts->avg('score'), 1);
+    }
+
+    public function isAvailableOnDate(?\Carbon\Carbon $date = null): bool
+    {
+        $today = ($date ?? \Carbon\Carbon::today())->startOfDay();
+
+        if (! $this->active) {
+            return false;
+        }
+
+        if ($this->start_date) {
+            $startDate = $this->start_date instanceof \Carbon\Carbon ? $this->start_date->startOfDay() : \Carbon\Carbon::parse($this->start_date)->startOfDay();
+            if ($today->lt($startDate)) {
+                return false;
+            }
+        }
+
+        if ($this->end_date) {
+            $endDate = $this->end_date instanceof \Carbon\Carbon ? $this->end_date->endOfDay() : \Carbon\Carbon::parse($this->end_date)->endOfDay();
+            if ($today->gt($endDate)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

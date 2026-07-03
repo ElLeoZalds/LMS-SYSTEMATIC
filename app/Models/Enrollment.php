@@ -8,6 +8,10 @@ use App\Models\AssessmentAttempt;
 
 class Enrollment extends Model
 {
+    public const STATUS_PENDING = 'P';
+    public const STATUS_ACTIVE = 'A';
+    public const STATUS_COMPLETED = 'C';
+
     protected $primaryKey = 'enrollment_id';
 
     protected $fillable = [
@@ -55,8 +59,15 @@ class Enrollment extends Model
             return 0;
         }
 
+        $contentIds = $this->training->contents->pluck('content_id')->all();
+
+        if (empty($contentIds)) {
+            return 0;
+        }
+
         return $this->progress
-            ->where('percentage', '>=', 100)
+            ->filter(fn ($progress) => in_array($progress->content_id, $contentIds, true))
+            ->filter(fn ($progress) => (float) $progress->percentage >= 100)
             ->unique('content_id')
             ->count();
     }
@@ -75,7 +86,7 @@ class Enrollment extends Model
 
         return TaskSubmission::where('student_id', $this->student_id)
             ->whereIn('task_id', $taskIds)
-            ->whereNotNull('submitted_at')
+            ->submitted()
             ->distinct('task_id')
             ->count('task_id');
     }
@@ -83,7 +94,7 @@ class Enrollment extends Model
     public function completedAssessmentsCount()
     {
         return AssessmentAttempt::where('enrollment_id', $this->enrollment_id)
-            ->whereNotNull('submitted_at')
+            ->submitted()
             ->distinct('assessment_id')
             ->count('assessment_id');
     }
@@ -122,32 +133,37 @@ class Enrollment extends Model
 
     public function isCompleted()
     {
-        return strtoupper(trim((string) $this->status)) === 'C';
+        return strtoupper(trim((string) $this->status)) === self::STATUS_COMPLETED;
     }
 
     public function isInProgress()
     {
-        return strtoupper(trim((string) $this->status)) === 'A';
+        return strtoupper(trim((string) $this->status)) === self::STATUS_ACTIVE;
     }
 
     public function isNotStarted()
     {
-        return strtoupper(trim((string) $this->status)) === 'P';
+        return strtoupper(trim((string) $this->status)) === self::STATUS_PENDING;
     }
 
     public function scopeCompleted($query)
     {
-        return $query->where('status', 'C');
+        return $query->where('status', self::STATUS_COMPLETED);
     }
 
     public function scopeActive($query)
     {
-        return $query->where('status', 'A');
+        return $query->where('status', self::STATUS_ACTIVE);
     }
 
     public function scopePending($query)
     {
-        return $query->where('status', 'P');
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    public function canReceiveCertificate(float $minimumAverage = 13.0): bool
+    {
+        return $this->calculateAverage() >= $minimumAverage;
     }
 
     public function calculateAverage()
@@ -165,7 +181,7 @@ class Enrollment extends Model
             $taskIds = $training->tasks->pluck('task_id')->toArray();
             $submissions = TaskSubmission::whereIn('task_id', $taskIds)
                 ->where('student_id', $this->student_id)
-                ->whereNotNull('submitted_at')
+                ->submitted()
                 ->get();
             
             foreach ($submissions as $submission) {
@@ -181,7 +197,7 @@ class Enrollment extends Model
             foreach ($training->assessments as $assessment) {
                 $maxAttemptScore = AssessmentAttempt::where('enrollment_id', $this->enrollment_id)
                     ->where('assessment_id', $assessment->assessment_id)
-                    ->whereNotNull('submitted_at')
+                    ->submitted()
                     ->max('score');
 
                 if (!is_null($maxAttemptScore)) {

@@ -28,7 +28,7 @@ class TeacherController extends Controller
 
         $totalStudents = Enrollment::whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))->count();
         $totalActiveTrainings = Training::where('teacher_id', $user->user_id)
-            ->where('status', 1)
+            ->where('status', Training::STATUS_ACTIVE)
             ->count();
         $totalTasks = Task::whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))->count();
 
@@ -446,17 +446,14 @@ class TeacherController extends Controller
 
         $assessments = Assessment::where('training_id', $id)
             ->withCount(['attempts as attempts_count'])
+            ->with('attempts')
             ->get()
             ->map(function ($a) {
-                $avg = AssessmentAttempt::whereHas('assessment', fn ($q) => $q->where('assessment_id', $a->assessment_id))
-                    ->whereNotNull('submitted_at')
-                    ->avg('score');
-
                 return [
                     'assessment_id' => $a->assessment_id,
                     'title' => $a->title,
                     'attempts' => $a->attempts_count ?? 0,
-                    'average' => $avg !== null ? round($avg, 2) : null,
+                    'average' => $a->averageSubmittedScore(),
                     'active' => (bool) $a->active,
                 ];
             });

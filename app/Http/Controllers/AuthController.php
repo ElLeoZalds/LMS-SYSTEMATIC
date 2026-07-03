@@ -128,13 +128,13 @@ class AuthController extends Controller
 
     private function redirectAuthenticatedUser(?string $message = null)
     {
-        $roles = Auth::user()->roles;
+        $user = Auth::user();
 
-        if ($roles->contains('name', 'Administrator')) {
+        if ($user->isAdministrator()) {
             $response = redirect()->route('admin.dashboard');
-        } elseif ($roles->contains('name', 'Teacher')) {
+        } elseif ($user->isTeacher()) {
             $response = redirect()->route('teacher.dashboard');
-        } elseif ($roles->contains('name', 'Student')) {
+        } elseif ($user->isStudent()) {
             $response = redirect()->route('student.dashboard');
         } else {
             Auth::logout();

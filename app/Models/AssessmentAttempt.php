@@ -52,6 +52,11 @@ class AssessmentAttempt extends Model
         return $query->whereNull('submitted_at');
     }
 
+    public function scopeSubmitted($query)
+    {
+        return $query->whereNotNull('submitted_at');
+    }
+
     public function isPending(): bool
     {
         return $this->submitted_at === null;
@@ -60,5 +65,10 @@ class AssessmentAttempt extends Model
     public function isSubmitted(): bool
     {
         return ! $this->isPending();
+    }
+
+    public function isPassed(): bool
+    {
+        return $this->isSubmitted() && (float) $this->score > 0;
     }
 }

@@ -15,7 +15,7 @@ class TrainingController extends Controller
     public function index()
     {
         $trainings = Training::with(['course', 'teacher.person', 'administrator.person'])
-            ->where('status', 1)
+            ->where('status', Training::STATUS_ACTIVE)
             ->when(request('code'), fn ($query, $code) => $query->where('code', 'like', '%'.$code.'%'))
             ->orderBy('created_at', 'desc')
             ->get();
@@ -98,7 +98,7 @@ class TrainingController extends Controller
             'training_id' => $training->training_id,
             'student_id' => $data['student_id'],
             'enrollment_date' => now(),
-            'status' => 'A',
+            'status' => Enrollment::STATUS_ACTIVE,
         ]);
 
         return response()->json(['success' => true, 'message' => 'Alumno inscrito exitosamente.']);
@@ -117,7 +117,7 @@ class TrainingController extends Controller
         $data['administrator_id'] = auth()->id();
 
         if (! $trainingId) {
-            $data['status'] = 1;
+            $data['status'] = Training::STATUS_ACTIVE;
             $data['code'] = $this->generateTrainingCode($data['course_id'], $data['start_date']);
         }
 

@@ -29,7 +29,7 @@ class EnrollmentController extends Controller
 
     private function isStudent($user): bool
     {
-        return $user->roles->contains('name', 'Student');
+        return $user->isStudent();
     }
 
     private function isAlreadyEnrolled(int $studentId, int $trainingId): bool
@@ -46,7 +46,7 @@ class EnrollmentController extends Controller
             'student_id' => $studentId,
             'administrator_id' => null,
             'enrollment_date' => now()->toDateString(),
-            'status' => 'A',
+            'status' => Enrollment::STATUS_ACTIVE,
         ]);
     }
 }

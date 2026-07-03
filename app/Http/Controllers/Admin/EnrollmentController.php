@@ -50,14 +50,14 @@ class EnrollmentController extends Controller
 
         return Training::with('course', 'teacher.person')
             ->where('training_id', $request->training_id)
-            ->where('status', 1)
+            ->where('status', Training::STATUS_ACTIVE)
             ->firstOrFail();
     }
 
     private function activeTrainings()
     {
         return Training::with('course', 'teacher.person')
-            ->where('status', 1)
+            ->where('status', Training::STATUS_ACTIVE)
             ->get();
     }
 
@@ -109,7 +109,7 @@ class EnrollmentController extends Controller
                 'student_id' => $studentId,
                 'administrator_id' => auth()->id(),
                 'enrollment_date' => $now->toDateString(),
-                'status' => 'A',
+                'status' => Enrollment::STATUS_ACTIVE,
                 'created_at' => $now,
                 'updated_at' => $now,
             ])

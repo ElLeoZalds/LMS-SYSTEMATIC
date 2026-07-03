@@ -24,13 +24,13 @@ class RoleMiddleware
 
     private function canAccessRole($user, string $role): bool
     {
-        return $user->roles->contains('name', $role)
+        return $user->hasRole($role)
             || $this->isAdministratorManagingTeacherArea($user, $role);
     }
 
     private function isAdministratorManagingTeacherArea($user, string $role): bool
     {
         return $role === 'Teacher'
-            && $user->roles->contains('name', 'Administrator');
+            && $user->isAdministrator();
     }
 }

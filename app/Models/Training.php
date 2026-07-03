@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Training extends Model
 {
+    public const STATUS_DRAFT = 0;
+    public const STATUS_ACTIVE = 1;
+
     protected $primaryKey = 'training_id';
 
     protected $fillable = [
@@ -85,17 +88,22 @@ class Training extends Model
 
     public function normalizedStatus(): int
     {
-        return is_numeric($this->status) ? (int) $this->status : 0;
+        return is_numeric($this->status) ? (int) $this->status : self::STATUS_DRAFT;
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
     }
 
     public function isDraft(): bool
     {
-        return $this->normalizedStatus() === 0;
+        return $this->normalizedStatus() === self::STATUS_DRAFT;
     }
 
     public function isActive(): bool
     {
-        if ($this->normalizedStatus() !== 1) {
+        if ($this->normalizedStatus() !== self::STATUS_ACTIVE) {
             return false;
         }
 
@@ -114,7 +122,7 @@ class Training extends Model
 
     public function isClosed(): bool
     {
-        if ($this->normalizedStatus() === 0) {
+        if ($this->normalizedStatus() === self::STATUS_DRAFT) {
             return true;
         }
 

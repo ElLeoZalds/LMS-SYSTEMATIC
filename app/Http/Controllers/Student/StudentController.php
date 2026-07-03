@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Specialty;
+use App\Models\Training;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,8 +40,8 @@ class StudentController extends Controller
             })
             : collect();
         $totalCourses = $enrollments->count();
-        $completed = $enrollments->where('status', 'C')->count();
-        $inProgress = $enrollments->where('status', 'A')->count();
+        $completed = $enrollments->where('status', Enrollment::STATUS_COMPLETED)->count();
+        $inProgress = $enrollments->where('status', Enrollment::STATUS_ACTIVE)->count();
 
         $studentName = trim(implode(' ', array_filter([
             optional(Auth::user()->person)->first_names,
@@ -53,7 +54,7 @@ class StudentController extends Controller
         if (! $hasEnrollments) {
             $featuredCourses = Course::with(['specialty'])
                 ->whereHas('trainings', function ($query) {
-                    $query->where('status', 1);
+                    $query->where('status', Training::STATUS_ACTIVE);
                 })
                 ->latest('created_at')
                 ->take(3)
@@ -62,7 +63,7 @@ class StudentController extends Controller
             $specialties = Specialty::query()
                 ->whereHas('courses', function ($query) {
                     $query->whereHas('trainings', function ($trainingQuery) {
-                        $trainingQuery->where('status', 1);
+                        $trainingQuery->where('status', Training::STATUS_ACTIVE);
                     });
                 })
                 ->orderBy('specialty')

@@ -30,7 +30,7 @@ class CourseController extends Controller
             'teacher.person',
             'assessments',
             'tasks',
-            'contents',
+            'contents.training',
             'announcements',
             'enrollments.student.person',
         ])
@@ -361,21 +361,8 @@ class CourseController extends Controller
 
     private function validateAssessmentAvailability(Assessment $assessment)
     {
-        if (! $assessment->active) {
+        if (! $assessment->isAvailableOnDate()) {
             abort(403, 'Esta evaluación no está disponible.');
-        }
-
-        $today = Carbon::today();
-
-        $start = $assessment->start_date instanceof Carbon
-            ? $assessment->start_date->copy()->startOfDay()
-            : ($assessment->start_date ? Carbon::createFromFormat('Y-m-d', $assessment->start_date)->startOfDay() : null);
-        $end = $assessment->end_date instanceof Carbon
-            ? $assessment->end_date->copy()->endOfDay()
-            : ($assessment->end_date ? Carbon::createFromFormat('Y-m-d', $assessment->end_date)->endOfDay() : null);
-
-        if (($start && $today->lt($start)) || ($end && $today->gt($end))) {
-            abort(403, 'Esta evaluación está fuera de las fechas permitidas.');
         }
     }
 
@@ -409,7 +396,7 @@ class CourseController extends Controller
 
         $averageGrade = $enrollment->calculateAverage();
 
-        if ($averageGrade < 13) {
+        if (! $enrollment->canReceiveCertificate()) {
             return redirect()->back()->with('error', 'No cumples con la nota mínima (13) para obtener el certificado. Tu nota actual es: ' . $averageGrade);
         }
 
@@ -449,7 +436,7 @@ class CourseController extends Controller
 
         $averageGrade = $enrollment->calculateAverage();
 
-        if ($averageGrade < 13) {
+        if (! $enrollment->canReceiveCertificate()) {
             return redirect()->back()->with('error', 'El curso no ha sido aprobado con la nota mínima requerida (13) para obtener el certificado. Tu nota promedio es: ' . $averageGrade);
         }
 
@@ -499,7 +486,7 @@ class CourseController extends Controller
 
             $averageGrade = $enrollment->calculateAverage();
 
-            if ($averageGrade < 13) {
+            if (! $enrollment->canReceiveCertificate()) {
                 return view('student.certificates.verify_error', [
                     'message' => 'Este certificado no es válido porque el alumno no alcanzó la nota aprobatoria.'
                 ]);

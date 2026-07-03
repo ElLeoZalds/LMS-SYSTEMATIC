@@ -34,4 +34,19 @@ class TaskSubmission extends Model
     {
         return $this->belongsTo(User::class, 'student_id', 'user_id');
     }
+
+    public function scopeSubmitted($query)
+    {
+        return $query->whereNotNull('submitted_at');
+    }
+
+    public function isSubmitted(): bool
+    {
+        return ! is_null($this->submitted_at);
+    }
+
+    public function isGraded(): bool
+    {
+        return ! is_null($this->grade);
+    }
 }
