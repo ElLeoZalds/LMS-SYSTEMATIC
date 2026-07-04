@@ -79,6 +79,75 @@
             margin-right: 0;
         }
 
+        .student-metric-pass {
+            color: #1e8f55;
+            font-weight: 600;
+        }
+
+        .student-metric-fail {
+            color: #d64545;
+            font-weight: 600;
+        }
+
+        .student-attendance-good {
+            color: #1e8f55;
+            font-weight: 600;
+        }
+
+        .student-attendance-low {
+            color: #c97a16;
+            font-weight: 600;
+        }
+
+        .module-card {
+            background: linear-gradient(135deg, #f7f9fc 0%, #eef4fb 100%);
+            border: 1px solid #e5ebf2;
+            border-left: 4px solid #4f81bd;
+            border-radius: 0.75rem;
+            padding: 1rem 1rem 1.1rem;
+            height: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            background: linear-gradient(135deg, #eef5ff 0%, #f7fbff 100%);
+        }
+
+        .module-card .module-badge {
+            background: rgba(79, 129, 189, 0.14);
+            color: #35608f;
+            border: 1px solid rgba(79, 129, 189, 0.2);
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .module-card .module-stat-icon {
+            color: #4f81bd;
+        }
+
+        .module-card .module-stat-icon.tasks {
+            color: #d08a23;
+        }
+
+        .module-card .module-stat-icon.assessments {
+            color: #2f8f61;
+        }
+
+        .module-card:nth-child(2n) {
+            border-left-color: #5da36b;
+        }
+
+        .module-card:nth-child(3n) {
+            border-left-color: #d88b3d;
+        }
+
+        .module-card:nth-child(4n) {
+            border-left-color: #c97c76;
+        }
+
         @page {
             size: A4 portrait;
             margin: 1.5cm;
@@ -226,192 +295,219 @@
             <div class="card-body">
 
                 @if(request('tab', 'inicio') === 'inicio')
-                        <div class="mb-4">
-                            <div class="course-banner mb-3">
-                                @if(!empty($training->course->banner_path))
-                                    <div class="course-banner-image" style="background-image: url('{{ asset('storage/'.$training->course->banner_path) }}?v={{ file_exists(storage_path('app/public/'.$training->course->banner_path)) ? filemtime(storage_path('app/public/'.$training->course->banner_path)) : time() }}'); height:200px;"></div>
-                                @else
-                                    <div class="course-banner-fallback d-flex align-items-center justify-content-center text-white" style="height:200px;">
-                                        {{ strtoupper(substr($training->course->title, 0, 1)) }}
-                                    </div>
-                                @endif
-                                <div class="course-banner-overlay"></div>
-                            </div>
-                        </div>
-
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0 fw-bold text-dark">Contenido organizado por módulos</h5>
-                        </div>
-                        <div class="card-body">
-                            @if(($modules ?? collect())->isEmpty())
-                                <div class="alert alert-secondary mb-0">Aún no se han creado módulos para esta capacitación.</div>
-                            @else
-                                <div class="accordion" id="modulesAccordion">
-                                    @foreach($modules as $module)
-                                        @php $moduleKey = $module->module_id ?? $module->id; @endphp
-                                        @php $moduleContents = $training->contents->where('module_id', $moduleKey); @endphp
-                                        @php $moduleTasks = $training->tasks->where('module_id', $moduleKey); @endphp
-                                        @php $moduleAssessments = $training->assessments->where('module_id', $moduleKey); @endphp
-                                        <div class="card border mb-3">
-                                            <div class="card-header bg-light py-3" id="heading-{{ $moduleKey }}">
-                                                <button class="btn btn-link btn-block text-left p-0 text-decoration-none" type="button" data-toggle="collapse" data-target="#collapse-{{ $moduleKey }}" aria-expanded="true" aria-controls="collapse-{{ $moduleKey }}">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div>
-                                                            <h6 class="mb-1 fw-bold text-dark">{{ $module->title }}</h6>
-                                                            @if(!empty($module->description))
-                                                                <small class="text-muted">{{ $module->description }}</small>
-                                                            @endif
-                                                        </div>
-                                                        <span class="badge bg-primary">{{ $moduleContents->count() + $moduleTasks->count() + $moduleAssessments->count() }} elementos</span>
-                                                    </div>
-                                                </button>
-                                            </div>
-                                            <div id="collapse-{{ $moduleKey }}" class="collapse" aria-labelledby="heading-{{ $moduleKey }}" data-parent="#modulesAccordion">
-                                                <div class="card-body">
-                                                    <div class="row g-3">
-                                                        <div class="col-md-4">
-                                                            <div class="border rounded p-3 h-100">
-                                                                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-journal-bookmark me-1"></i>Contenidos</h6>
-                                                                @if($moduleContents->isEmpty())
-                                                                    <div class="text-muted small">Aún no has agregado contenido a este módulo.</div>
-                                                                @else
-                                                                    <ul class="list-unstyled mb-0">
-                                                                        @foreach($moduleContents as $content)
-                                                                            <li class="small mb-2"><i class="bi bi-file-earmark-text me-1"></i>{{ $content->title }}</li>
-                                                                        @endforeach
-                                                                    </ul>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="border rounded p-3 h-100">
-                                                                <h6 class="fw-bold text-success mb-3"><i class="bi bi-list-task me-1"></i>Tareas</h6>
-                                                                @if($moduleTasks->isEmpty())
-                                                                    <div class="text-muted small">Aún no has agregado tareas a este módulo.</div>
-                                                                @else
-                                                                    <ul class="list-unstyled mb-0">
-                                                                        @foreach($moduleTasks as $task)
-                                                                            <li class="small mb-2"><i class="bi bi-check2-square me-1"></i>{{ $task->title }}</li>
-                                                                        @endforeach
-                                                                    </ul>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="border rounded p-3 h-100">
-                                                                <h6 class="fw-bold text-info mb-3"><i class="bi bi-clipboard-check me-1"></i>Evaluaciones</h6>
-                                                                @if($moduleAssessments->isEmpty())
-                                                                    <div class="text-muted small">Aún no has agregado evaluaciones a este módulo.</div>
-                                                                @else
-                                                                    <ul class="list-unstyled mb-0">
-                                                                        @foreach($moduleAssessments as $assessment)
-                                                                            <li class="small mb-2"><i class="bi bi-clipboard2-data me-1"></i>{{ $assessment->title }}</li>
-                                                                        @endforeach
-                                                                    </ul>
-                                                                @endif
-                                                            </div>
-                                                        </div>
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 fw-bold text-dark">Resumen del curso</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="border rounded p-3 h-100">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <i class="bi bi-info-circle text-primary mt-1"></i>
+                                                    <div>
+                                                        <h6 class="fw-bold mb-2">Información general</h6>
+                                                        <p class="small text-muted mb-1"><strong>Especialidad:</strong> {{ optional($training->course->specialty)->specialty ?? 'Sin especialidad' }}</p>
+                                                        <p class="small text-muted mb-1"><strong>Modalidad:</strong> {{ ucfirst($training->modality) }}</p>
+                                                        <p class="small text-muted mb-1"><strong>Inicio:</strong> {{ $training->start_date ? $training->start_date->format('d/m/Y') : 'Sin fecha' }}</p>
+                                                        <p class="small text-muted mb-0"><strong>Fin:</strong> {{ $training->end_date ? $training->end_date->format('d/m/Y') : 'Sin fecha' }}</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <a href="{{ route('teacher.attendance.create', ['training_id' => $training->training_id]) }}" class="text-decoration-none">
-                                <div class="card border-start border-primary border-3 shadow-sm h-100"
-                                    style="cursor: pointer; transition: box-shadow 0.3s;">
-                                    <div class="card-body">
-                                        <h5 class="card-title fw-bold text-dark mb-2">
-                                            <i class="bi bi-calendar-check text-primary me-2"></i>Registrar Asistencia
-                                        </h5>
-                                        <p class="card-text text-muted small">Marca la asistencia de tus estudiantes</p>
+                                        <div class="col-md-6">
+                                            <div class="border rounded p-3 h-100">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    <i class="bi bi-megaphone text-success mt-1"></i>
+                                                    <div class="w-100">
+                                                        <h6 class="fw-bold mb-2">Últimos anuncios</h6>
+                                                        @if($latestAnnouncements->isEmpty())
+                                                            <p class="small text-muted mb-0">Aún no hay anuncios publicados para esta capacitación.</p>
+                                                        @else
+                                                            <ul class="list-unstyled mb-0">
+                                                                @foreach($latestAnnouncements as $announcement)
+                                                                    <li class="small mb-2">
+                                                                        <div class="fw-semibold text-dark">{{ $announcement->title }}</div>
+                                                                        <div class="text-muted">{{ \Illuminate\Support\Str::limit(strip_tags($announcement->message), 90) }}</div>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </a>
+                            </div>
                         </div>
 
-                        <div class="col-12 col-md-6">
-                            <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=contenido" class="text-decoration-none">
-                                <div class="card border-start border-success border-3 shadow-sm h-100"
-                                    style="cursor: pointer; transition: box-shadow 0.3s;">
-                                    <div class="card-body">
-                                        <h5 class="card-title fw-bold text-dark mb-2">
-                                            <i class="bi bi-plus-circle text-success me-2"></i>Crear Tarea o Evaluación
-                                        </h5>
-                                        <p class="card-text text-muted small">Asigna una nueva tarea o evaluación en la pestaña de contenidos</p>
-                                    </div>
+                        <div class="col-lg-5">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 fw-bold text-dark">Próximas sesiones</h5>
                                 </div>
-                            </a>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <a href="{{ route('teacher.courses.show', $training->training_id) }}?tab=estudiantes" class="text-decoration-none">
-                                <div class="card border-start border-info border-3 shadow-sm h-100"
-                                    style="cursor: pointer; transition: box-shadow 0.3s;">
-                                    <div class="card-body">
-                                        <h5 class="card-title fw-bold text-dark mb-2">
-                                            <i class="bi bi-people text-info me-2"></i>Ver Estudiantes
-                                        </h5>
-                                        <p class="card-text text-muted small">Consulta la lista completa de estudiantes</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <div class="card border-start border-warning border-3 shadow-sm h-100">
                                 <div class="card-body">
-                                    <h5 class="card-title fw-bold text-dark mb-3">
-                                        <i class="bi bi-info-circle text-warning me-2"></i>Información
-                                    </h5>
-                                    <div class="small">
-                                        <p class="mb-2"><strong>Modalidad:</strong> {{ ucfirst($training->modality) }}</p>
-                                        <p class="mb-2"><strong>Estado:</strong> <span class="badge bg-success">Activo</span>
-                                        </p>
-                                        <p class="mb-0"><strong>Estudiantes:</strong> {{ $totalStudents }}</p>
-                                    </div>
+                                    @if($upcomingSchedules->isEmpty())
+                                        <div class="alert alert-light border mb-0">No hay sesiones programadas próximas.</div>
+                                    @else
+                                        <div class="list-group list-group-flush">
+                                            @foreach($upcomingSchedules as $schedule)
+                                                <div class="list-group-item px-0 py-3">
+                                                    <div class="d-flex justify-content-between align-items-start gap-3">
+                                                        <div>
+                                                            <div class="fw-semibold text-dark">{{ $schedule->date ? $schedule->date->format('d/m/Y') : 'Sin fecha' }}</div>
+                                                            <div class="small text-muted">{{ $schedule->start_time ? \Carbon\Carbon::parse($schedule->start_time)->format('H:i') : 'Sin hora' }} - {{ $schedule->end_time ? \Carbon\Carbon::parse($schedule->end_time)->format('H:i') : 'Sin hora' }}</div>
+                                                        </div>
+                                                        <span class="badge bg-primary-subtle text-primary">Programada</span>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-12">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 fw-bold text-dark">Módulos del curso</h5>
+                                </div>
+                                <div class="card-body">
+                                    @if(($modules ?? collect())->isEmpty())
+                                        <div class="alert alert-secondary mb-0">Aún no se han creado módulos para esta capacitación.</div>
+                                    @else
+                                        <div class="row g-4">
+                                            @foreach($modules as $module)
+                                                @php
+                                                    $moduleKey = $module->module_id ?? $module->id;
+                                                    $moduleContents = $training->contents->where('module_id', $moduleKey);
+                                                    $moduleTasks = $training->tasks->where('module_id', $moduleKey);
+                                                    $moduleAssessments = $training->assessments->where('module_id', $moduleKey);
+                                                @endphp
+                                                <div class="col-lg-6">
+                                                    <div class="module-card h-100">
+                                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                                            <div>
+                                                                <h6 class="fw-bold mb-1 text-dark">{{ $module->title }}</h6>
+                                                                @if(!empty($module->description))
+                                                                    <small class="text-muted">{{ $module->description }}</small>
+                                                                @endif
+                                                            </div>
+                                                            <span class="module-badge">{{ $moduleContents->count() + $moduleTasks->count() + $moduleAssessments->count() }} elementos</span>
+                                                        </div>
+                                                        <div class="mt-3 small text-muted">
+                                                            <div class="d-flex gap-3 flex-wrap">
+                                                                <span><i class="bi bi-file-earmark-text me-1 module-stat-icon"></i>{{ $moduleContents->count() }} contenidos</span>
+                                                                <span><i class="bi bi-list-task me-1 module-stat-icon tasks"></i>{{ $moduleTasks->count() }} tareas</span>
+                                                                <span><i class="bi bi-clipboard-check me-1 module-stat-icon assessments"></i>{{ $moduleAssessments->count() }} evaluaciones</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
 
                 @elseif(request('tab') === 'estudiantes')
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Estudiantes Matriculados <span
-                                class="badge bg-primary">{{ $totalStudents }}</span></h5>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Estudiantes Matriculados <span class="badge bg-primary">{{ $students->count() }}</span></h5>
+                            <p class="text-muted small mb-0">Directorio simple y filtrable por estado o búsqueda.</p>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <button type="button" id="filterStudentsBtn" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-funnel me-1"></i>Filtrar Estudiantes
+                                @if($activeStudentFiltersCount > 0)
+                                    <span class="badge bg-info text-dark ms-2">Filtros activos: {{ $activeStudentFiltersCount }}</span>
+                                @endif
+                            </button>
+                            @if($activeStudentFiltersCount > 0)
+                                <a href="{{ route('teacher.courses.show', ['id' => $training->training_id, 'tab' => 'estudiantes']) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+                                </a>
+                            @endif
+                        </div>
                     </div>
 
-                    @if($training->enrollments->count() > 0)
+                    @if($students->count() > 0)
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle">
+                            <table class="table table-hover align-middle" style="min-width: 900px;">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Nombre</th>
+                                        <th>Nombre completo</th>
                                         <th>DNI</th>
                                         <th>Email</th>
                                         <th>Teléfono</th>
+                                        <th><i class="bi bi-person-check me-1"></i>Estado</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($training->enrollments as $enrollment)
+                                    @foreach($students as $enrollment)
+                                        @php $isActive = strtoupper((string) $enrollment->status) === 'A'; @endphp
                                         <tr>
-                                            <td class="fw-bold">{{ $enrollment->student->person->first_names }}
-                                                {{ $enrollment->student->person->last_names }}</td>
-                                            <td>{{ $enrollment->student->person->document_number }}</td>
-                                            <td><small>{{ $enrollment->student->person->email }}</small></td>
-                                            <td><small>{{ $enrollment->student->person->phone }}</small></td>
+                                            <td class="fw-bold">{{ optional($enrollment->student->person)->first_names }} {{ optional($enrollment->student->person)->last_names }}</td>
+                                            <td>{{ optional($enrollment->student->person)->document_number }}</td>
+                                            <td><small>{{ optional($enrollment->student->person)->email }}</small></td>
+                                            <td><small>{{ optional($enrollment->student->person)->phone }}</small></td>
+                                            <td>
+                                                <span class="badge {{ $isActive ? 'bg-success' : 'bg-secondary' }}">
+                                                    {{ $isActive ? 'Activo' : 'Inactivo' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#student-detail-{{ $enrollment->enrollment_id }}">
+                                                    <i class="bi bi-eye me-1"></i>Ver detalle
+                                                </button>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
+
+                        @foreach($students as $enrollment)
+                            <div class="modal fade" id="student-detail-{{ $enrollment->enrollment_id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title fw-bold text-dark">{{ optional($enrollment->student->person)->first_names }} {{ optional($enrollment->student->person)->last_names }}</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <div class="border rounded p-3">
+                                                        <div class="small text-muted mb-1">Estado de matrícula</div>
+                                                        <span class="badge {{ strtoupper((string) $enrollment->status) === 'A' ? 'bg-success' : 'bg-secondary' }}">
+                                                            {{ strtoupper((string) $enrollment->status) === 'A' ? 'Activo' : 'Inactivo' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="border rounded p-3">
+                                                        <div class="small text-muted mb-1">Contacto</div>
+                                                        <div class="small"><strong>Email:</strong> {{ optional($enrollment->student->person)->email ?? 'Sin email' }}</div>
+                                                        <div class="small"><strong>Teléfono:</strong> {{ optional($enrollment->student->person)->phone ?? 'Sin teléfono' }}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     @else
                         <div class="alert alert-info text-center mb-0" role="alert">
                             <i class="bi bi-info-circle me-2"></i>No hay estudiantes matriculados en este curso aún.
@@ -833,8 +929,8 @@
                             <label for="assessment-module" class="form-label fw-bold">Módulo</label>
                             <select name="module_id" id="assessment-module" class="form-control" required>
                                 <option value="">Selecciona un módulo</option>
-                                @foreach($modules ?? [] as $module)
-                                    <option value="{{ $module->id }}">{{ $module->title }}</option>
+                                @foreach(($modules ?? collect()) as $module)
+                                    <option value="{{ optional($module)->id }}">{{ optional($module)->title }}</option>
                                 @endforeach
                             </select>
                             <small class="form-text text-muted">Selecciona el módulo al que pertenece esta evaluación.</small>
@@ -904,8 +1000,8 @@
                             <label for="task-module" class="form-label fw-bold">Módulo</label>
                             <select name="module_id" id="task-module" class="form-control" required>
                                 <option value="">Selecciona un módulo</option>
-                                @foreach($modules ?? [] as $module)
-                                    <option value="{{ $module->id }}">{{ $module->title }}</option>
+                                @foreach(($modules ?? collect()) as $module)
+                                    <option value="{{ optional($module)->id }}">{{ optional($module)->title }}</option>
                                 @endforeach
                             </select>
                             <small class="form-text text-muted">Selecciona el módulo al que pertenece esta tarea.</small>
@@ -1087,6 +1183,74 @@
                     form.reset();
                 });
             });
+
+            const filterStudentsBtn = document.getElementById('filterStudentsBtn');
+            if (filterStudentsBtn) {
+                filterStudentsBtn.addEventListener('click', function() {
+                    const currentUrl = new URL(window.location.href);
+                    const currentStatus = currentUrl.searchParams.get('status') || 'all';
+                    const currentSearch = currentUrl.searchParams.get('search') || '';
+                    const safeSearch = currentSearch.replace(/"/g, '&quot;');
+
+                    Swal.fire({
+                        title: 'Filtrar Estudiantes',
+                        icon: 'info',
+                        html: `
+                            <div class="text-start">
+                                <label class="form-label fw-bold">Estado</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="student_status" id="student-status-all" value="all" ${currentStatus === 'all' ? 'checked' : ''}>
+                                    <label class="form-check-label" for="student-status-all">Todos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="student_status" id="student-status-active" value="active" ${currentStatus === 'active' ? 'checked' : ''}>
+                                    <label class="form-check-label" for="student-status-active">Solo Activos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="student_status" id="student-status-inactive" value="inactive" ${currentStatus === 'inactive' ? 'checked' : ''}>
+                                    <label class="form-check-label" for="student-status-inactive">Solo Inactivos</label>
+                                </div>
+                                <label class="form-label fw-bold mt-3">Buscar por nombre o DNI</label>
+                                <input type="text" id="student-search" class="form-control" value="${safeSearch}" placeholder="Ej. María o 12345678">
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Aplicar Filtro',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#4e73df',
+                        cancelButtonColor: '#6c757d',
+                        customClass: {
+                            confirmButton: 'btn btn-primary',
+                            cancelButton: 'btn btn-secondary'
+                        },
+                        buttonsStyling: false,
+                        preConfirm: function() {
+                            const selectedStatus = document.querySelector('input[name="student_status"]:checked')?.value || 'all';
+                            const search = document.getElementById('student-search').value.trim();
+                            return { status: selectedStatus, search: search };
+                        }
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            const nextUrl = new URL(window.location.href);
+                            nextUrl.searchParams.set('tab', 'estudiantes');
+
+                            if (result.value.status && result.value.status !== 'all') {
+                                nextUrl.searchParams.set('status', result.value.status);
+                            } else {
+                                nextUrl.searchParams.delete('status');
+                            }
+
+                            if (result.value.search) {
+                                nextUrl.searchParams.set('search', result.value.search);
+                            } else {
+                                nextUrl.searchParams.delete('search');
+                            }
+
+                            window.location.href = nextUrl.toString();
+                        }
+                    });
+                });
+            }
 
             // SweetAlert confirmation for delete forms
             document.querySelectorAll('form.swal-confirm').forEach(function(form) {

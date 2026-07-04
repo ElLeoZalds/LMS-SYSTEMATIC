@@ -62,6 +62,84 @@
             </div>
         </div>
 
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start flex-column flex-md-row gap-2">
+                    <div>
+                        <h5 class="mb-2 font-weight-bold text-gray-800">Crear nueva evaluación</h5>
+                        <p class="text-muted small mb-0">Selecciona el módulo al que pertenece la evaluación para que aparezca correctamente en el gradebook.</p>
+                    </div>
+                    @if(($modules ?? collect())->isEmpty())
+                        <span class="badge badge-warning text-dark">Debe crear módulos para este curso antes de crear evaluaciones</span>
+                    @endif
+                </div>
+
+                @if(($modules ?? collect())->isEmpty())
+                    <div class="alert alert-warning mt-3 mb-0" role="alert">
+                        Debe crear módulos para este curso antes de crear evaluaciones.
+                    </div>
+                @else
+                    <form action="{{ route('teacher.assessments.store') }}" method="POST" class="row g-3 mt-2">
+                        @csrf
+                        <input type="hidden" name="training_id" value="{{ $training->training_id }}">
+
+                        <div class="col-md-6">
+                            <label for="module_id" class="form-label small fw-bold">Módulo</label>
+                            <select class="form-control form-control-sm" id="module_id" name="module_id" required>
+                                <option value="">Selecciona un módulo</option>
+                                @foreach($modules as $module)
+                                    <option value="{{ $module->id }}" {{ old('module_id') == $module->id ? 'selected' : '' }}>
+                                        {{ $module->title }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('module_id') <div class="text-danger small">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="title" class="form-label small fw-bold">Título</label>
+                            <input type="text" class="form-control form-control-sm" id="title" name="title" value="{{ old('title') }}" required>
+                            @error('title') <div class="text-danger small">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="start_date" class="form-label small fw-bold">Fecha de inicio</label>
+                            <input type="date" class="form-control form-control-sm" id="start_date" name="start_date" value="{{ old('start_date') }}" required>
+                            @error('start_date') <div class="text-danger small">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="end_date" class="form-label small fw-bold">Fecha de fin</label>
+                            <input type="date" class="form-control form-control-sm" id="end_date" name="end_date" value="{{ old('end_date') }}" required>
+                            @error('end_date') <div class="text-danger small">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="allowed_attempts" class="form-label small fw-bold">Intentos</label>
+                            <input type="number" class="form-control form-control-sm" id="allowed_attempts" name="allowed_attempts" value="{{ old('allowed_attempts', 1) }}" min="1" max="3" required>
+                            @error('allowed_attempts') <div class="text-danger small">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="time_limit" class="form-label small fw-bold">Límite (min)</label>
+                            <input type="number" class="form-control form-control-sm" id="time_limit" name="time_limit" value="{{ old('time_limit', 60) }}" min="20" max="60">
+                            @error('time_limit') <div class="text-danger small">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-12">
+                            <label for="description" class="form-label small fw-bold">Descripción</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ old('description') }}</textarea>
+                            @error('description') <div class="text-danger small">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary btn-sm" @if(($modules ?? collect())->isEmpty()) disabled @endif>Crear Evaluación</button>
+                        </div>
+                    </form>
+                @endif
+            </div>
+        </div>
+
         {{-- Listado de Evaluaciones y Preguntas --}}
         <div class="row">
             @forelse($training->assessments as $assessment)

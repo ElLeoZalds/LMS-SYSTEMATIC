@@ -8,7 +8,9 @@ use App\Models\Enrollment;
 use App\Models\Specialty;
 use App\Models\Training;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
@@ -109,5 +111,54 @@ class StudentController extends Controller
             });
 
         return view('student.courses.index', compact('courses'));
+    }
+
+    public function getUnreadNotifications(): JsonResponse
+    {
+        $notifications = Auth::user()
+            ->unreadNotifications()
+            ->latest('created_at')
+            ->take(10)
+            ->get()
+            ->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'title' => data_get($notification->data, 'announcement_title', data_get($notification->data, 'title', 'Nuevo anuncio')),
+                    'course' => data_get($notification->data, 'course_title', data_get($notification->data, 'course', 'Curso')),
+                    'created_at' => $notification->created_at?->toIso8601String(),
+                    'relative_time' => $notification->created_at?->diffForHumans(),
+                    'url' => data_get($notification->data, 'url', route('student.dashboard')),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'count' => $notifications->count(),
+            'notifications' => $notifications,
+        ]);
+    }
+
+    public function markAllNotificationsAsRead(): JsonResponse
+    {
+        Auth::user()->unreadNotifications->each->markAsRead();
+
+        return response()->json([
+            'success' => true,
+            'count' => 0,
+        ]);
+    }
+
+    public function markNotificationAsRead($notificationId): JsonResponse
+    {
+        $notification = Auth::user()->notifications()->find($notificationId);
+
+        if ($notification) {
+            $notification->markAsRead();
+        }
+
+        return response()->json([
+            'success' => true,
+            'notification_id' => $notificationId,
+        ]);
     }
 }

@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             SpecialtiesSeeder::class,
             TeacherSpecialtiesSeeder::class,
             CoursesSeeder::class,
+            ModulesSeeder::class,
             TrainingsSeeder::class,
             AnnouncementsSeeder::class,
             PaymentMethodsSeeder::class,

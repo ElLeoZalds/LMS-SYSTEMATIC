@@ -79,7 +79,7 @@
                                             <input type="hidden" name="email" value="{{ $user->person->email ?? '' }}">
                                             <input type="hidden" name="role_id" value="{{ optional($user->roles->first())->role_id }}">
                                             <input type="hidden" name="status" value="{{ $user->status === 'A' ? 'I' : 'A' }}">
-                                            <button type="submit" class="btn btn-sm {{ $user->status === 'A' ? 'btn-warning' : 'btn-success' }}" onclick="return confirm('{{ $user->status === 'A' ? '¿Desactivar este usuario?' : '¿Activar este usuario?' }}');">
+                                            <button type="button" class="btn btn-sm {{ $user->status === 'A' ? 'btn-warning' : 'btn-success' }}" onclick="confirmUserStatusChange(this.closest('form'))">
                                                 <i class="fas {{ $user->status === 'A' ? 'fa-user-slash' : 'fa-user-check' }}"></i> {{ $user->status === 'A' ? 'Desactivar' : 'Activar' }}
                                             </button>
                                         </form>
@@ -97,6 +97,31 @@
                 <div class="mt-3">
                     {{ $users->links() }}
                 </div>
+
+                <script>
+                    function confirmUserStatusChange(form) {
+                        const isActive = form.querySelector('input[name="status"]').value === 'A';
+                        const title = isActive ? '¿Deseas desactivar este usuario?' : '¿Deseas activar este usuario?';
+                        const text = isActive
+                            ? 'El usuario quedará inactivo después de confirmar.'
+                            : 'El usuario quedará activo después de confirmar.';
+
+                        Swal.fire({
+                            title,
+                            text,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: isActive ? '#f6c23e' : '#1cc88a',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: isActive ? 'Sí, desactivar' : 'Sí, activar',
+                            cancelButtonText: 'Cancelar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                form.submit();
+                            }
+                        });
+                    }
+                </script>
 
                 @foreach($users as $userModal)
                     @php

@@ -11,6 +11,7 @@ class Task extends Model
 
     protected $fillable = [
         'training_id',
+        'module_id',
         'title',
         'description',
         'due_date',

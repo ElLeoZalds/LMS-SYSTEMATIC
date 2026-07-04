@@ -22,6 +22,7 @@
                             <tr>
                                 <th class="align-middle"></th>
                                 <th class="align-middle">Título</th>
+                                <th class="align-middle">Módulos</th>
                                 <th class="align-middle">Detalles</th>
                                 <th class="align-middle">Estado</th>
                                 <th class="align-middle text-end">Acciones</th>
@@ -37,10 +38,15 @@
                                         </div>
                                     </td>
                                     <td class="align-middle">
-                                        <div class="fw-bold">{{ $course->title }}</div>
+                                        <a href="{{ route('admin.courses.edit', $course->course_id) }}" class="fw-bold text-primary">
+                                            {{ $course->title }}
+                                        </a>
                                         <div class="text-muted small">
                                             {{ optional($course->specialty)->specialty ?? 'Sin especialidad' }}
                                         </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="badge bg-light text-dark">{{ $course->modules_count }} módulo{{ $course->modules_count == 1 ? '' : 's' }}</span>
                                     </td>
                                     <td class="align-middle">
                                         <div class="text-muted small">
@@ -52,7 +58,7 @@
                                         <x-status-badge :is-active="$course->isActive()" />
                                     </td>
                                     <td class="align-middle text-end">
-                                        <x-action-button type="edit" :route="route('admin.courses.edit', $course->course_id)" />
+                                        <x-action-button type="edit" :route="route('admin.courses.edit', $course->course_id)" label="Gestionar" />
                                         <x-action-button type="toggle" :route="route('admin.courses.toggle-active', $course->course_id)" :is-active="$course->isActive()" />
                                     </td>
                                 </tr>

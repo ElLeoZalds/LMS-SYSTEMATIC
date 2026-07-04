@@ -4,14 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\Module;
 use App\Models\Specialty;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CourseController extends Controller
 {
     public function index()
     {
         $courses = Course::with('specialty')
+            ->withCount('modules')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -34,7 +37,7 @@ class CourseController extends Controller
         $data['title'] = trim($data['title']);
         $data['description'] = $data['description'] !== null ? trim($data['description']) : null;
 
-        Course::create([
+        $course = Course::create([
             'specialty_id' => $data['specialty_id'],
             'title' => $data['title'],
             'abbreviation' => $this->generateAbbreviation($data['title']),
@@ -45,16 +48,44 @@ class CourseController extends Controller
             'is_active' => true,
         ]);
 
-        return redirect()->route('admin.courses.index')
+        $modulesData = $request->input('modules_data');
+
+        if (! empty($modulesData)) {
+            $parsedModules = json_decode((string) $modulesData, true);
+
+            if (is_array($parsedModules)) {
+                foreach ($parsedModules as $moduleData) {
+                    if (! is_array($moduleData)) {
+                        continue;
+                    }
+
+                    $moduleTitle = trim((string) ($moduleData['title'] ?? ''));
+
+                    if ($moduleTitle === '') {
+                        continue;
+                    }
+
+                    $course->modules()->create([
+                        'title' => $moduleTitle,
+                        'description' => isset($moduleData['description']) ? trim((string) $moduleData['description']) : null,
+                        'order' => (int) ($moduleData['order'] ?? 0),
+                        'is_active' => true,
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('admin.courses.edit', $course)
             ->with('success', 'Curso creado correctamente');
     }
 
     public function edit($id)
     {
-        $course = Course::findOrFail($id);
+        $course = Course::with('modules')->findOrFail($id);
+        $modules = $course->modules()->orderBy('order')->orderBy('title')->get();
         $specialties = Specialty::orderBy('specialty', 'asc')->get();
 
-        return view('admin.courses.edit', compact('course', 'specialties'));
+        return view('admin.courses.edit', compact('course', 'modules', 'specialties'));
     }
 
     public function update(Request $request, $id)
@@ -86,6 +117,77 @@ class CourseController extends Controller
 
         return redirect()->route('admin.courses.index')
             ->with('success', $course->fresh()->isActive() ? 'Curso activado correctamente' : 'Curso desactivado correctamente');
+    }
+
+    public function modules($course_id)
+    {
+        $course = Course::findOrFail($course_id);
+
+        return response()->json($course->modules()->orderBy('order')->orderBy('title')->get());
+    }
+
+    public function storeModule(Request $request, $course_id)
+    {
+        $course = Course::findOrFail($course_id);
+
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:150', Rule::unique('modules', 'title')->where(fn ($query) => $query->where('course_id', $course->course_id))],
+            'description' => ['nullable', 'string'],
+            'order' => ['required', 'integer', 'min:0'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+
+        $course->modules()->create([
+            'title' => trim($data['title']),
+            'description' => $data['description'] !== null ? trim($data['description']) : null,
+            'order' => $data['order'],
+            'is_active' => (bool) ($data['is_active'] ?? true),
+        ]);
+
+        return redirect()->route('admin.courses.edit', $course)
+            ->with('success', 'Módulo creado correctamente.');
+    }
+
+    public function updateModule(Request $request, $course_id, $module_id)
+    {
+        $course = Course::findOrFail($course_id);
+        $module = $course->modules()->findOrFail($module_id);
+
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:150', Rule::unique('modules', 'title')->where(fn ($query) => $query->where('course_id', $course->course_id))->ignore($module->id)],
+            'description' => ['nullable', 'string'],
+            'order' => ['required', 'integer', 'min:0'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+
+        $module->update([
+            'title' => trim($data['title']),
+            'description' => $data['description'] !== null ? trim($data['description']) : null,
+            'order' => $data['order'],
+            'is_active' => (bool) ($data['is_active'] ?? true),
+        ]);
+
+        return redirect()->route('admin.courses.edit', $course)
+            ->with('success', 'Módulo actualizado correctamente.');
+    }
+
+    public function toggleModuleActive($course_id, $module_id)
+    {
+        $course = Course::findOrFail($course_id);
+        $module = $course->modules()->findOrFail($module_id);
+
+        $hasSubmissions = $module->tasks()->whereHas('submissions')->exists();
+        $hasAttempts = $module->assessments()->whereHas('attempts')->exists();
+
+        if ($module->is_active && ($hasSubmissions || $hasAttempts)) {
+            return redirect()->route('admin.courses.edit', $course)
+                ->with('error', 'No se puede desactivar este módulo porque ya contiene entregas o intentos registrados.');
+        }
+
+        $module->update(['is_active' => ! $module->is_active]);
+
+        return redirect()->route('admin.courses.edit', $course)
+            ->with('success', $module->fresh()->is_active ? 'Módulo activado correctamente.' : 'Módulo desactivado correctamente.');
     }
 
     private function courseValidationRules(): array

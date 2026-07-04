@@ -13,9 +13,11 @@ use App\Models\Schedule;
 use App\Models\Task;
 use App\Models\TaskSubmission;
 use App\Models\Training;
+use App\Notifications\NewAnnouncementNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class TeacherController extends Controller
@@ -211,10 +213,13 @@ class TeacherController extends Controller
         $user = auth()->user();
 
         $training = Training::with([
-            'course',
+            'course.specialty',
             'schedules',
             'enrollments.student.person',
-            'announcements',
+            'announcements' => fn ($query) => $query->latest('created_at')->take(3),
+            'tasks.submissions',
+            'assessments',
+            'contents',
         ])
             ->where('training_id', $id)
             ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
@@ -223,6 +228,80 @@ class TeacherController extends Controller
         $totalStudents = $training->enrollments->count();
         $totalAssessments = $training->assessments()->count();
         $totalAttendanceRecords = Attendance::whereHas('schedule', fn ($q) => $q->where('training_id', $id))->count();
+
+        $upcomingSchedules = $training->schedules()
+            ->whereDate('date', '>=', Carbon::today())
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->get();
+
+        $pendingReviewsCount = 0;
+        foreach ($training->tasks as $task) {
+            $pendingReviewsCount += $task->submissions->whereNull('grade')->count();
+        }
+        $activeAssessmentsCount = $training->assessments->filter(fn ($assessment) => $assessment->active
+            && (! $assessment->start_date || $assessment->start_date->lte(Carbon::today()))
+            && (! $assessment->end_date || $assessment->end_date->gte(Carbon::today())))
+            ->count();
+
+        $attendanceSummary = [
+            'present' => 0,
+            'absent' => 0,
+            'late' => 0,
+            'justified' => 0,
+        ];
+
+        foreach (Attendance::whereHas('schedule', fn ($q) => $q->where('training_id', $id))->get() as $attendance) {
+            $status = strtolower((string) ($attendance->attendance_status ?? ''));
+
+            if ($status === 'present' || $status === 'p') {
+                $attendanceSummary['present']++;
+            } elseif ($status === 'absent' || $status === 'a') {
+                $attendanceSummary['absent']++;
+            } elseif ($status === 'late' || $status === 't') {
+                $attendanceSummary['late']++;
+            } elseif ($status === 'justified' || $status === 'j') {
+                $attendanceSummary['justified']++;
+            }
+        }
+
+        $latestAnnouncements = $training->announcements;
+
+        $studentStatusFilter = request('status', 'all');
+        $studentSearchFilter = trim((string) request('search', ''));
+        $activeStudentFiltersCount = 0;
+
+        if ($studentStatusFilter !== 'all') {
+            $activeStudentFiltersCount++;
+        }
+
+        if ($studentSearchFilter !== '') {
+            $activeStudentFiltersCount++;
+        }
+
+        $students = $training->enrollments->filter(function ($enrollment) use ($studentStatusFilter, $studentSearchFilter) {
+            $isActive = strtoupper((string) $enrollment->status) === Enrollment::STATUS_ACTIVE;
+            $person = $enrollment->student?->person;
+            $fullName = trim(($person->first_names ?? '').' '.($person->last_names ?? ''));
+            $document = (string) ($person->document_number ?? '');
+            $search = mb_strtolower($studentSearchFilter);
+
+            if ($studentStatusFilter === 'active' && ! $isActive) {
+                return false;
+            }
+
+            if ($studentStatusFilter === 'inactive' && $isActive) {
+                return false;
+            }
+
+            if ($search !== ''
+                && ! str_contains(mb_strtolower($fullName), $search)
+                && ! str_contains(mb_strtolower($document), $search)) {
+                return false;
+            }
+
+            return true;
+        })->values();
 
         $moduleId = (int) request('module_id', 0);
         $modules = Module::where('course_id', $training->course_id)
@@ -235,14 +314,21 @@ class TeacherController extends Controller
         $moduleId = $selectedModule?->id;
 
         $gradebook = $this->buildGradebookData($training, $selectedModule);
-        $students = $training->enrollments;
 
         return view('teacher.courses.show', compact(
             'training',
             'totalStudents',
             'totalAssessments',
             'totalAttendanceRecords',
+            'upcomingSchedules',
+            'pendingReviewsCount',
+            'activeAssessmentsCount',
+            'attendanceSummary',
+            'latestAnnouncements',
             'students',
+            'studentStatusFilter',
+            'studentSearchFilter',
+            'activeStudentFiltersCount',
             'modules',
             'selectedModule',
             'moduleId',
@@ -531,13 +617,24 @@ class TeacherController extends Controller
             }
         }
 
-        Announcement::create([
+        $announcement = Announcement::create([
             'training_id' => $training->training_id,
             'teacher_id' => $training->teacher_id,
             'content' => $validated['content'],
             'link' => $validated['link'] ?? null,
             'attachments' => $attachments ?: null,
         ]);
+
+        $students = Enrollment::where('training_id', $training->training_id)
+            ->with('student')
+            ->get()
+            ->pluck('student')
+            ->filter()
+            ->values();
+
+        if ($students->isNotEmpty()) {
+            Notification::send($students, new NewAnnouncementNotification($announcement, $training, $user));
+        }
 
         return redirect()->route('teacher.courses.show', ['id' => $training->training_id, 'tab' => 'anuncios'])
             ->with('success', 'Anuncio publicado correctamente.');
@@ -630,11 +727,15 @@ class TeacherController extends Controller
             ->with('attempts')
             ->get()
             ->map(function ($a) {
+                $average = method_exists($a, 'averageSubmittedScore')
+                    ? $a->averageSubmittedScore()
+                    : 0.0;
+
                 return [
                     'assessment_id' => $a->assessment_id,
                     'title' => $a->title,
                     'attempts' => $a->attempts_count ?? 0,
-                    'average' => $a->averageSubmittedScore(),
+                    'average' => $average,
                     'active' => (bool) $a->active,
                 ];
             });
@@ -660,7 +761,7 @@ class TeacherController extends Controller
     {
         $request->validate([
             'training_id' => 'required|exists:trainings,training_id',
-            'module_id' => 'required|exists:modules,module_id',
+            'module_id' => 'required|exists:modules,id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string',
             'delivery_date' => 'required|date|after_or_equal:today',

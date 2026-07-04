@@ -19,6 +19,25 @@ class TaskController extends Controller
         return auth()->user()?->roles->contains('name', 'Administrator') ?? false;
     }
 
+    public function create(Request $request, $training_id = null)
+    {
+        $trainingId = $request->input('training_id', $training_id);
+        $user = auth()->user();
+
+        $training = Training::with('course')
+            ->where('training_id', $trainingId)
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
+            ->firstOrFail();
+
+        $courseId = $training->course?->course_id ?? $training->course_id;
+        $modules = Module::where('course_id', $courseId)
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get();
+
+        return view('teacher.tasks.create', compact('training', 'modules'));
+    }
+
     public function store(Request $request)
     {
         $data = $this->validatedData($request, true);
@@ -115,7 +134,7 @@ class TaskController extends Controller
     private function validatedData(Request $request, bool $includeTraining = false): array
     {
         $rules = [
-            'module_id' => 'required|exists:modules,module_id',
+            'module_id' => 'required|exists:modules,id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string',
             'delivery_date' => 'required|date|after_or_equal:today',

@@ -47,8 +47,12 @@ Route::prefix('admin')
 
         Route::resource('courses', CourseController::class);
         Route::patch('courses/{course}/toggle-active', [CourseController::class, 'toggleActive'])->name('courses.toggle-active');
-        Route::resource('modules', ModuleController::class)->names('modules');
-        Route::patch('modules/{module}/toggle-active', [ModuleController::class, 'toggleActive'])->name('modules.toggle-active');
+        Route::get('courses/{course}/modules', [CourseController::class, 'modules'])->name('courses.modules');
+        Route::post('courses/{course}/modules', [CourseController::class, 'storeModule'])->name('courses.modules.store');
+        Route::patch('courses/{course}/modules/{module}', [CourseController::class, 'updateModule'])->name('courses.modules.update');
+        Route::patch('courses/{course}/modules/{module}/toggle-active', [CourseController::class, 'toggleModuleActive'])->name('courses.modules.toggle-active');
+        // Route::resource('modules', ModuleController::class)->names('modules');
+        // Route::patch('modules/{module}/toggle-active', [ModuleController::class, 'toggleActive'])->name('modules.toggle-active');
         Route::resource('specialties', SpecialtyController::class);
         Route::patch('specialties/{specialty}/toggle-active', [SpecialtyController::class, 'toggleActive'])->name('specialties.toggle-active');
         Route::resource('users', UserController::class);
@@ -128,6 +132,9 @@ Route::prefix('student')
         Route::post('/tasks/{task_id}/submit', [StudentCourseController::class, 'submitTask'])->name('tasks.submit');
         Route::get('/courses/{id}/certificate', [StudentCourseController::class, 'downloadCertificate'])->name('courses.certificate');
         Route::get('/courses/{id}/certificate/preview', [StudentCourseController::class, 'previewCertificate'])->name('courses.certificate.preview');
+        Route::get('/notifications/unread', [StudentController::class, 'getUnreadNotifications'])->name('notifications.unread');
+        Route::post('/notifications/mark-all-read', [StudentController::class, 'markAllNotificationsAsRead'])->name('notifications.mark-all-read');
+        Route::post('/notifications/{notification_id}/mark-read', [StudentController::class, 'markNotificationAsRead'])->name('notifications.mark-read');
     });
 
 Route::get('/verify/certificate/{code}', [StudentCourseController::class, 'verifyCertificate'])->name('certificate.verify');

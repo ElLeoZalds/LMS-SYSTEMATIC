@@ -46,7 +46,13 @@ class AssessmentController extends Controller
             ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
-        return view('teacher.assessments.manage', compact('training'));
+        $courseId = $training->course?->course_id ?? $training->course_id;
+        $modules = Module::where('course_id', $courseId)
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get();
+
+        return view('teacher.assessments.manage', compact('training', 'modules'));
     }
 
     public function showAssessment($assessment_id)
@@ -68,7 +74,7 @@ class AssessmentController extends Controller
     {
         $request->validate([
             'training_id' => 'required|exists:trainings,training_id',
-            'module_id' => 'required|exists:modules,module_id',
+            'module_id' => 'required|exists:modules,id',
             'title' => 'required|string|max:150',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -267,7 +273,7 @@ class AssessmentController extends Controller
     public function update(Request $request, $assessment_id)
     {
         $request->validate([
-            'module_id' => 'required|exists:modules,module_id',
+            'module_id' => 'required|exists:modules,id',
             'title' => 'required|string|max:150',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',

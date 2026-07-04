@@ -74,32 +74,19 @@
             </a>
         </li>
 
-        <li class="nav-item {{ request()->routeIs('admin.specialties.*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.specialties.index') }}">
-                <i class="fas fa-fw fa-tags"></i>
-                <span>Especialidades</span>
-            </a>
-        </li>
-
-        <li class="nav-item {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.courses.index') }}">
+        <li class="nav-item {{ request()->routeIs('admin.specialties.*', 'admin.courses.*', 'admin.trainings.*') ? 'active' : '' }}">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCatalogo" aria-expanded="false" aria-controls="collapseCatalogo">
                 <i class="fas fa-fw fa-book"></i>
-                <span>Cursos</span>
+                <span>Catálogo Académico</span>
             </a>
-        </li>
-
-        <li class="nav-item {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.modules.index') }}">
-                <i class="fas fa-fw fa-layer-group"></i>
-                <span>Módulos</span>
-            </a>
-        </li>
-
-        <li class="nav-item {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.trainings.index') }}">
-                <i class="fas fa-fw fa-graduation-cap"></i>
-                <span>Capacitaciones</span>
-            </a>
+            <div id="collapseCatalogo" class="collapse {{ request()->routeIs('admin.specialties.*', 'admin.courses.*', 'admin.trainings.*') ? 'show' : '' }}" aria-labelledby="headingCatalogo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">Gestión académica:</h6>
+                    <a class="collapse-item {{ request()->routeIs('admin.specialties.*') ? 'active' : '' }}" href="{{ route('admin.specialties.index') }}">Especialidades</a>
+                    <a class="collapse-item {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}" href="{{ route('admin.courses.index') }}">Cursos</a>
+                    <a class="collapse-item {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}" href="{{ route('admin.trainings.index') }}">Capacitaciones</a>
+                </div>
+            </div>
         </li>
 
     @elseif($role === 'Teacher')

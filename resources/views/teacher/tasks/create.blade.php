@@ -12,6 +12,12 @@
             <div class="card-body p-4">
                 <h1 class="h3 mb-4 text-gray-800">Crear Tarea - {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</h1>
 
+                @if(($modules ?? collect())->isEmpty())
+                    <div class="alert alert-warning" role="alert">
+                        Debe crear módulos para este curso antes de crear tareas.
+                    </div>
+                @endif
+
                 <form action="{{ route('teacher.tasks.store') }}" method="POST" class="row g-3"> {{-- Grid con gap reducido
                     --}}
                     @csrf
@@ -62,7 +68,7 @@
 
                     {{-- Botón Submit --}}
                     <div class="col-12 text-end">
-                        <button type="submit" class="btn btn-primary btn-sm">Crear Tarea</button> {{-- Botón pequeño para
+                        <button type="submit" class="btn btn-primary btn-sm" @if(($modules ?? collect())->isEmpty()) disabled @endif>Crear Tarea</button> {{-- Botón pequeño para
                         densidad --}}
                     </div>
                 </form>
