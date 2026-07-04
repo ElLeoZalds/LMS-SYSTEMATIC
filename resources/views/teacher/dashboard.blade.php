@@ -2,214 +2,170 @@
 
 @section('content')
     <div class="container-fluid px-4 py-1">
-        <div class="mb-4">
-            <h1 class="h3 mb-4 text-gray-800">Resumen de Actividad</h1>
-            <p class="text-muted small">Vista general de tus capacitaciones y tareas recientes.</p>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-md p-4 mt-4">
-            <h2 class="h5 font-weight-bold mb-4">Actividad Reciente</h2>
-            <div class="table-responsive">
-                <table class="table table-sm table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="small fw-bold">Tarea</th>
-                            <th class="small fw-bold">Curso</th>
-                            <th class="small fw-bold">Fecha de Creación</th>
-                            <th class="small fw-bold">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($recentActivities as $activity)
-                            <tr>
-                                <td class="small">{{ $activity->title }}</td>
-                                <td class="small">{{ optional($activity->training->course)->title ?? 'N/A' }}{{ optional($activity->training->start_date)->format(' (Y-m)') }}</td>
-                                <td class="small">{{ $activity->created_at->format('d/m/Y H:i') }}</td>
-                                <td>
-                                    <span class="badge {{ $activity->active ? 'bg-success' : 'bg-secondary' }} small">
-                                        {{ $activity->active ? 'Activo' : 'Inactivo' }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="text-center text-muted small py-3">No hay actividades recientes.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1 text-gray-800">Panel del docente</h1>
+                <p class="text-muted mb-0">Tus capacitaciones activas, pendientes y recursos clave en un solo lugar.</p>
             </div>
+            <a href="{{ route('teacher.courses') }}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-collection me-1"></i>Ver todas las capacitaciones
+            </a>
         </div>
-    </div>
 
-    <div class="modal fade" id="createAssessmentModal" tabindex="-1" aria-labelledby="createAssessmentModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="createAssessmentModalLabel">Filtrar Alumnos</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label for="selectTrainingStudents" class="form-label small">Selecciona una capacitación</label>
-                        <select id="selectTrainingStudents" class="form-select">
-                            <option value="">-- Seleccionar --</option>
-                            @foreach($trainings as $t)
-                                <option value="{{ $t->training_id }}">{{ $t->course->title }}</option>
-                            @endforeach
-                        </select>
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Estudiantes</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalStudents }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-people-fill fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-muted small mb-0">Selecciona una capacitación y luego haz clic en "Ver estudiantes" para filtrar.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                    <button type="button" id="btnViewStudents" class="btn btn-primary" disabled>Ver estudiantes</button>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="filterModalLabel">Filtrar Promedios</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label for="selectTrainingAvg" class="form-label small">Selecciona una capacitación</label>
-                        <select id="selectTrainingAvg" class="form-select">
-                            <option value="">-- Seleccionar --</option>
-                            @foreach($trainings as $t)
-                                <option value="{{ $t->training_id }}">{{ $t->course->title }}</option>
-                            @endforeach
-                        </select>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Capacitaciones activas</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalActiveTrainings }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-book-half fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-muted small mb-0">Selecciona una capacitación y luego haz clic en "Ver promedios".</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                    <button type="button" id="btnViewAverages" class="btn btn-primary" disabled>Ver promedios</button>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Tareas registradas</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalTasks }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-list-task fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Promedio general</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $averageScore }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-bar-chart-fill fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0 fw-bold text-dark">Mis capacitaciones activas</h5>
+                                <small class="text-muted">Gestiona cada curso desde una vista rápida y enfocada.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if($activeTrainings->isEmpty())
+                            <div class="alert alert-secondary mb-0">No tienes capacitaciones activas en este momento.</div>
+                        @else
+                            <div class="row g-3">
+                                @foreach($activeTrainings as $training)
+                                    <div class="col-12">
+                                        <div class="border rounded p-3 h-100">
+                                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">{{ optional($training->course)->title ?? 'Sin curso' }}</h6>
+                                                    <small class="text-muted">{{ optional($training->course->specialty)->specialty ?? 'Sin especialidad' }}</small>
+                                                </div>
+                                                <span class="badge bg-success">Activo</span>
+                                            </div>
+                                            <div class="small text-muted mb-3">
+                                                <div><i class="bi bi-clock me-1"></i>{{ $training->schedules->isNotEmpty() ? $training->schedules->map(fn($schedule) => $schedule->date->format('d/m/Y') . ' ' . $schedule->start_time)->join(', ') : 'Sin horario asignado' }}</div>
+                                                <div class="mt-1"><i class="bi bi-people me-1"></i>{{ $training->enrollments->count() }} estudiantes matriculados</div>
+                                            </div>
+                                            <a href="{{ route('teacher.courses.show', $training->training_id) }}" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-box-arrow-up-right me-1"></i>Gestionar curso
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold text-dark">Pendientes de hoy</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0">Tareas por revisar</h6>
+                                <span class="badge bg-warning text-dark">{{ $pendingTasks->count() }}</span>
+                            </div>
+                            @if($pendingTasks->isEmpty())
+                                <div class="text-muted small">No hay tareas pendientes en los próximos 7 días.</div>
+                            @else
+                                <ul class="list-unstyled mb-0">
+                                    @foreach($pendingTasks->take(5) as $task)
+                                        <li class="border rounded p-2 mb-2 small">
+                                            <div class="fw-semibold">{{ $task->title }}</div>
+                                            <div class="text-muted">{{ optional($task->training->course)->title ?? 'Sin curso' }}</div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0">Evaluaciones próximas</h6>
+                                <span class="badge bg-info text-dark">{{ $upcomingAssessments->count() }}</span>
+                            </div>
+                            @if($upcomingAssessments->isEmpty())
+                                <div class="text-muted small">No hay evaluaciones próximas en los próximos 7 días.</div>
+                            @else
+                                <ul class="list-unstyled mb-0">
+                                    @foreach($upcomingAssessments->take(5) as $assessment)
+                                        <li class="border rounded p-2 mb-2 small">
+                                            <div class="fw-semibold">{{ $assessment->title }}</div>
+                                            <div class="text-muted">{{ optional($assessment->training->course)->title ?? 'Sin curso' }}</div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const selectStudents = document.getElementById('selectTrainingStudents');
-            const btnViewStudents = document.getElementById('btnViewStudents');
-
-            const selectAvg = document.getElementById('selectTrainingAvg');
-            const btnViewAverages = document.getElementById('btnViewAverages');
-
-            if (selectStudents) {
-                selectStudents.addEventListener('change', function () {
-                    btnViewStudents.disabled = !this.value;
-                });
-
-                btnViewStudents.addEventListener('click', async function () {
-                    const id = selectStudents.value;
-                    if (!id) return;
-                    btnViewStudents.disabled = true;
-                    btnViewStudents.textContent = 'Cargando...';
-
-                    try {
-                        const res = await fetch("{{ url('teacher/ajax/students') }}".replace(/\/$/, '') + '/' + id);
-                        const json = await res.json();
-                        const container = selectStudents.closest('.modal-body');
-                        renderStudentsTable(container, json.data || []);
-                    } catch (err) {
-                        console.error(err);
-                        alert('Error al cargar estudiantes.');
-                    } finally {
-                        btnViewStudents.disabled = false;
-                        btnViewStudents.textContent = 'Ver estudiantes';
-                    }
-                });
-            }
-
-            if (selectAvg) {
-                selectAvg.addEventListener('change', function () {
-                    btnViewAverages.disabled = !this.value;
-                });
-
-                btnViewAverages.addEventListener('click', async function () {
-                    const id = selectAvg.value;
-                    if (!id) return;
-                    btnViewAverages.disabled = true;
-                    btnViewAverages.textContent = 'Cargando...';
-
-                    try {
-                        const res = await fetch("{{ url('teacher/ajax/averages') }}".replace(/\/$/, '') + '/' + id);
-                        const json = await res.json();
-                        const container = selectAvg.closest('.modal-body');
-                        renderAveragesTable(container, json.data || []);
-                    } catch (err) {
-                        console.error(err);
-                        alert('Error al cargar promedios.');
-                    } finally {
-                        btnViewAverages.disabled = false;
-                        btnViewAverages.textContent = 'Ver promedios';
-                    }
-                });
-            }
-        });
-
-        function renderStudentsTable(container, students) {
-            let html = '';
-            if (!students || students.length === 0) {
-                html = '<p class="text-muted small">No se encontraron estudiantes para esta capacitación.</p>';
-            } else {
-                html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Nombre</th><th>Email</th></tr></thead><tbody>';
-                students.forEach(s => {
-                    html += `<tr><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.email || '')}</td></tr>`;
-                });
-                html += '</tbody></table></div>';
-            }
-
-            // Reemplaza contenido del modal preservando el área del select
-            const existing = container.querySelector('.filter-results');
-            if (existing) existing.remove();
-            const div = document.createElement('div');
-            div.className = 'filter-results mt-3';
-            div.innerHTML = html;
-            container.appendChild(div);
-        }
-
-        function renderAveragesTable(container, items) {
-            let html = '';
-            if (!items || items.length === 0) {
-                html = '<p class="text-muted small">No se encontraron evaluaciones para esta capacitación.</p>';
-            } else {
-                html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Evaluación</th><th>Promedio</th><th>Intentos</th><th>Activo</th></tr></thead><tbody>';
-                items.forEach(it => {
-                    html += `<tr><td>${escapeHtml(it.title)}</td><td>${it.average !== null ? it.average : 'N/A'}</td><td>${it.attempts}</td><td>${it.active ? 'Sí' : 'No'}</td></tr>`;
-                });
-                html += '</tbody></table></div>';
-            }
-
-            const existing = container.querySelector('.filter-results');
-            if (existing) existing.remove();
-            const div = document.createElement('div');
-            div.className = 'filter-results mt-3';
-            div.innerHTML = html;
-            container.appendChild(div);
-        }
-
-        function escapeHtml(unsafe) {
-            return String(unsafe)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-    </script>
 @endsection

@@ -39,6 +39,29 @@ class TeacherController extends Controller
             ->avg('score');
         $averageScore = $averageScore !== null ? round($averageScore, 2) : 0;
 
+        $activeTrainings = Training::with(['course', 'schedules', 'enrollments'])
+            ->where('teacher_id', $user->user_id)
+            ->where('status', Training::STATUS_ACTIVE)
+            ->orderByDesc('start_date')
+            ->get();
+
+        $pendingTasks = Task::with(['training.course', 'submissions'])
+            ->whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))
+            ->whereNotNull('due_date')
+            ->where('due_date', '<=', now()->addDays(7)->endOfDay())
+            ->get()
+            ->filter(fn ($task) => $task->submissions->contains(fn ($submission) => is_null($submission->grade)));
+
+        $upcomingAssessments = Assessment::with(['training.course'])
+            ->whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))
+            ->where('active', true)
+            ->where(function ($query) {
+                $query->whereBetween('start_date', [now()->startOfDay(), now()->addDays(7)->endOfDay()])
+                    ->orWhereBetween('end_date', [now()->startOfDay(), now()->addDays(7)->endOfDay()]);
+            })
+            ->orderBy('start_date')
+            ->get();
+
         $recentActivities = Assessment::with('training.course')
             ->whereHas('training', fn ($q) => $q->where('teacher_id', $user->user_id))
             ->latest('created_at')
@@ -54,6 +77,9 @@ class TeacherController extends Controller
             'totalTasks',
             'totalAttempts',
             'averageScore',
+            'activeTrainings',
+            'pendingTasks',
+            'upcomingAssessments',
             'recentActivities',
             'trainings'
         ));

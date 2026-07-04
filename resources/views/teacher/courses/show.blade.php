@@ -7,15 +7,24 @@
 
     <div class="teacher-course-view">
         <div class="container-fluid px-4 py-1">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 mb-2 text-gray-800">{{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }}</h1>
-                <small class="text-muted">Código: {{ $training->code ?? 'N/A' }} | Modalidad:
-                    <strong>{{ ucfirst($training->modality) }}</strong></small>
+            <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div>
+                        <h1 class="h3 mb-2 text-gray-800">{{ optional($training->course)->title ?? 'Sin curso' }}</h1>
+                        <p class="text-muted mb-2">{{ optional($training->course->specialty)->specialty ?? 'Sin especialidad' }}</p>
+                        <div class="small text-muted">
+                            <span class="me-3"><i class="bi bi-code-square me-1"></i>Código: {{ $training->code ?? 'N/A' }}</span>
+                            <span class="me-3"><i class="bi bi-clock-history me-1"></i>Modalidad: {{ ucfirst($training->modality) }}</span>
+                            <span><i class="bi bi-calendar-event me-1"></i>{{ $training->start_date ? $training->start_date->format('d/m/Y') : 'Sin fecha' }} - {{ $training->end_date ? $training->end_date->format('d/m/Y') : 'Sin fecha' }}</span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-success mb-2">Activo</span>
+                        <div class="small text-muted">{{ $totalStudents }} estudiantes matriculados</div>
+                    </div>
+                </div>
             </div>
-            <a href="{{ route('teacher.courses') }}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-left me-2"></i>Volver al Curso
-            </a>
         </div>
 
         <div class="row g-3 mb-4">
@@ -227,6 +236,90 @@
                                 <div class="course-banner-overlay"></div>
                             </div>
                         </div>
+
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0 fw-bold text-dark">Contenido organizado por módulos</h5>
+                        </div>
+                        <div class="card-body">
+                            @if(($modules ?? collect())->isEmpty())
+                                <div class="alert alert-secondary mb-0">Aún no se han creado módulos para esta capacitación.</div>
+                            @else
+                                <div class="accordion" id="modulesAccordion">
+                                    @foreach($modules as $module)
+                                        @php $moduleKey = $module->module_id ?? $module->id; @endphp
+                                        @php $moduleContents = $training->contents->where('module_id', $moduleKey); @endphp
+                                        @php $moduleTasks = $training->tasks->where('module_id', $moduleKey); @endphp
+                                        @php $moduleAssessments = $training->assessments->where('module_id', $moduleKey); @endphp
+                                        <div class="card border mb-3">
+                                            <div class="card-header bg-light py-3" id="heading-{{ $moduleKey }}">
+                                                <button class="btn btn-link btn-block text-left p-0 text-decoration-none" type="button" data-toggle="collapse" data-target="#collapse-{{ $moduleKey }}" aria-expanded="true" aria-controls="collapse-{{ $moduleKey }}">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h6 class="mb-1 fw-bold text-dark">{{ $module->title }}</h6>
+                                                            @if(!empty($module->description))
+                                                                <small class="text-muted">{{ $module->description }}</small>
+                                                            @endif
+                                                        </div>
+                                                        <span class="badge bg-primary">{{ $moduleContents->count() + $moduleTasks->count() + $moduleAssessments->count() }} elementos</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <div id="collapse-{{ $moduleKey }}" class="collapse" aria-labelledby="heading-{{ $moduleKey }}" data-parent="#modulesAccordion">
+                                                <div class="card-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-4">
+                                                            <div class="border rounded p-3 h-100">
+                                                                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-journal-bookmark me-1"></i>Contenidos</h6>
+                                                                @if($moduleContents->isEmpty())
+                                                                    <div class="text-muted small">Aún no has agregado contenido a este módulo.</div>
+                                                                @else
+                                                                    <ul class="list-unstyled mb-0">
+                                                                        @foreach($moduleContents as $content)
+                                                                            <li class="small mb-2"><i class="bi bi-file-earmark-text me-1"></i>{{ $content->title }}</li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="border rounded p-3 h-100">
+                                                                <h6 class="fw-bold text-success mb-3"><i class="bi bi-list-task me-1"></i>Tareas</h6>
+                                                                @if($moduleTasks->isEmpty())
+                                                                    <div class="text-muted small">Aún no has agregado tareas a este módulo.</div>
+                                                                @else
+                                                                    <ul class="list-unstyled mb-0">
+                                                                        @foreach($moduleTasks as $task)
+                                                                            <li class="small mb-2"><i class="bi bi-check2-square me-1"></i>{{ $task->title }}</li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="border rounded p-3 h-100">
+                                                                <h6 class="fw-bold text-info mb-3"><i class="bi bi-clipboard-check me-1"></i>Evaluaciones</h6>
+                                                                @if($moduleAssessments->isEmpty())
+                                                                    <div class="text-muted small">Aún no has agregado evaluaciones a este módulo.</div>
+                                                                @else
+                                                                    <ul class="list-unstyled mb-0">
+                                                                        @foreach($moduleAssessments as $assessment)
+                                                                            <li class="small mb-2"><i class="bi bi-clipboard2-data me-1"></i>{{ $assessment->title }}</li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <a href="{{ route('teacher.attendance.create', ['training_id' => $training->training_id]) }}" class="text-decoration-none">

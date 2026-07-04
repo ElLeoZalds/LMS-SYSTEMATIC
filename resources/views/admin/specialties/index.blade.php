@@ -2,13 +2,17 @@
 
 @section('content')
     <div class="container-fluid px-4 py-1">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h3 mb-4 text-gray-800">Especialidades</h1>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#createSpecialtyModal"
-                    data-backdrop="static" data-keyboard="false">
-                + Crear especialidad
-            </button>
-        </div>
+        <x-page-header
+            title="Especialidades"
+            subtitle="Administra las especialidades con vistas dedicadas y badges de estado consistentes."
+            action-route="{{ route('admin.specialties.create') }}"
+            action-label="Crear especialidad"
+            action-icon="plus"
+        />
+
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
         <div class="card shadow mb-4">
             <div class="card-body p-3">
@@ -38,22 +42,11 @@
                                         <div class="text-muted small">Cursos: {{ $specialty->courses->count() ?? 0 }}</div>
                                     </td>
                                     <td class="align-middle">
-                                        @php
-                                            $specialtyStatus = (string) ($specialty->status ?? 'A');
-                                            $specialtyBadgeClass = $specialtyStatus === 'A' ? 'bg-success' : 'bg-secondary';
-                                            $specialtyBadgeText = $specialtyStatus === 'A' ? 'Activo' : 'Inactivo';
-                                        @endphp
-                                        <span class="badge {{ $specialtyBadgeClass }}">{{ $specialtyBadgeText }}</span>
+                                        <x-status-badge :is-active="$specialty->isActive()" />
                                     </td>
                                     <td class="align-middle text-end">
-                                        <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $specialty->specialty_id }}"
-                                            data-specialty="{{ $specialty->specialty }}">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-secondary"
-                                            onclick="confirmDeactivate('{{ route('admin.specialties.destroy', $specialty->specialty_id) }}')">
-                                            <i class="fas fa-toggle-off"></i> Desactivar
-                                        </button>
+                                        <x-action-button type="edit" :route="route('admin.specialties.edit', $specialty->specialty_id)" />
+                                        <x-action-button type="delete" :route="route('admin.specialties.destroy', $specialty->specialty_id)" label="Desactivar" icon="toggle-off" />
                                     </td>
                                 </tr>
                             @endforeach
@@ -62,76 +55,9 @@
                 </div>
             </div>
         </div>
-
-        <!-- Modal -->
-        <div class="modal fade" id="createSpecialtyModal" tabindex="-1" role="dialog"
-             aria-labelledby="createSpecialtyModalLabel" aria-hidden="true"
-             data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 rounded-3">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title fw-bold" id="createSpecialtyModalLabel">Crear Especialidad</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="{{ route('admin.specialties.store') }}" id="createSpecialtyForm">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="specialty" class="form-label">Especialidad</label>
-                                <input type="text" name="specialty" id="specialty" class="form-control" required>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-3">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" form="createSpecialtyForm" class="btn btn-primary">Guardar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Edit Modal -->
-        <div class="modal fade" id="editModal" tabindex="-1" role="dialog"
-             aria-labelledby="editModalLabel" aria-hidden="true"
-             data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 rounded-3">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title fw-bold" id="editModalLabel">Editar Especialidad</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="editForm" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <div class="mb-3">
-                                <label for="edit_specialty" class="form-label">Especialidad</label>
-                                <input type="text" name="specialty" id="edit_specialty" class="form-control" required>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer border-0 bg-light rounded-bottom-3">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" form="editForm" class="btn btn-primary">Actualizar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const id = this.getAttribute('data-id');
-                const specialty = this.getAttribute('data-specialty');
-
-                document.getElementById('edit_specialty').value = specialty;
-                document.getElementById('editForm').action = `/admin/specialties/${id}`;
-                $('#editModal').modal({backdrop: 'static', keyboard: false});
-            });
-        });
-
         function confirmDeactivate(url) {
             Swal.fire({
                 title: '¿Desactivar esta especialidad?',

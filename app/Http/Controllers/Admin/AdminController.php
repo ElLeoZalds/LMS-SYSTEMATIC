@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Schedule;
+use App\Models\Specialty;
 use App\Models\Training;
 use App\Models\User;
 
@@ -27,7 +28,20 @@ class AdminController extends Controller
         $totalSchedules = Schedule::count();
         $totalEnrollments = Enrollment::count();
 
+        $activeTrainings = Training::where('status', Training::STATUS_ACTIVE)
+            ->where(function ($query) {
+                $query->whereNull('end_date')
+                    ->orWhereDate('end_date', '>=', now()->toDateString());
+            })
+            ->count();
+
         $latestUsers = User::with('person')->latest()->take(5)->get();
+        $recentEnrollments = Enrollment::with(['student.person', 'training.course'])
+            ->latest('created_at')
+            ->take(5)
+            ->get();
+        $recentCourses = Course::with('specialty')->latest()->take(5)->get();
+        $recentSpecialties = Specialty::latest()->take(5)->get();
 
         return view('admin.dashboard', compact(
             'totalStudents',
@@ -37,7 +51,11 @@ class AdminController extends Controller
             'totalTrainings',
             'totalSchedules',
             'totalEnrollments',
-            'latestUsers'
+            'activeTrainings',
+            'latestUsers',
+            'recentEnrollments',
+            'recentCourses',
+            'recentSpecialties'
         ));
     }
 }

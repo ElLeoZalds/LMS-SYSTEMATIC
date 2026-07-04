@@ -53,11 +53,7 @@
                                 <td>{{ $module->title }}</td>
                                 <td>{{ $module->course->title ?? 'Sin curso' }}</td>
                                 <td>
-                                    @if($module->is_active)
-                                        <span class="badge badge-success">Activo</span>
-                                    @else
-                                        <span class="badge badge-danger">Inactivo</span>
-                                    @endif
+                                    <x-status-badge :is-active="$module->is_active" />
                                 </td>
                                 <td>
                                     <a href="{{ route('admin.modules.edit', $module) }}" class="btn btn-sm btn-warning">
