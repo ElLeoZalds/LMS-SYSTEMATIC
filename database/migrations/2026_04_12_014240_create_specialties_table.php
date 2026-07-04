@@ -15,6 +15,7 @@ return new class extends Migration
 
             $table->id('specialty_id');
             $table->string('specialty', 100)->unique();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

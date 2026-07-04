@@ -56,10 +56,21 @@ class ModuleController extends Controller
 
     public function toggleActive(Module $module)
     {
+        if (! $module->is_active) {
+            return back()->with('success', 'El módulo ya estaba inactivo.');
+        }
+
+        $hasSubmissions = $module->tasks()->whereHas('submissions')->exists();
+        $hasAttempts = $module->assessments()->whereHas('attempts')->exists();
+
+        if ($hasSubmissions || $hasAttempts) {
+            return back()->with('error', 'No se puede desactivar este módulo porque ya contiene calificaciones o entregas de estudiantes registradas.');
+        }
+
         $module->update([
-            'is_active' => ! $module->is_active,
+            'is_active' => false,
         ]);
 
-        return back()->with('success', 'Estado del módulo actualizado correctamente.');
+        return back()->with('success', 'Módulo desactivado correctamente.');
     }
 }

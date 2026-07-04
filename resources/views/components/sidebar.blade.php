@@ -88,6 +88,13 @@
             </a>
         </li>
 
+        <li class="nav-item {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.modules.index') }}">
+                <i class="fas fa-fw fa-layer-group"></i>
+                <span>Módulos</span>
+            </a>
+        </li>
+
         <li class="nav-item {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('admin.trainings.index') }}">
                 <i class="fas fa-fw fa-graduation-cap"></i>

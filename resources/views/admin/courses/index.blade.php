@@ -53,7 +53,7 @@
                                     </td>
                                     <td class="align-middle text-end">
                                         <x-action-button type="edit" :route="route('admin.courses.edit', $course->course_id)" />
-                                        <x-action-button type="delete" :route="route('admin.courses.destroy', $course->course_id)" label="Desactivar" icon="toggle-off" />
+                                        <x-action-button type="toggle" :route="route('admin.courses.toggle-active', $course->course_id)" :is-active="$course->isActive()" />
                                     </td>
                                 </tr>
                             @endforeach
@@ -64,27 +64,4 @@
         </div>
     </div>
 
-    <script>
-        function confirmDeactivate(url) {
-            Swal.fire({
-                title: '¿Desactivar este curso?',
-                text: 'El curso no estará disponible para nuevas capacitaciones ni inscripciones.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#f6c23e',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, desactivar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = url;
-                    form.innerHTML = '@csrf @method("DELETE")';
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        }
-    </script>
 @endsection

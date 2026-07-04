@@ -46,15 +46,18 @@ Route::prefix('admin')
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         Route::resource('courses', CourseController::class);
+        Route::patch('courses/{course}/toggle-active', [CourseController::class, 'toggleActive'])->name('courses.toggle-active');
         Route::resource('modules', ModuleController::class)->names('modules');
         Route::patch('modules/{module}/toggle-active', [ModuleController::class, 'toggleActive'])->name('modules.toggle-active');
         Route::resource('specialties', SpecialtyController::class);
+        Route::patch('specialties/{specialty}/toggle-active', [SpecialtyController::class, 'toggleActive'])->name('specialties.toggle-active');
         Route::resource('users', UserController::class);
         Route::get('students', [AdminStudentController::class, 'index'])->name('students.index');
         Route::get('students/{user}', [AdminStudentController::class, 'show'])->name('students.show');
         Route::resource('contents', ContentController::class);
         Route::resource('payments', PaymentController::class);
 
+        Route::patch('trainings/{training}/toggle-active', [TrainingController::class, 'toggleActive'])->name('trainings.toggle-active');
         Route::resource('trainings', TrainingController::class);
         Route::post('trainings/{training}/enroll', [TrainingController::class, 'enroll'])->name('trainings.enroll');
 

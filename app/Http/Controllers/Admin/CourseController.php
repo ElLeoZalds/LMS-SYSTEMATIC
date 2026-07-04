@@ -42,7 +42,7 @@ class CourseController extends Controller
             'hours_count' => $data['hours_count'],
             'reference_price' => $data['reference_price'],
             'banner_path' => $data['banner_path'] ?? null,
-            'status' => Course::STATUS_ACTIVE,
+            'is_active' => true,
         ]);
 
         return redirect()->route('admin.courses.index')
@@ -75,11 +75,17 @@ class CourseController extends Controller
 
     public function destroy($id)
     {
+        return redirect()->route('admin.courses.index')
+            ->with('error', 'La eliminación no está permitida. Use la opción de desactivar para ocultar este curso.');
+    }
+
+    public function toggleActive($id)
+    {
         $course = Course::findOrFail($id);
-        $course->update(['status' => Course::STATUS_INACTIVE]);
+        $course->update(['is_active' => ! $course->isActive()]);
 
         return redirect()->route('admin.courses.index')
-            ->with('success', 'Curso desactivado correctamente');
+            ->with('success', $course->fresh()->isActive() ? 'Curso activado correctamente' : 'Curso desactivado correctamente');
     }
 
     private function courseValidationRules(): array

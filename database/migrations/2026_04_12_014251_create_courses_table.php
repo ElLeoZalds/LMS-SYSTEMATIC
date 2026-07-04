@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('hours_count')->nullable();
             $table->decimal('reference_price', 10, 2)->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

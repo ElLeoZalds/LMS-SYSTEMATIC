@@ -19,7 +19,7 @@ class TrainingController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $courses = Course::all();
+        $courses = Course::where('is_active', true)->get();
         $teachers = User::whereHas('roles', fn ($q) => $q->where('name', 'Teacher'))->with('person')->get();
         $students = User::whereHas('roles', fn ($q) => $q->where('name', 'Student'))->with('person')->take(100)->get();
 
@@ -28,14 +28,30 @@ class TrainingController extends Controller
 
     public function create()
     {
-        $courses = Course::all();
+        $courses = Course::where('is_active', true)->get();
 
         return view('admin.trainings.create', compact('courses'));
     }
 
     public function store(Request $request)
     {
-        Training::create($this->trainingData($request));
+        $data = $this->trainingData($request);
+        $course = Course::find($data['course_id']);
+
+        if ($course && ! $course->isActive()) {
+            if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pueden programar nuevas capacitaciones para un curso inactivo.',
+                ], 422);
+            }
+
+            return back()->withInput()->withErrors([
+                'course_id' => 'No se pueden programar nuevas capacitaciones para un curso inactivo.',
+            ]);
+        }
+
+        Training::create($data);
 
         if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
             return response()->json([
@@ -51,7 +67,7 @@ class TrainingController extends Controller
     public function edit($id)
     {
         $training = Training::findOrFail($id);
-        $courses = Course::all();
+        $courses = Course::where('is_active', true)->get();
 
         return view('admin.trainings.edit', compact('training', 'courses'));
     }
@@ -59,7 +75,24 @@ class TrainingController extends Controller
     public function update(Request $request, $id)
     {
         $training = Training::findOrFail($id);
-        $training->update($this->trainingData($request, $id));
+        $data = $this->trainingData($request, $id);
+        $course = Course::find($data['course_id']);
+        $originalCourseId = $training->course_id;
+
+        if ($course && ! $course->isActive() && (int) $data['course_id'] !== (int) $originalCourseId) {
+            if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pueden programar nuevas capacitaciones para un curso inactivo.',
+                ], 422);
+            }
+
+            return back()->withInput()->withErrors([
+                'course_id' => 'No se pueden programar nuevas capacitaciones para un curso inactivo.',
+            ]);
+        }
+
+        $training->update($data);
 
         if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
             return response()->json([
@@ -73,14 +106,21 @@ class TrainingController extends Controller
             ->with('success', 'Capacitación actualizada correctamente.');
     }
 
-    public function destroy($id)
+    public function toggleActive($id)
     {
         $training = Training::findOrFail($id);
-        $training->update(['status' => Training::STATUS_DRAFT]);
+        $training->update(['is_active' => ! $training->isActive()]);
 
         return redirect()
             ->route('admin.trainings.index')
-            ->with('success', 'Capacitación desactivada correctamente.');
+            ->with('success', $training->fresh()->isActive() ? 'Capacitación activada correctamente.' : 'Capacitación desactivada correctamente.');
+    }
+
+    public function destroy($id)
+    {
+        return redirect()
+            ->route('admin.trainings.index')
+            ->with('error', 'La eliminación no está permitida. Use la opción de desactivar para ocultar esta capacitación.');
     }
 
     public function enroll(Request $request, Training $training)
@@ -117,6 +157,7 @@ class TrainingController extends Controller
 
         if (! $trainingId) {
             $data['status'] = Training::STATUS_ACTIVE;
+            $data['is_active'] = true;
             $data['code'] = $this->generateTrainingCode($data['course_id'], $data['start_date']);
         }
 

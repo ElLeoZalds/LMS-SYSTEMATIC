@@ -22,12 +22,14 @@ class Training extends Model
         'start_date',
         'end_date',
         'status',
+        'is_active',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
         'status' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     public function course()
@@ -109,6 +111,10 @@ class Training extends Model
 
     public function isActive(): bool
     {
+        if (array_key_exists('is_active', $this->attributes)) {
+            return (bool) $this->attributes['is_active'];
+        }
+
         if ($this->normalizedStatus() !== self::STATUS_ACTIVE) {
             return false;
         }

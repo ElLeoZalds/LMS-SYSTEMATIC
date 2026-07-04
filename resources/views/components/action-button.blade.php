@@ -1,23 +1,23 @@
-@props(['type' => 'edit', 'route' => null, 'id' => null, 'icon' => null, 'label' => null, 'class' => null])
+@props(['type' => 'edit', 'route' => null, 'id' => null, 'icon' => null, 'label' => null, 'class' => null, 'isActive' => null])
 
 @php
     $iconName = $icon ?? match ($type) {
         'edit' => 'edit',
         'delete' => 'trash',
-        'toggle' => 'toggle-on',
+        'toggle' => ($isActive ? 'toggle-off' : 'toggle-on'),
         default => 'circle',
     };
 
     $labelText = $label ?? match ($type) {
         'edit' => 'Editar',
-        'delete' => 'Desactivar',
-        'toggle' => 'Cambiar',
+        'delete' => 'Eliminar',
+        'toggle' => ($isActive ? 'Desactivar' : 'Activar'),
         default => 'Acción',
     };
 
     $buttonClass = $class ?? match ($type) {
         'edit' => 'btn btn-sm btn-warning',
-        'delete' => 'btn btn-sm btn-outline-secondary',
+        'delete' => 'btn btn-sm btn-outline-danger',
         'toggle' => 'btn btn-sm btn-outline-secondary',
         default => 'btn btn-sm btn-secondary',
     };
@@ -28,7 +28,7 @@
         <i class="fas fa-{{ $iconName }}"></i> {{ $labelText }}
     </a>
 @elseif ($type === 'delete')
-    <button type="button" class="{{ $buttonClass }}" onclick="confirmDeactivate('{{ $route ?? '#' }}')">
+    <button type="button" class="{{ $buttonClass }}" onclick="confirmDelete('{{ $route ?? '#' }}')">
         <i class="fas fa-{{ $iconName }}"></i> {{ $labelText }}
     </button>
 @elseif ($type === 'toggle')

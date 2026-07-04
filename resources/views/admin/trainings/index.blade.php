@@ -80,10 +80,7 @@
                                             data-modality="{{ $training->modality }}">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-secondary"
-                                            onclick="confirmDeactivate('{{ route('admin.trainings.destroy', $training->training_id) }}')">
-                                            <i class="fas fa-toggle-off"></i> Desactivar
-                                        </button>
+                                        <x-action-button type="toggle" :route="route('admin.trainings.toggle-active', $training->training_id)" :is-active="$training->isActive()" />
                                     </td>
                                 </tr>
                             @empty
@@ -426,30 +423,6 @@
                     $('#editModal').modal({backdrop: 'static', keyboard: false});
                 });
             });
-
-function confirmDeactivate(url) {
-            Swal.fire({
-                title: '¿Desactivar esta capacitación?',
-                text: 'La capacitación dejará de estar activa para los usuarios.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#f6c23e',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, desactivar',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = url;
-                        form.innerHTML = '@csrf @method("DELETE")';
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
-                });
-            }
-
-            window.confirmDelete = confirmDelete;
 
             $('#bulkScheduleForm').on('submit', function (e) {
                 e.preventDefault();

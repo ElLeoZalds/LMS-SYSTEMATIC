@@ -28,7 +28,7 @@ class SpecialtyController extends Controller
 
         Specialty::create([
             'specialty' => $request->specialty,
-            'status' => Specialty::STATUS_ACTIVE,
+            'is_active' => true,
         ]);
 
         return redirect()->route('admin.specialties.index')
@@ -60,10 +60,27 @@ class SpecialtyController extends Controller
 
     public function destroy($id)
     {
+        return redirect()->route('admin.specialties.index')
+            ->with('error', 'La eliminación no está permitida. Use la opción de desactivar para ocultar esta especialidad.');
+    }
+
+    public function toggleActive($id)
+    {
         $specialty = Specialty::findOrFail($id);
-        $specialty->update(['status' => Specialty::STATUS_INACTIVE]);
+        $isActive = $specialty->isActive();
+
+        $specialty->update(['is_active' => ! $isActive]);
+
+        if (! $isActive) {
+            $specialty->courses()->update(['is_active' => false]);
+
+            return redirect()->route('admin.specialties.index')
+                ->with('success', 'Especialidad activada. Los cursos asociados se han desactivado automáticamente.');
+        }
+
+        $courseCount = $specialty->courses()->count();
 
         return redirect()->route('admin.specialties.index')
-            ->with('success', 'Especialidad desactivada correctamente');
+            ->with('success', "Especialidad desactivada. {$courseCount} cursos asociados también han sido desactivados.");
     }
 }

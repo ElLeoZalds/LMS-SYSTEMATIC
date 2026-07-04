@@ -21,6 +21,7 @@ class Course extends Model
         'hours_count',
         'reference_price',
         'status',
+        'is_active',
     ];
 
     public function trainings()
@@ -40,6 +41,10 @@ class Course extends Model
 
     public function isActive(): bool
     {
+        if (array_key_exists('is_active', $this->attributes)) {
+            return (bool) $this->attributes['is_active'];
+        }
+
         return (string) ($this->status ?? self::STATUS_ACTIVE) === self::STATUS_ACTIVE;
     }
 }
