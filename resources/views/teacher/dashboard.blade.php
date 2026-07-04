@@ -7,42 +7,6 @@
             <p class="text-muted small">Vista general de tus capacitaciones y tareas recientes.</p>
         </div>
 
-        <div class="row g-3 mb-4">
-            <div class="col-12 col-sm-6 col-md-6 col-lg-6">
-                <div class="card border-0 shadow-sm p-3 h-100">
-                    <div class="card-body text-center d-flex flex-column justify-content-between">
-                        <div>
-                            <i class="bi bi-bar-chart-fill text-info h4 mb-2"></i>
-                            <h5 class="card-title h6 fw-bold mb-1">{{ number_format($averageScore, 2, ',', '.') }}</h5>
-                            <p class="card-text small text-muted mb-3">Promedio de notas en exámenes</p>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-info w-100 mt-2" data-toggle="modal"
-                            data-target="#filterModal">
-                            <i class="bi bi-filter me-1"></i>Filtrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md-6 col-lg-6">
-                <div class="card border-0 shadow-sm p-3 h-100">
-                    <div class="card-body text-center d-flex flex-column justify-content-between">
-                        <div>
-                            <i class="bi bi-people-fill text-primary h4 mb-2"></i>
-                            <h5 class="card-title h6 fw-bold mb-1">{{ $totalStudents }}</h5>
-                            <p class="card-text small text-muted mb-3">Total de Alumnos</p>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-2" data-toggle="modal"
-                            data-target="#createAssessmentModal">
-                            <i class="bi bi-filter me-1"></i>Filtrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            
-        </div>
-
         <div class="bg-white rounded-lg shadow-md p-4 mt-4">
             <h2 class="h5 font-weight-bold mb-4">Actividad Reciente</h2>
             <div class="table-responsive">

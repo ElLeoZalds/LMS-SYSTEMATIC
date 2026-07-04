@@ -583,15 +583,24 @@
         }
 
         .bg-gradient-1 {
-            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%) !important;
+            background-color: #1d4ed8 !important; /* Administrador: azul estático */
         }
 
         .bg-gradient-2 {
-            background: linear-gradient(135deg, #0b4f8a 0%, #3b82f6 100%) !important;
+            background-color: #3b82f6 !important; /* Profesor: azul estático */
         }
 
         .bg-gradient-3 {
-            background: linear-gradient(135deg, #2563eb 0%, #93c5fd 100%) !important;
+            background-color: #93c5fd !important; /* Estudiante: azul claro estático */
+        }
+
+        /* For visual consistency, remove any box-shadow inside the sidebar */
+        .sidebar,
+        .sidebar .nav-item,
+        .sidebar .nav-link,
+        .sidebar .sidebar-brand,
+        .sidebar .sidebar-heading {
+            box-shadow: none !important;
         }
 
         .sidebar .nav-item.active > .nav-link,

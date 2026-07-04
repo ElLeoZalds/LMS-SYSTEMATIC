@@ -1,0 +1,433 @@
+Informe completo del proyecto LMS Systematic
+=========================================
+
+Fecha de elaboración: 2026-07-04
+Proyecto: LMS Systematic
+Tipo: Sistema de Gestión de Aprendizaje (LMS) desarrollado con Laravel 12 / PHP 8.2
+
+Resumen ejecutivo
+-----------------
+Este proyecto corresponde a una plataforma LMS orientada a la gestión académica de la empresa Systematic. Su propósito principal es administrar cursos, capacitaciones, usuarios, matrículas, pagos, asistencias, evaluaciones, tareas, contenidos, anuncios y certificados. El sistema está pensado para tres tipos de usuarios principales: Administradores, Docentes y Estudiantes. Cada rol accede a un panel específico con funcionalidades diferenciadas y permisos controlados por middleware de roles.
+
+La arquitectura está basada en Laravel, con modelos Eloquent, controladores por módulo, vistas Blade, migraciones para la base de datos, seeders para crear datos iniciales y un diseño visual basado en el tema SB Admin 2, con clases de Bootstrap y alertas interactivas.
+
+1. Tecnologías y dependencias principales
+----------------------------------------
+- Backend: PHP 8.2, Laravel 12
+- Base de datos: MySQL (configuración estándar en Laravel)
+- Frontend: Blade, Bootstrap/SB Admin 2, CSS propio, JavaScript ligero
+- Gestión de archivos: almacenamiento público con Laravel Filesystem
+- Generación de documentos: DOMPDF
+- Generación de códigos QR: simple-qrcode
+- Procesamiento de imágenes: intervention/image-laravel
+- Herramientas de desarrollo: Composer, NPM, Vite
+
+2. Estructura general del proyecto
+---------------------------------
+- app/: contiene modelos, controladores, middleware y providers.
+- app/Http/Controllers/: controladores organizados por rol y módulo.
+- app/Models/: modelos Eloquent que representan entidades del negocio.
+- app/Http/Middleware/: middleware de autenticación y permisos.
+- database/migrations/: migraciones para crear las tablas del sistema.
+- database/seeders/: seeders para poblar la base de datos con datos de ejemplo.
+- resources/views/: vistas Blade organizadas por rol y módulo.
+- routes/web.php: definición de rutas públicas y protegidas por rol.
+- public/: recursos públicos, archivos estáticos, imágenes, CSS y JS.
+- storage/: archivos subidos por usuarios y caché del framework.
+
+3. Migraciones del sistema
+--------------------------
+El proyecto usa migraciones para definir la estructura de la base de datos. Las tablas principales creadas son:
+
+- create_people_table: almacena datos personales de usuarios.
+- create_users_table: usuarios del sistema, credenciales y estado.
+- create_roles_table: roles del sistema.
+- create_specialties_table: especialidades o áreas temáticas.
+- create_user_roles_table: relación muchos a muchos entre usuarios y roles.
+- create_courses_table: cursos base ofrecidos por la institución.
+- create_trainings_table: capacitaciones programadas vinculadas a un curso, docente y administrador.
+- create_payment_methods_table: métodos de pago disponibles.
+- create_enrollments_table: inscripciones de estudiantes a capacitaciones.
+- create_payments_table: pagos relacionados con las inscripciones.
+- create_assessments_table: evaluaciones asociadas a una capacitación.
+- create_questions_table: preguntas de cada evaluación.
+- create_alternatives_table: alternativas para cada pregunta.
+- create_contents_table: contenidos académicos asociados a una capacitación.
+- create_progress_table: progreso del estudiante en contenidos.
+- create_teacher_specialties_table: especialidades asociadas a docentes.
+- create_schedules_table: horarios de las capacitaciones.
+- create_attendances_table: asistencia registrada por clase/sesión.
+- create_assessment_attempts_table: intentos de respuesta de evaluaciones.
+- create_tasks_table: tareas asignadas a las capacitaciones.
+- create_task_submissions_table: entregas de tareas por parte de los estudiantes.
+- create_announcements_table: anuncios publicados por docentes en capacitaciones.
+
+Estas tablas permiten soportar un flujo completo de aprendizaje, desde la inscripción hasta la certificación.
+
+4. Seeders y datos iniciales
+----------------------------
+El proyecto incluye varios seeders que alimentan la base de datos con datos base para pruebas y uso del sistema. El seeder principal es DatabaseSeeder, el cual ejecuta los siguientes módulos:
+
+- PeopleSeeder: crea personas ficticias.
+- RolesSeeder: crea los roles Administrator, Teacher y Student.
+- UsersSeeder: crea usuarios de ejemplo.
+- RoleUserSeeder: asigna roles a los usuarios.
+- SpecialtiesSeeder: carga especialidades del negocio.
+- TeacherSpecialtiesSeeder: asigna especialidades a docentes.
+- CoursesSeeder: crea cursos base.
+- TrainingsSeeder: crea capacitaciones.
+- AnnouncementsSeeder: crea anuncios de ejemplo.
+- PaymentMethodsSeeder: define métodos de pago.
+- EnrollmentsSeeder: matricula estudiantes.
+- PaymentsSeeder: genera pagos de ejemplo.
+- AssessmentsSeeder: crea evaluaciones.
+- QuestionsSeeder: crea preguntas.
+- AlternativesSeeder: crea opciones de respuesta.
+- ContentsSeeder: crea contenido de estudio.
+- ProgressSeeder: registra avance de contenidos.
+- SchedulesSeeder: crea horarios.
+- AttendancesSeeder: registra asistencia.
+- AssessmentAttemptsSeeder: simula intentos de evaluación.
+- TaskSeeder: crea tareas.
+- TaskSubmissionSeeder: simula entregas.
+
+Esto permite levantar el sistema con un estado funcional desde el inicio.
+
+5. Roles del sistema y permisos
+-------------------------------
+El sistema define tres roles principales:
+
+- Administrator: gestión completa del sistema. Puede administrar usuarios, estudiantes, especialidades, cursos, capacitaciones, horarios, matrículas y pagos.
+- Teacher: gestiona cursos asignados, publica anuncios, registra asistencias, evalúa entregas, crea evaluaciones y revisa progreso de estudiantes.
+- Student: visualiza sus cursos, participa en evaluaciones, entrega tareas, consulta calendario y puede obtener certificados si cumple con la nota mínima.
+
+El acceso está protegido por RoleMiddleware y por grupos de rutas definidas en routes/web.php. Además, los administradores pueden gestionar áreas de docentes, lo que se habilita de forma explícita en el middleware.
+
+6. Flujo general de funcionamiento
+---------------------------------
+El flujo típico del sistema es el siguiente:
+
+1. Un usuario se registra desde la vista pública.
+2. El sistema crea automáticamente una persona y un usuario con rol Student.
+3. El usuario inicia sesión.
+4. Según su rol, entra en un panel diferente:
+   - administrador: dashboard de administración
+   - docente: dashboard de gestión docente
+   - estudiante: dashboard de aprendizaje
+5. El administrador crea cursos, especialidades, capacitaciones y horarios.
+6. Se realizan matrículas de estudiantes a capacitaciones.
+7. Los docentes publican contenidos, anuncios, evaluaciones y tareas.
+8. Los estudiantes acceden a contenido, responden evaluaciones y entregan tareas.
+9. Se registra asistencia y se calcula progreso.
+10. Si el estudiante aprueba con nota mínima, puede visualizar o descargar un certificado.
+
+7. Modelos principales y relaciones
+-----------------------------------
+A continuación se describen los modelos más relevantes y cómo se relacionan entre sí:
+
+- User
+  - Pertenece a una Person.
+  - Puede tener muchos Roles mediante la tabla user_roles.
+  - Puede tener muchas Especialidades (docentes) mediante teacher_specialties.
+  - Puede ser profesor de muchas Trainings.
+  - Puede tener muchas Enrollments como estudiante.
+  - Puede administrar muchas Trainings o Enrollments.
+
+- Person
+  - Representa los datos personales del usuario.
+  - Está relacionado de forma uno a uno con User.
+
+- Role
+  - Define un rol del sistema.
+  - Se relaciona con User mediante una relación muchos a muchos.
+
+- Specialty
+  - Representa una especialidad o área temática.
+  - Tiene muchos Courses.
+  - Puede estar asociada a muchos docentes.
+
+- Course
+  - Es la base del contenido académico.
+  - Pertenece a una Specialty.
+  - Tiene muchas Trainings.
+
+- Training
+  - Es una capacitación específica ejecutada en una fecha y modalidad determinadas.
+  - Pertenece a un Course.
+  - Pertenece a un Teacher (User).
+  - Pertenece a un Administrator (User).
+  - Tiene muchas Enrollments, Schedules, Assessments, Tasks, Announcements y Contents.
+
+- Enrollment
+  - Representa la matrícula de un estudiante en una capacitación.
+  - Pertenece a un User estudiante.
+  - Pertenece a una Training.
+  - Puede tener muchos Payments y Progress.
+
+- Schedule
+  - Representa un horario de clase o sesión.
+  - Pertenece a una Training.
+  - Tiene muchas Attendances.
+
+- Attendance
+  - Registra la asistencia de un estudiante a un horario específico.
+  - Pertenece a un Schedule y a una Enrollment.
+
+- Assessment
+  - Es una evaluación de una capacitación.
+  - Pertenece a una Training.
+  - Tiene muchas Questions y Attempts.
+
+- Question
+  - Representa una pregunta dentro de una evaluación.
+  - Pertenece a un Assessment.
+  - Tiene muchas Alternatives.
+
+- Alternative
+  - Es una opción de respuesta de una pregunta.
+  - Pertenece a una Question.
+
+- Task
+  - Es una tarea asignada dentro de una capacitación.
+  - Pertenece a una Training.
+  - Tiene muchas TaskSubmissions.
+
+- TaskSubmission
+  - Es la entrega de una tarea por parte de un estudiante.
+  - Pertenece a un Task y a un User.
+
+- Content
+  - Es un recurso o material de aprendizaje asignado a una capacitación.
+  - Pertenece a una Training.
+
+- Progress
+  - Registra el avance de un estudiante en contenidos específicos.
+  - Pertenece a una Enrollment y a un Content.
+
+- Announcement
+  - Representa un aviso publicado por un docente dentro de una capacitación.
+  - Pertenece a una Training y a un User docente.
+
+- Payment
+  - Registra un pago asociado a una matrícula.
+  - Pertenece a una Enrollment y a un PaymentMethod.
+
+8. Controladores principales
+----------------------------
+El proyecto organiza sus controladores por rol y módulo.
+
+- AuthController
+  - Maneja login, logout, registro, verificación de correo y redirección según rol.
+
+- Admin/AdminController
+  - Proporciona el dashboard administrativo con métricas generales.
+
+- Admin/UserController
+  - Gestiona usuarios administrativos y docentes, incluyendo filtros, edición y desactivación.
+
+- Admin/StudentController
+  - Muestra la vista de estudiantes y su información asociada.
+
+- Admin/CourseController
+  - Administra cursos y especialidades, incluyendo creación, edición y desactivación.
+
+- Admin/SpecialtyController
+  - Gestiona especialidades y sus operaciones CRUD.
+
+- Admin/TrainingController
+  - Crea y gestiona capacitaciones, genera códigos y permite inscripciones de estudiantes.
+
+- Admin/EnrollmentController
+  - Gestiona inscripciones masivas de estudiantes a capacitaciones.
+
+- Admin/ScheduleController
+  - Crea, edita y valida horarios, incluyendo carga masiva.
+
+- Admin/PaymentController
+  - Administra pagos y métodos de pago.
+
+- Admin/ContentController
+  - Gestiona contenidos de las capacitaciones.
+
+- Teacher/TeacherController
+  - Dashboard docente, calendario, gestión de cursos, anuncios, reportes y vistas de estudiantes.
+
+- Teacher/AssessmentController
+  - Crea y gestiona evaluaciones, preguntas, alternativas, puntajes y permisos.
+
+- Teacher/TaskController
+  - Gestiona tareas, entregas, calificaciones y retroalimentación.
+
+- Teacher/AttendanceController
+  - Registra y consulta asistencias.
+
+- Student/StudentController
+  - Dashboard del estudiante, listado de cursos y navegación general.
+
+- Student/CourseController
+  - Muestra detalle de cursos, permite responder evaluaciones, entregar tareas, generar certificados y verificar códigos.
+
+9. Diseño de la interfaz y experiencia de usuario
+------------------------------------------------
+El diseño del proyecto se apoya en el tema SB Admin 2, que aporta una estética institucional, clara y funcional. La interfaz se caracteriza por:
+
+- Sidebar lateral con navegación por rol.
+- Dashboard con métricas y tarjetas informativas.
+- Tablas con filtros y acciones.
+- Formularios con validación visual.
+- Botones con estilo uniforme.
+- Modales para crear y editar elementos.
+- Alertas de éxito, error e información.
+
+El diseño es coherente para administración, docencia y aprendizaje. El sistema prioriza la claridad operativa sobre la estética ornamental.
+
+10. Uso de Bootstrap y librerías de interfaz
+-------------------------------------------
+Sí, el proyecto usa Bootstrap. De forma específica:
+
+- Se utiliza la plantilla SB Admin 2, que está basada en Bootstrap 4.
+- Las vistas emplean clases como btn, card, table, form-control, modal, alert, row, col, badge, navbar y sidebar.
+- Se emplean modales con clases de Bootstrap para crear, editar y confirmar operaciones.
+- El sistema también incorpora SweetAlert2 para notificaciones tipo toast y alertas más interactivas.
+
+Aunque el proyecto mezcla varias convenciones visuales, el núcleo del diseño sigue siendo Bootstrap-compatible y está alineado con la experiencia típica de aplicaciones Laravel administrativas.
+
+11. Vistas principales del proyecto
+----------------------------------
+El proyecto cuenta con las siguientes vistas Blade principales:
+
+Autenticación:
+- resources/views/auth/login.blade.php
+- resources/views/auth/register.blade.php
+- resources/views/layouts/auth.blade.php
+
+Componentes reutilizables:
+- resources/views/components/navbar.blade.php
+- resources/views/components/sidebar.blade.php
+- resources/views/components/footer.blade.php
+- resources/views/layouts/app.blade.php
+
+Vistas públicas y generales:
+- resources/views/welcome.blade.php
+- resources/views/courses/index.blade.php
+
+Vistas de administración:
+- resources/views/admin/dashboard.blade.php
+- resources/views/admin/users/index.blade.php
+- resources/views/admin/users/create.blade.php
+- resources/views/admin/users/edit.blade.php
+- resources/views/admin/students/index.blade.php
+- resources/views/admin/students/show.blade.php
+- resources/views/admin/specialties/index.blade.php
+- resources/views/admin/courses/index.blade.php
+- resources/views/admin/trainings/index.blade.php
+- resources/views/admin/enrollments/create.blade.php
+- resources/views/admin/schedules/index.blade.php
+- resources/views/admin/schedules/create.blade.php
+- resources/views/admin/schedules/edit.blade.php
+
+Vistas de docentes:
+- resources/views/teacher/dashboard.blade.php
+- resources/views/teacher/calendar.blade.php
+- resources/views/teacher/attendance.blade.php
+- resources/views/teacher/courses/index.blade.php
+- resources/views/teacher/courses/show.blade.php
+- resources/views/teacher/courses/students.blade.php
+- resources/views/teacher/courses/report.blade.php
+- resources/views/teacher/courses/report-attendance.blade.php
+- resources/views/teacher/assessments/index.blade.php
+- resources/views/teacher/assessments/manage.blade.php
+- resources/views/teacher/assessments/show_assessment.blade.php
+- resources/views/teacher/assessments/_question_modal.blade.php
+- resources/views/teacher/tasks/create.blade.php
+- resources/views/teacher/tasks/submissions.blade.php
+
+Vistas de estudiantes:
+- resources/views/student/dashboard.blade.php
+- resources/views/student/courses/index.blade.php
+- resources/views/student/courses/detail.blade.php
+- resources/views/student/courses/show.blade.php
+- resources/views/student/courses/take.blade.php
+- resources/views/student/courses/confirmation.blade.php
+- resources/views/student/courses/summary.blade.php
+- resources/views/student/courses/payment.blade.php
+- resources/views/student/assessments/result.blade.php
+- resources/views/student/certificates/preview.blade.php
+- resources/views/student/certificates/template.blade.php
+- resources/views/student/certificates/verify.blade.php
+- resources/views/student/certificates/verify_error.blade.php
+
+12. Modales utilizados en el sistema
+-----------------------------------
+El proyecto usa múltiples modales para mejorar la interacción del usuario. Entre los más relevantes se encuentran:
+
+- Modal de términos y condiciones y política de privacidad en registro.
+- Modal de creación de cursos.
+- Modal de creación de especialidades.
+- Modal de creación de capacitaciones.
+- Modal de carga masiva de horarios.
+- Modal de edición de usuarios.
+- Modal de carga de banner para cursos.
+- Modal de creación de evaluaciones.
+- Modal de creación de preguntas.
+- Modal de calificación de tareas.
+- Modal de asistencias anteriores.
+- Modal de filtro en dashboard docente.
+
+Estos modales permiten manejar operaciones complejas sin navegar fuera de la vista actual, mejorando la experiencia de uso.
+
+13. Avisos, mensajes y feedback del sistema
+------------------------------------------
+El proyecto tiene un sistema de notificaciones muy claro basado en flash messages y alertas de sesión:
+
+- Mensajes de éxito: por ejemplo, cuando se crean cursos, capacitaciones, horarios o entregas.
+- Mensajes de error: cuando falla la validación o cuando un usuario no tiene permisos.
+- Alertas informativas: por ejemplo, en registros, fechas de evaluación, límites de intentos o restricciones de certificación.
+- Toasts globales: configurados en la plantilla principal para mostrar mensajes breves y agradables.
+
+Esto mejora la usabilidad y proporciona retroalimentación visible al usuario tras cada acción.
+
+14. Funcionalidades destacadas por rol
+-------------------------------------
+Administración
+- Gestión de usuarios y roles.
+- Gestión de cursos y especialidades.
+- Programación de capacitaciones.
+- Inscripción masiva de estudiantes.
+- Programación y control de horarios.
+- Visualización de pagos y matrículas.
+
+Docencia
+- Visualización del dashboard del profesor.
+- Gestión de cursos asignados.
+- Publicación de anuncios.
+- Creación de evaluaciones y preguntas.
+- Registro de asistencia.
+- Revisión, calificación y retroalimentación de tareas.
+- Reportes de progreso y rendimiento.
+
+Estudiantes
+- Inicio de sesión y registro.
+- Visualización de cursos inscritos.
+- Acceso a contenidos y tareas.
+- Presentación de evaluaciones.
+- Seguimiento de progreso.
+- Descarga o previsualización de certificados.
+
+15. Resumen técnico final
+------------------------
+El proyecto LMS Systematic es un sistema completo y bien organizado para la gestión de formación virtual y presencial. Cuenta con:
+
+- arquitectura Laravel robusta
+- modelo de datos relacional bien definido
+- autenticación y control de acceso por roles
+- gestión de cursos, capacitaciones, matrículas y pagos
+- módulo de evaluaciones y tareas
+- seguimiento de asistencia y progreso
+- generación de certificados y códigos QR
+- interfaz administrativa moderna basada en Bootstrap/SB Admin 2
+- múltiples vistas y modales para una experiencia amigable
+
+En conjunto, el sistema está preparado para funcionar como una plataforma educativa completa, con separación clara de roles, buena organización de controladores y modelos, y una interfaz orientada a la administración y al aprendizaje.
+
+Fin del informe.

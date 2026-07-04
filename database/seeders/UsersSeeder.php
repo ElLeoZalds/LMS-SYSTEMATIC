@@ -76,7 +76,7 @@ class UsersSeeder extends Seeder
                     'person_id' => 8,
                     'username' => 'isabel.jimenez.student',
                     'password' => Hash::make('123456'),
-                    'status' => 'A',
+                    'status' => 'A',    
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
