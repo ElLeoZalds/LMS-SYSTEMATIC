@@ -2,6 +2,8 @@
 
 @section('content')
     @php
+        use Illuminate\Support\Str;
+
         $isAdministrator = auth()->user()?->roles->contains('name', 'Administrator') ?? false;
     @endphp
 
@@ -726,106 +728,87 @@
                 @elseif(request('tab') === 'calificaciones')
                     <div class="d-flex justify-content-between align-items-center mb-3 print-report-header">
                         <div>
-                            <h5 class="fw-bold text-dark mb-1">Consolidado de Calificaciones</h5>
-                            <p class="text-muted mb-0">Curso: {{ optional($training->course)->title ?? 'Sin curso' }}{{ optional($training->start_date)->format(' (Y-m)') }} | Código: {{ $training->code ?? 'N/A' }} | Modalidad: {{ ucfirst($training->modality) }}</p>
+                            <h5 class="fw-bold text-dark mb-1">Gradebook por Módulo</h5>
+                            <p class="text-muted mb-0">Curso: {{ optional($training->course)->title ?? 'Sin curso' }} · Módulo: {{ $selectedModule->title ?? 'Sin módulo seleccionado' }}</p>
                         </div>
-                        <a href="{{ route('teacher.courses.report', $training->training_id) }}" class="btn btn-sm btn-outline-success">
-                            <i class="bi bi-printer me-1"></i> Imprimir Registro
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('teacher.courses.report', $training->training_id) }}" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-printer me-1"></i> Imprimir Registro
+                            </a>
+                            @if($selectedModule)
+                                <a href="{{ route('teacher.courses.export-gradebook', ['training' => $training->training_id, 'module_id' => $selectedModule->id]) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-download me-1"></i> Exportar PDF
+                                </a>
+                            @endif
+                        </div>
                     </div>
 
-                    @if($students->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle text-dark" style="font-size: 0.85rem;">
-                                <thead class="table-light text-center text-uppercase font-weight-bold" style="font-size: 0.75rem;">
-                                    <tr>
-                                        <th rowspan="2" class="align-middle text-start" style="min-width: 220px;">Estudiante</th>
-                                        @if($training->tasks && $training->tasks->count() > 0)
-                                            <th colspan="{{ $training->tasks->count() }}" class="text-info bg-light">Tareas Entregables</th>
-                                        @endif
-                                        @if($training->assessments->count() > 0)
-                                            <th colspan="{{ $training->assessments->count() }}" class="text-primary bg-light">Evaluaciones</th>
-                                        @endif
-                                        <th rowspan="2" class="align-middle bg-dark text-white" style="width: 75px;">Prom.</th>
-                                    </tr>
-                                    <tr>
-                                        {{-- Columnas de Tareas --}}
-                                        @if($training->tasks)
-                                            @foreach($training->tasks as $task)
-                                                <th class="fw-normal text-truncate small" style="max-width: 110px;" title="{{ $task->title }}">
-                                                    {{ Str::limit($task->title, 12) }}
-                                                </th>
-                                            @endforeach
-                                        @endif
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-body">
+                            <label for="moduleSelect" class="form-label fw-bold small text-uppercase">Módulo</label>
+                            <select id="moduleSelect" class="form-select form-select-sm" onchange="window.location.href=this.value">
+                                <option value="{{ route('teacher.courses.show', ['id' => $training->training_id, 'tab' => 'calificaciones']) }}" {{ ! $moduleId ? 'selected' : '' }}>Seleccionar módulo</option>
+                                @foreach($modules as $module)
+                                    <option value="{{ route('teacher.courses.show', ['id' => $training->training_id, 'tab' => 'calificaciones', 'module_id' => $module->id]) }}" {{ $moduleId == $module->id ? 'selected' : '' }}>
+                                        {{ $module->title }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
 
-                                        {{-- Columnas de Evaluaciones --}}
-                                        @foreach($training->assessments as $assessment)
-                                            <th class="fw-normal text-truncate small" style="max-width: 110px;" title="{{ $assessment->title }}">
-                                                {{ Str::limit($assessment->title, 12) }}
-                                            </th>
-                                        @endforeach
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($students as $enrollment)
-                                        @php
-                                            $student = $enrollment->student;
-                                            $totalNotes = 0;
-                                            $notesCount = 0;
-                                        @endphp
+                    @if($selectedModule)
+                        @if($students->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle text-dark" style="font-size: 0.85rem;">
+                                    <thead class="table-light text-center text-uppercase font-weight-bold" style="font-size: 0.75rem;">
                                         <tr>
-                                            <td class="fw-bold text-secondary">
-                                                {{ $student->person->first_names }} {{ $student->person->last_names }}
-                                            </td>
-
-                                            {{-- Buscar notas de Tareas --}}
-                                            @if($training->tasks)
-                                                @foreach($training->tasks as $task)
-                                                    @php
-                                                        $submission = $task->submissions->where('student_id', $student->user_id)->first();
-                                                        $grade = $submission ? $submission->grade : null;
-                                                        if(!is_null($grade)) {
-                                                            $totalNotes += $grade;
-                                                            $notesCount++;
-                                                        }
-                                                    @endphp
-                                                    <td class="text-center @if(!is_null($grade)) {{ $grade >= 11 ? 'text-success fw-bold' : 'text-danger fw-bold' }} @else text-muted @endif">
-                                                        {{ !is_null($grade) ? $grade : '-' }}
+                                            <th rowspan="2" class="align-middle text-start" style="min-width: 220px;">Estudiante</th>
+                                            @if($gradebook['tasks']->count() > 0)
+                                                <th colspan="{{ $gradebook['tasks']->count() }}" class="text-info bg-light">Tareas</th>
+                                            @endif
+                                            @if($gradebook['assessments']->count() > 0)
+                                                <th colspan="{{ $gradebook['assessments']->count() }}" class="text-primary bg-light">Evaluaciones</th>
+                                            @endif
+                                            <th rowspan="2" class="align-middle bg-dark text-white" style="width: 90px;">Promedio</th>
+                                        </tr>
+                                        <tr>
+                                            @foreach($gradebook['tasks'] as $task)
+                                                <th class="fw-normal text-truncate small" style="max-width: 110px;" title="{{ $task->title }}">{{ Str::limit($task->title, 12) }}</th>
+                                            @endforeach
+                                            @foreach($gradebook['assessments'] as $assessment)
+                                                <th class="fw-normal text-truncate small" style="max-width: 110px;" title="{{ $assessment->title }}">{{ Str::limit($assessment->title, 12) }}</th>
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($gradebook['rows'] as $row)
+                                            <tr>
+                                                <td class="fw-bold text-secondary">
+                                                    {{ optional($row['student']->person)->first_names }} {{ optional($row['student']->person)->last_names }}
+                                                </td>
+                                                @foreach($row['cells'] as $cell)
+                                                    @php $value = $cell['value']; @endphp
+                                                    <td class="text-center @if(! is_null($value)) {{ $value >= 11 ? 'text-success fw-bold' : 'text-danger fw-bold' }} @else text-muted @endif">
+                                                        {{ ! is_null($value) ? $value : '-' }}
                                                     </td>
                                                 @endforeach
-                                            @endif
-
-                                            {{-- Buscar notas de Evaluaciones --}}
-                                            @foreach($training->assessments as $assessment)
-                                                @php
-                                                    $attempt = $assessment->attempts->filter(function($a) use($student) {
-                                                        return optional($a->enrollment)->student_id == $student->user_id;
-                                                    })->max('score');
-                                                    if(!is_null($attempt)) {
-                                                        $totalNotes += $attempt;
-                                                        $notesCount++;
-                                                    }
-                                                @endphp
-                                                <td class="text-center @if(!is_null($attempt)) {{ $attempt >= 11 ? 'text-success fw-bold' : 'text-danger fw-bold' }} @else text-muted @endif">
-                                                    {{ !is_null($attempt) ? $attempt : '-' }}
+                                                <td class="text-center fw-bold table-light {{ ($row['average'] ?? 0) >= 11 ? 'text-success' : 'text-danger' }}">
+                                                    {{ is_null($row['average']) ? '-' : $row['average'] }}
                                                 </td>
-                                            @endforeach
-
-                                            {{-- Calcular promedio de la fila --}}
-                                            @php
-                                                $finalAverage = $notesCount > 0 ? round($totalNotes / $notesCount, 1) : 0;
-                                            @endphp
-                                            <td class="text-center fw-bold table-light {{ $finalAverage >= 11 ? 'text-success' : 'text-danger' }}">
-                                                {{ $finalAverage > 0 ? $finalAverage : '-' }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="alert alert-info text-center mb-0" role="alert">
+                                <i class="bi bi-info-circle me-2"></i>No hay estudiantes registrados para procesar calificaciones.
+                            </div>
+                        @endif
                     @else
-                        <div class="alert alert-info text-center mb-0" role="alert">
-                            <i class="bi bi-info-circle me-2"></i>No hay estudiantes registrados para procesar calificaciones.
+                        <div class="alert alert-secondary mb-0" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>Selecciona un módulo para ver la matriz de calificaciones.
                         </div>
                     @endif
                 @endif

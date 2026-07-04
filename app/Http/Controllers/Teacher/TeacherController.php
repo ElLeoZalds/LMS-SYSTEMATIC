@@ -11,7 +11,9 @@ use App\Models\Enrollment;
 use App\Models\Module;
 use App\Models\Schedule;
 use App\Models\Task;
+use App\Models\TaskSubmission;
 use App\Models\Training;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -208,12 +210,9 @@ class TeacherController extends Controller
     {
         $user = auth()->user();
 
-        // Cargamos el training con sus evaluaciones y las relaciones necesarias para las notas
         $training = Training::with([
             'course',
             'schedules',
-            'assessments.attempts.enrollment', // Trae los intentos globales de las evaluaciones de este curso y su enrollment
-            'tasks',
             'enrollments.student.person',
             'announcements',
         ])
@@ -222,11 +221,20 @@ class TeacherController extends Controller
             ->firstOrFail();
 
         $totalStudents = $training->enrollments->count();
-        $totalAssessments = $training->assessments->count();
+        $totalAssessments = $training->assessments()->count();
         $totalAttendanceRecords = Attendance::whereHas('schedule', fn ($q) => $q->where('training_id', $id))->count();
-        $modules = Module::where('course_id', $training->course_id)->where('is_active', true)->orderBy('order')->get();
 
-        // Obtenemos los estudiantes directamente desde las inscripciones cargadas
+        $moduleId = (int) request('module_id', 0);
+        $modules = Module::where('course_id', $training->course_id)
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->with(['tasks', 'assessments'])
+            ->get();
+
+        $selectedModule = $modules->firstWhere('id', $moduleId) ?? $modules->first();
+        $moduleId = $selectedModule?->id;
+
+        $gradebook = $this->buildGradebookData($training, $selectedModule);
         $students = $training->enrollments;
 
         return view('teacher.courses.show', compact(
@@ -235,8 +243,152 @@ class TeacherController extends Controller
             'totalAssessments',
             'totalAttendanceRecords',
             'students',
-            'modules'
+            'modules',
+            'selectedModule',
+            'moduleId',
+            'gradebook'
         ));
+    }
+
+    public function exportGradebook($trainingId, $moduleId = null)
+    {
+        $user = auth()->user();
+
+        $training = Training::with(['course', 'enrollments.student.person'])
+            ->where('training_id', $trainingId)
+            ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
+            ->firstOrFail();
+
+        $modules = Module::where('course_id', $training->course_id)
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->with(['tasks', 'assessments'])
+            ->get();
+
+        $selectedModule = $modules->firstWhere('id', (int) $moduleId) ?? $modules->first();
+        $gradebook = $this->buildGradebookData($training, $selectedModule);
+
+        $pdf = Pdf::loadView('teacher.courses.gradebook-pdf', [
+            'training' => $training,
+            'selectedModule' => $selectedModule,
+            'gradebook' => $gradebook,
+        ]);
+
+        return $pdf->download('gradebook-'.$training->training_id.'.pdf');
+    }
+
+    private function buildGradebookData(Training $training, ?Module $selectedModule = null): array
+    {
+        $tasks = $selectedModule?->tasks ?? collect();
+        $assessments = $selectedModule?->assessments ?? collect();
+
+        $taskIds = $tasks->pluck('task_id')->filter()->all();
+        $assessmentIds = $assessments->pluck('assessment_id')->filter()->all();
+        $enrollmentIds = $training->enrollments->pluck('enrollment_id')->filter()->all();
+        $studentIds = $training->enrollments->pluck('student_id')->filter()->all();
+
+        $submissionMap = [];
+        if (! empty($taskIds) && ! empty($studentIds)) {
+            $submissions = TaskSubmission::whereIn('task_id', $taskIds)
+                ->whereIn('student_id', $studentIds)
+                ->get();
+
+            foreach ($submissions as $submission) {
+                $key = $submission->task_id.'-'.$submission->student_id;
+                $current = $submissionMap[$key] ?? null;
+
+                if (! $current) {
+                    $submissionMap[$key] = $submission;
+                    continue;
+                }
+
+                if ($submission->submitted_at && $current->submitted_at && $submission->submitted_at->gt($current->submitted_at)) {
+                    $submissionMap[$key] = $submission;
+                }
+            }
+        }
+
+        $attemptMap = [];
+        if (! empty($assessmentIds) && ! empty($enrollmentIds)) {
+            $attempts = AssessmentAttempt::whereIn('assessment_id', $assessmentIds)
+                ->whereIn('enrollment_id', $enrollmentIds)
+                ->submitted()
+                ->get();
+
+            foreach ($attempts as $attempt) {
+                $key = $attempt->assessment_id.'-'.$attempt->enrollment_id;
+                $current = $attemptMap[$key] ?? null;
+
+                if (! $current) {
+                    $attemptMap[$key] = $attempt;
+                    continue;
+                }
+
+                $currentSubmitted = $current->submitted_at ?? $current->created_at;
+                $attemptSubmitted = $attempt->submitted_at ?? $attempt->created_at;
+
+                if ($attemptSubmitted && $currentSubmitted && $attemptSubmitted->gt($currentSubmitted)) {
+                    $attemptMap[$key] = $attempt;
+                }
+            }
+        }
+
+        $rows = [];
+        foreach ($training->enrollments as $enrollment) {
+            $student = $enrollment->student;
+            $totalNotes = 0;
+            $notesCount = 0;
+            $cells = [];
+
+            foreach ($tasks as $task) {
+                $submission = $submissionMap[$task->task_id.'-'.$student->user_id] ?? null;
+                $grade = $submission?->grade;
+
+                if (! is_null($grade)) {
+                    $totalNotes += (float) $grade;
+                    $notesCount++;
+                }
+
+                $cells[] = [
+                    'type' => 'task',
+                    'label' => $task->title,
+                    'value' => $grade,
+                    'submission' => $submission,
+                ];
+            }
+
+            foreach ($assessments as $assessment) {
+                $attempt = $attemptMap[$assessment->assessment_id.'-'.$enrollment->enrollment_id] ?? null;
+                $score = $attempt?->score;
+
+                if (! is_null($score)) {
+                    $totalNotes += (float) $score;
+                    $notesCount++;
+                }
+
+                $cells[] = [
+                    'type' => 'assessment',
+                    'label' => $assessment->title,
+                    'value' => $score,
+                    'attempt' => $attempt,
+                ];
+            }
+
+            $average = $notesCount > 0 ? round($totalNotes / $notesCount, 1) : null;
+
+            $rows[] = [
+                'enrollment' => $enrollment,
+                'student' => $student,
+                'cells' => $cells,
+                'average' => $average,
+            ];
+        }
+
+        return [
+            'tasks' => $tasks,
+            'assessments' => $assessments,
+            'rows' => $rows,
+        ];
     }
 
     public function report($id)

@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Assessment;
 use App\Models\AssessmentAttempt;
 use App\Models\Attendance;
+use App\Models\Content;
 use App\Models\Enrollment;
+use App\Models\Module;
+use App\Models\Progress;
 use App\Models\Task;
 use App\Models\TaskSubmission;
 use App\Models\Training;
@@ -50,31 +53,197 @@ class CourseController extends Controller
             $attendances = Attendance::where('enrollment_id', $enrollment->enrollment_id)
                 ->with('schedule')
                 ->get();
-            $attempts = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
-                ->with('assessment')
-                ->orderByDesc('created_at')
+
+            $modules = Module::where('course_id', $training->course_id)
+                ->where('is_active', true)
+                ->orderBy('order')
+                ->with([
+                    'tasks',
+                    'assessments',
+                    'contents' => fn ($query) => $query->orderBy('order_index')->orderBy('content_id'),
+                ])
                 ->get();
-            $taskIds = $training->tasks->pluck('task_id')->all();
-            $submissions = TaskSubmission::where('student_id', $studentId)
-                ->whereIn('task_id', $taskIds)
-                ->orderByDesc('submitted_at')
-                ->get()
-                ->unique('task_id')
-                ->keyBy('task_id');
+
+            $courseContents = Content::where('training_id', $id)
+                ->orderBy('order_index')
+                ->orderBy('content_id')
+                ->get();
+
+            $completedContentIds = Progress::where('enrollment_id', $enrollment->enrollment_id)
+                ->whereIn('content_id', $courseContents->pluck('content_id'))
+                ->pluck('content_id')
+                ->toArray();
+
+            $moduleReports = [];
+            $allValues = [];
+
+            foreach ($modules as $module) {
+                $taskIds = $module->tasks->pluck('task_id')->filter()->all();
+                $assessmentIds = $module->assessments->pluck('assessment_id')->filter()->all();
+
+                $taskSubmissions = TaskSubmission::where('student_id', $studentId)
+                    ->whereIn('task_id', $taskIds)
+                    ->get();
+
+                $assessmentAttempts = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
+                    ->whereIn('assessment_id', $assessmentIds)
+                    ->submitted()
+                    ->get();
+
+                $items = [];
+                $moduleValues = [];
+
+                foreach ($module->tasks as $task) {
+                    $submission = $taskSubmissions->where('task_id', $task->task_id)->sortByDesc('submitted_at')->first();
+                    $grade = $submission?->grade;
+                    $state = 'Pendiente';
+
+                    if ($submission && ! is_null($submission->grade)) {
+                        $state = 'Calificado';
+                        $moduleValues[] = (float) $submission->grade;
+                    } elseif ($submission && $submission->submitted_at) {
+                        $state = 'Entregado';
+                    }
+
+                    $items[] = [
+                        'type' => 'task',
+                        'title' => $task->title,
+                        'grade' => $grade,
+                        'state' => $state,
+                    ];
+                }
+
+                foreach ($module->assessments as $assessment) {
+                    $attempt = $assessmentAttempts->where('assessment_id', $assessment->assessment_id)->sortByDesc('submitted_at')->first();
+                    $grade = $attempt?->score;
+                    $state = 'Pendiente';
+
+                    if ($attempt && ! is_null($attempt->score)) {
+                        $state = 'Calificado';
+                        $moduleValues[] = (float) $attempt->score;
+                    } elseif ($attempt && $attempt->submitted_at) {
+                        $state = 'Calificado';
+                    }
+
+                    $items[] = [
+                        'type' => 'assessment',
+                        'title' => $assessment->title,
+                        'grade' => $grade,
+                        'state' => $state,
+                    ];
+                }
+
+                $moduleAverage = count($moduleValues) > 0 ? round(array_sum($moduleValues) / count($moduleValues), 1) : null;
+                if (! is_null($moduleAverage)) {
+                    $allValues[] = $moduleAverage;
+                }
+
+                $moduleReports[] = [
+                    'module' => $module,
+                    'items' => $items,
+                    'average' => $moduleAverage,
+                ];
+            }
+
             $averageGrade = $enrollment->calculateAverage();
+            $generalAverage = count($allValues) > 0 ? round(array_sum($allValues) / count($allValues), 1) : $averageGrade;
 
             return view('student.courses.show', compact(
                 'training',
                 'course',
                 'isEnrolled',
                 'attendances',
-                'attempts',
-                'submissions',
-                'averageGrade'
+                'modules',
+                'moduleReports',
+                'averageGrade',
+                'generalAverage',
+                'courseContents',
+                'completedContentIds'
             ));
         }
 
         return view('student.courses.detail', compact('training', 'course', 'isEnrolled'));
+    }
+
+    public function viewContent($training_id, $content_id)
+    {
+        $studentId = auth()->id();
+
+        $enrollment = Enrollment::where('student_id', $studentId)
+            ->where('training_id', $training_id)
+            ->firstOrFail();
+
+        $content = Content::with([
+            'module' => fn ($query) => $query->with(['course']),
+            'module.contents' => fn ($query) => $query->orderBy('order_index')->orderBy('content_id'),
+        ])
+            ->where('content_id', $content_id)
+            ->where('training_id', $training_id)
+            ->firstOrFail();
+
+        $moduleContents = $content->module?->contents ?? collect();
+        $completedContentIds = Progress::where('enrollment_id', $enrollment->enrollment_id)
+            ->whereIn('content_id', $moduleContents->pluck('content_id'))
+            ->pluck('content_id')
+            ->toArray();
+
+        $currentIndex = $moduleContents->search(fn ($item) => (int) $item->content_id === (int) $content_id);
+        $previousContent = $currentIndex !== false && $currentIndex > 0 ? $moduleContents[$currentIndex - 1] : null;
+        $nextContent = $currentIndex !== false && $currentIndex < $moduleContents->count() - 1 ? $moduleContents[$currentIndex + 1] : null;
+
+        $training = Training::findOrFail($training_id);
+
+        return view('student.courses.view-content', compact(
+            'training',
+            'content',
+            'moduleContents',
+            'completedContentIds',
+            'previousContent',
+            'nextContent'
+        ));
+    }
+
+    public function markContentComplete($training_id, $content_id)
+    {
+        $studentId = auth()->id();
+
+        $enrollment = Enrollment::where('student_id', $studentId)
+            ->where('training_id', $training_id)
+            ->firstOrFail();
+
+        $content = Content::where('content_id', $content_id)
+            ->where('training_id', $training_id)
+            ->firstOrFail();
+
+        $moduleContents = Content::where('module_id', $content->module_id)
+            ->where('training_id', $training_id)
+            ->orderBy('order_index')
+            ->orderBy('content_id')
+            ->get();
+
+        $progress = Progress::firstOrNew([
+            'enrollment_id' => $enrollment->enrollment_id,
+            'content_id' => $content->content_id,
+        ]);
+
+        $progress->fill([
+            'percentage' => 100,
+            'activity_date' => now()->toDateString(),
+            'status' => 'A',
+        ]);
+        $progress->save();
+
+        $currentIndex = $moduleContents->search(fn ($item) => (int) $item->content_id === (int) $content_id);
+        $nextContent = $currentIndex !== false && $currentIndex < $moduleContents->count() - 1 ? $moduleContents[$currentIndex + 1] : null;
+
+        if ($nextContent) {
+            return redirect()->route('student.courses.view-content', ['training' => $training_id, 'content' => $nextContent->content_id])
+                ->with('success', 'Contenido marcado como completado. Continúa con el siguiente tema.');
+        }
+
+        return redirect()->route('student.courses.view-content', ['training' => $training_id, 'content' => $content->content_id])
+            ->with('module_completed', true)
+            ->with('success', '¡Módulo completado!');
     }
 
     public function takeExam(Request $request, $assessment_id)

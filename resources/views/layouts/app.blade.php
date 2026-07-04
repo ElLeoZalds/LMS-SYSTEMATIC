@@ -21,6 +21,7 @@
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @stack('styles')
     <script>
         // Configuración global de Toast — usar SwalToast.fire({icon, title}) en todo el proyecto
         const SwalToast = Swal.mixin({

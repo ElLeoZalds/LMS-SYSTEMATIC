@@ -74,6 +74,7 @@ Route::prefix('teacher')
 
         Route::get('/courses', [TeacherController::class, 'courses'])->name('courses');
         Route::get('/courses/{id}', [TeacherController::class, 'show'])->name('courses.show');
+        Route::get('/courses/{training}/export-gradebook/{module_id?}', [TeacherController::class, 'exportGradebook'])->name('courses.export-gradebook');
         Route::get('/courses/{id}/report', [TeacherController::class, 'report'])->name('courses.report');
         Route::get('/courses/{id}/report/asistencias', [TeacherController::class, 'reportAttendance'])->name('courses.report.attendance');
         Route::post('/courses/{id}/banner', [TeacherController::class, 'uploadBanner'])->name('courses.banner.upload');
@@ -116,6 +117,8 @@ Route::prefix('student')
 
         Route::get('/courses', [StudentController::class, 'courses'])->name('courses.index');
         Route::get('/courses/{id}', [StudentCourseController::class, 'show'])->name('courses.show');
+        Route::get('/courses/{training}/content/{content}', [StudentCourseController::class, 'viewContent'])->name('courses.view-content');
+        Route::post('/courses/{training}/content/{content}/complete', [StudentCourseController::class, 'markContentComplete'])->name('courses.content.complete');
         Route::get('/assessment/{id}/take', [StudentCourseController::class, 'takeExam'])->name('assessment.take');
         Route::post('/assessment/{id}/submit', [StudentCourseController::class, 'submitExam'])->name('assessment.submit');
 

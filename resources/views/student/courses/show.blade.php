@@ -110,6 +110,49 @@
                         </div>
                     </div>
 
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0 fw-bold">Módulos y contenidos</h5>
+                        </div>
+                        <div class="card-body">
+                            @if($modules->isNotEmpty())
+                                @foreach($modules as $module)
+                                    <div class="border rounded-3 p-3 mb-3">
+                                        <div class="d-flex justify-content-between align-items-start gap-3">
+                                            <div>
+                                                <h6 class="mb-1 fw-bold text-dark">{{ $module->title }}</h6>
+                                                <p class="text-muted small mb-0">{{ $module->description ?: 'Explora los contenidos de este módulo.' }}</p>
+                                            </div>
+                                            <span class="badge bg-light text-dark">{{ $module->contents->count() }} contenidos</span>
+                                        </div>
+                                        @if($module->contents->isNotEmpty())
+                                            <div class="list-group mt-3">
+                                                @foreach($module->contents as $contentItem)
+                                                    @php $isCompleted = in_array($contentItem->content_id, $completedContentIds ?? [], true); @endphp
+                                                    <a href="{{ route('student.courses.view-content', ['training' => $training->training_id, 'content' => $contentItem->content_id]) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                        <span>
+                                                            <i class="me-2 {{ $isCompleted ? 'bi bi-check-circle-fill text-success' : 'bi bi-circle text-secondary' }}"></i>
+                                                            {{ $contentItem->title }}
+                                                        </span>
+                                                        <small class="text-muted text-uppercase">{{ $contentItem->type }}</small>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="alert alert-info small mb-0 mt-3" role="alert">
+                                                <i class="bi bi-info-circle me-2"></i>No hay contenidos registrados para este módulo todavía.
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="alert alert-info mb-0" role="alert">
+                                    <i class="bi bi-info-circle me-2"></i>No hay módulos disponibles para este curso.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
                     <div class="row g-3">
                         <div class="col-md-4">
                             <div class="card shadow-sm border-0">
@@ -363,83 +406,74 @@
 
                 @elseif(request('tab') === 'calificaciones')
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0">Mis calificaciones</h5>
+                        <h5 class="fw-bold text-dark mb-0">Mi progreso por módulos</h5>
                     </div>
 
-                    <!-- Card de Certificado -->
-                    <div class="card border-0 shadow-sm rounded-lg mb-4" style="background-color: @if($averageGrade >= 13) #d1e7dd @else #fff3cd @endif; border-left: 5px solid @if($averageGrade >= 13) #198754 @else #ffc107 @endif; color: @if($averageGrade >= 13) #0f5132 @else #664d03 @endif;">
+                    <div class="card border-0 shadow-sm rounded-lg mb-4" style="background-color: @if($generalAverage >= 13) #d1e7dd @else #fff3cd @endif; border-left: 5px solid @if($generalAverage >= 13) #198754 @else #ffc107 @endif; color: @if($generalAverage >= 13) #0f5132 @else #664d03 @endif;">
                         <div class="card-body p-4">
                             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                                 <div>
                                     <div class="d-flex align-items-center mb-2">
-                                        @if($averageGrade >= 13)
+                                        @if($generalAverage >= 13)
                                             <span class="badge badge-success me-2 px-2 py-1">APROBADO</span>
                                             <h5 class="fw-bold mb-0 text-success" style="display: inline-block; vertical-align: middle;">¡Curso Aprobado!</h5>
                                         @else
-                                            <span class="badge badge-warning text-dark me-2 px-2 py-1">EN PROGRESO / PENDIENTE</span>
-                                            <h5 class="fw-bold mb-0 text-warning" style="display: inline-block; vertical-align: middle; color: #664d03 !important;">Certificado Pendiente</h5>
+                                            <span class="badge badge-warning text-dark me-2 px-2 py-1">EN PROGRESO</span>
+                                            <h5 class="fw-bold mb-0 text-warning" style="display: inline-block; vertical-align: middle; color: #664d03 !important;">Progreso en curso</h5>
                                         @endif
                                     </div>
                                     <p class="mb-0 text-dark">
-                                        Tu promedio acumulado es de <strong>{{ $averageGrade }}</strong>. 
-                                        @if($averageGrade >= 13)
-                                            Cumples con los requisitos para obtener la certificación digital de este curso.
-                                        @else
-                                            Se requiere una nota promedio mínima de <strong>13</strong> para generar el certificado.
-                                        @endif
+                                        Tu promedio general del curso es <strong>{{ $generalAverage }}</strong>.
                                     </p>
                                 </div>
-                                @if($averageGrade >= 13)
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <a href="{{ route('student.courses.certificate.preview', $training->training_id) }}" class="btn btn-outline-success btn-lg font-weight-bold px-4 py-2 shadow-sm rounded-pill">
-                                            <i class="bi bi-eye-fill me-2"></i>Vista Previa
-                                        </a>
-                                        <a href="{{ route('student.courses.certificate', $training->training_id) }}" class="btn btn-success btn-lg font-weight-bold px-4 py-2 shadow-sm rounded-pill">
-                                            <i class="bi bi-patch-check-fill me-2"></i>Descargar Certificado
-                                        </a>
-                                    </div>
-                                @endif
                             </div>
                         </div>
                     </div>
 
-                    @if($attempts->isNotEmpty())
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle">
-                                <thead class="table-light text-center small text-uppercase">
-                                    <tr>
-                                        <th>Evaluación</th>
-                                        <th>Fecha</th>
-                                        <th>Puntaje</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($attempts as $attempt)
-                                        @php
-                                            $isSubmitted = ! is_null($attempt->submitted_at);
-                                            $statusLabel = $isSubmitted
-                                                ? ($attempt->score > 0 ? 'Aprobado' : 'Reprobado')
-                                                : 'En curso';
-                                            $statusClass = $isSubmitted
-                                                ? ($attempt->score > 0 ? 'bg-success' : 'bg-danger')
-                                                : 'bg-info';
-                                        @endphp
-                                        <tr>
-                                            <td>{{ $attempt->assessment->title ?? 'Sin evaluación' }}</td>
-                                            <td class="text-center">
-                                                {{ optional($attempt->submitted_at ?? $attempt->created_at)->format('d/m/Y H:i') }}
-                                            </td>
-                                            <td class="text-center">
-                                                {{ $isSubmitted ? $attempt->score : '-' }}
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                    @if($moduleReports)
+                        <div class="accordion" id="moduleGradesAccordion">
+                            @foreach($moduleReports as $index => $report)
+                                <div class="accordion-item shadow-sm border-0 mb-3 rounded-3 overflow-hidden">
+                                    <h2 class="accordion-header" id="module-heading-{{ $index }}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#module-collapse-{{ $index }}" aria-expanded="false" aria-controls="module-collapse-{{ $index }}">
+                                            <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                                                <span class="fw-bold text-dark">{{ $report['module']->title }}</span>
+                                                <span class="badge {{ is_null($report['average']) ? 'bg-secondary' : ($report['average'] >= 11 ? 'bg-success' : 'bg-warning text-dark') }}">
+                                                    Promedio del módulo: {{ is_null($report['average']) ? '-' : $report['average'] }}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    </h2>
+                                    <div id="module-collapse-{{ $index }}" class="accordion-collapse collapse" aria-labelledby="module-heading-{{ $index }}" data-bs-parent="#moduleGradesAccordion">
+                                        <div class="accordion-body">
+                                            @if($report['items'])
+                                                <div class="list-group">
+                                                    @foreach($report['items'] as $item)
+                                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <div class="fw-semibold">{{ $item['title'] }}</div>
+                                                                <small class="text-muted">{{ $item['type'] === 'task' ? 'Tarea' : 'Evaluación' }}</small>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <div class="fw-bold">
+                                                                    {{ is_null($item['grade']) ? '-' : $item['grade'] }}
+                                                                </div>
+                                                                <span class="badge {{ $item['state'] === 'Calificado' ? 'bg-success' : ($item['state'] === 'Entregado' ? 'bg-info' : 'bg-secondary') }}">
+                                                                    {{ $item['state'] }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <div class="alert alert-info mb-0" role="alert">
+                                                    <i class="bi bi-info-circle me-2"></i>No hay actividades registradas para este módulo.
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     @else
                         <div class="alert alert-info mb-0" role="alert">
