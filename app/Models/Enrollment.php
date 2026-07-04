@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TaskSubmission;
 use App\Models\AssessmentAttempt;
+use App\Models\Module;
 
 class Enrollment extends Model
 {
@@ -41,6 +42,11 @@ class Enrollment extends Model
     public function administrator()
     {
         return $this->belongsTo(User::class, 'administrator_id', 'user_id');
+    }
+
+    public function modules()
+    {
+        return $this->belongsToMany(Module::class, 'enrollment_module', 'enrollment_id', 'module_id');
     }
 
     public function progress()

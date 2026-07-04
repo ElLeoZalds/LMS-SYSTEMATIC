@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController;
+use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SpecialtyController;
@@ -45,6 +46,8 @@ Route::prefix('admin')
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         Route::resource('courses', CourseController::class);
+        Route::resource('modules', ModuleController::class)->names('modules');
+        Route::patch('modules/{module}/toggle-active', [ModuleController::class, 'toggleActive'])->name('modules.toggle-active');
         Route::resource('specialties', SpecialtyController::class);
         Route::resource('users', UserController::class);
         Route::get('students', [AdminStudentController::class, 'index'])->name('students.index');

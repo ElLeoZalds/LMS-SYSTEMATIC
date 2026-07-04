@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Content;
+use App\Models\Module;
 use App\Models\Training;
 use Illuminate\Http\Request;
 
@@ -24,8 +25,9 @@ class ContentController extends Controller
     public function create()
     {
         $trainings = $this->activeTrainings();
+        $modules = Module::where('is_active', true)->orderBy('order')->get();
 
-        return view('admin.contents.create', compact('trainings'));
+        return view('admin.contents.create', compact('trainings', 'modules'));
     }
 
     public function store(Request $request)
@@ -40,8 +42,15 @@ class ContentController extends Controller
     {
         $content = Content::findOrFail($id);
         $trainings = $this->activeTrainings();
+        $modules = Module::where('is_active', true)->orderBy('order')->get();
+        $selectedTraining = $content->training;
+        $courseId = $selectedTraining?->course_id;
 
-        return view('admin.contents.edit', compact('content', 'trainings'));
+        if ($courseId) {
+            $modules = Module::where('course_id', $courseId)->where('is_active', true)->orderBy('order')->get();
+        }
+
+        return view('admin.contents.edit', compact('content', 'trainings', 'modules'));
     }
 
     public function update(Request $request, $id)
@@ -71,6 +80,7 @@ class ContentController extends Controller
     {
         return $request->validate([
             'training_id' => 'required|exists:trainings,training_id',
+            'module_id' => 'required|exists:modules,module_id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string',
             'type' => 'required|string|max:50',

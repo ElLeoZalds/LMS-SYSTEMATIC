@@ -13,10 +13,16 @@ return new class extends Migration
             $table->id('task_id');
 
             // Relación con trainings (restricción de llave foránea)
-            $table->unsignedBigInteger('training_id');
+            $table->unsignedBigInteger('training_id')->nullable();
             $table->foreign('training_id')
                 ->references('training_id')
                 ->on('trainings')
+                ->onDelete('cascade');
+
+            $table->unsignedBigInteger('module_id')->nullable();
+            $table->foreign('module_id')
+                ->references('id')
+                ->on('modules')
                 ->onDelete('cascade');
 
             // Campos de la tarea

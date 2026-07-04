@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Models\Module;
 use App\Models\Task;
 use App\Models\TaskSubmission;
 use App\Models\Training;
@@ -30,6 +31,7 @@ class TaskController extends Controller
 
         $taskData = [
             'training_id' => $training->training_id,
+            'module_id' => $data['module_id'],
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'due_date' => $dueDate,
@@ -83,6 +85,7 @@ class TaskController extends Controller
             $task->file_path = $this->storeAttachment($request);
         }
 
+        $task->module_id = $data['module_id'];
         $task->title = $data['title'];
         $task->description = $data['description'] ?? null;
         $task->due_date = $dueDate;
@@ -112,6 +115,7 @@ class TaskController extends Controller
     private function validatedData(Request $request, bool $includeTraining = false): array
     {
         $rules = [
+            'module_id' => 'required|exists:modules,module_id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string',
             'delivery_date' => 'required|date|after_or_equal:today',

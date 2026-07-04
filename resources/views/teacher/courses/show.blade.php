@@ -365,6 +365,7 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Título</th>
+                                            <th>Módulo</th>
                                             <th class="text-center">Inicio</th>
                                             <th class="text-center">Fin</th>
                                             <th class="text-center">Intentos</th>
@@ -382,6 +383,7 @@
                                                         <small class="text-muted d-block">{{ $assessment->description }}</small>
                                                     @endif
                                                 </td>
+                                                <td>{{ optional($assessment->module)->title ?? 'Sin módulo' }}</td>
                                                 <td class="text-center">{{ $assessment->start_date ? \Carbon\Carbon::parse($assessment->start_date)->format('d/m/Y') : 'Sin fecha' }}</td>
                                                 <td class="text-center">{{ $assessment->end_date ? \Carbon\Carbon::parse($assessment->end_date)->format('d/m/Y') : 'Sin fecha' }}</td>
                                                 <td class="text-center">{{ $assessment->allowed_attempts }}</td>
@@ -447,6 +449,7 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Título</th>
+                                                <th>Módulo</th>
                                                 <th class="text-center">Vence</th>
                                                 <th class="text-center">Entregas</th>
                                                 <th class="text-center">Por revisar</th>
@@ -469,6 +472,7 @@
                                                             </small>
                                                         @endif
                                                     </td>
+                                                    <td>{{ optional($task->module)->title ?? 'Sin módulo' }}</td>
                                                     <td class="text-center text-secondary small">{{ $task->due_date ? $task->due_date->format('d/m/Y H:i') : 'Sin fecha' }}</td>
                                                     <td class="text-center">
                                                         <span class="badge bg-light text-dark border px-2 py-1">{{ $task->submissions->count() }}</span>
@@ -750,6 +754,16 @@
                     <input type="hidden" name="training_id" value="{{ $training->training_id }}">
                     <div class="modal-body">
                         <div class="form-group mb-3">
+                            <label for="assessment-module" class="form-label fw-bold">Módulo</label>
+                            <select name="module_id" id="assessment-module" class="form-control" required>
+                                <option value="">Selecciona un módulo</option>
+                                @foreach($modules ?? [] as $module)
+                                    <option value="{{ $module->id }}">{{ $module->title }}</option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Selecciona el módulo al que pertenece esta evaluación.</small>
+                        </div>
+                        <div class="form-group mb-3">
                             <label for="assessment-title" class="form-label fw-bold">Título</label>
                             <input type="text" name="title" id="assessment-title" class="form-control" required placeholder="Ej. Examen Parcial I">
                         </div>
@@ -810,6 +824,16 @@
                     @csrf
                     <input type="hidden" name="training_id" value="{{ $training->training_id }}">
                     <div class="modal-body">
+                        <div class="form-group mb-3">
+                            <label for="task-module" class="form-label fw-bold">Módulo</label>
+                            <select name="module_id" id="task-module" class="form-control" required>
+                                <option value="">Selecciona un módulo</option>
+                                @foreach($modules ?? [] as $module)
+                                    <option value="{{ $module->id }}">{{ $module->title }}</option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Selecciona el módulo al que pertenece esta tarea.</small>
+                        </div>
                         <div class="form-group mb-3">
                             <label for="task-title" class="form-label fw-bold">Título de la Tarea</label>
                             <input type="text" name="title" id="task-title" class="form-control" required placeholder="Ej. Informe de Laboratorio 1">

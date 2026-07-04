@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\Alternative;
 use App\Models\Assessment;
+use App\Models\Module;
 use App\Models\Question;
 use App\Models\Training;
 use Carbon\Carbon;
@@ -67,6 +68,7 @@ class AssessmentController extends Controller
     {
         $request->validate([
             'training_id' => 'required|exists:trainings,training_id',
+            'module_id' => 'required|exists:modules,module_id',
             'title' => 'required|string|max:150',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -104,6 +106,7 @@ class AssessmentController extends Controller
 
         Assessment::create([
             'training_id' => $training->training_id,
+            'module_id' => $request->module_id,
             'title' => $request->title,
             'description' => $request->description ?? null,
             'start_date' => $request->start_date,
@@ -264,6 +267,7 @@ class AssessmentController extends Controller
     public function update(Request $request, $assessment_id)
     {
         $request->validate([
+            'module_id' => 'required|exists:modules,module_id',
             'title' => 'required|string|max:150',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -298,6 +302,7 @@ class AssessmentController extends Controller
         }
 
         $assessment->update([
+            'module_id' => $request->module_id,
             'title' => $request->title,
             'start_date' => $request->start_date,
             'end_date' => Carbon::parse($request->end_date)->endOfDay()->toDateString(),

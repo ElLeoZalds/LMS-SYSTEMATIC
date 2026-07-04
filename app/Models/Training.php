@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Module;
 
 class Training extends Model
 {
@@ -84,6 +85,11 @@ class Training extends Model
     public function contents()
     {
         return $this->hasMany(Content::class, 'training_id', 'training_id');
+    }
+
+    public function modules()
+    {
+        return $this->course?->modules() ?? collect();
     }
 
     public function normalizedStatus(): int

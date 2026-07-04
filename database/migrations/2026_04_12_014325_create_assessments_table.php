@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('assessments', function (Blueprint $table) {
             $table->id('assessment_id');
-            $table->unsignedBigInteger('training_id');
+            $table->unsignedBigInteger('training_id')->nullable();
             $table->foreign('training_id')->references('training_id')->on('trainings')->onDelete('cascade');
+            $table->unsignedBigInteger('module_id')->nullable();
+            $table->foreign('module_id')->references('id')->on('modules')->onDelete('cascade');
             $table->string('title', 150);
             $table->text('description')->nullable();
             $table->date('start_date');

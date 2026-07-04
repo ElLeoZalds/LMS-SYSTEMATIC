@@ -8,6 +8,7 @@ use App\Models\Assessment;
 use App\Models\AssessmentAttempt;
 use App\Models\Attendance;
 use App\Models\Enrollment;
+use App\Models\Module;
 use App\Models\Schedule;
 use App\Models\Task;
 use App\Models\Training;
@@ -197,6 +198,7 @@ class TeacherController extends Controller
         $totalStudents = $training->enrollments->count();
         $totalAssessments = $training->assessments->count();
         $totalAttendanceRecords = Attendance::whereHas('schedule', fn ($q) => $q->where('training_id', $id))->count();
+        $modules = Module::where('course_id', $training->course_id)->where('is_active', true)->orderBy('order')->get();
 
         // Obtenemos los estudiantes directamente desde las inscripciones cargadas
         $students = $training->enrollments;
@@ -206,7 +208,8 @@ class TeacherController extends Controller
             'totalStudents',
             'totalAssessments',
             'totalAttendanceRecords',
-            'students' // Enviamos los estudiantes para mapear la matriz en la vista
+            'students',
+            'modules'
         ));
     }
 
@@ -470,13 +473,16 @@ class TeacherController extends Controller
             ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
-        return view('teacher.tasks.create', compact('training'));
+        $modules = Module::where('course_id', $training->course_id)->where('is_active', true)->orderBy('order')->get();
+
+        return view('teacher.tasks.create', compact('training', 'modules'));
     }
 
     public function storeTask(Request $request)
     {
         $request->validate([
             'training_id' => 'required|exists:trainings,training_id',
+            'module_id' => 'required|exists:modules,module_id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string',
             'delivery_date' => 'required|date|after_or_equal:today',
@@ -494,6 +500,7 @@ class TeacherController extends Controller
 
         Task::create([
             'training_id' => $request->training_id,
+            'module_id' => $request->module_id,
             'title' => $request->title,
             'description' => $request->description,
             'due_date' => Carbon::parse($request->delivery_date)->endOfDay(),

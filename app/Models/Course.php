@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Module;
 
 class Course extends Model
 {
@@ -25,6 +26,11 @@ class Course extends Model
     public function trainings()
     {
         return $this->hasMany(Training::class, 'course_id', 'course_id');
+    }
+
+    public function modules()
+    {
+        return $this->hasMany(Module::class, 'course_id', 'course_id');
     }
 
     public function specialty()

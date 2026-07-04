@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Module;
 
 class Task extends Model
 {
@@ -23,6 +24,11 @@ class Task extends Model
     public function training()
     {
         return $this->belongsTo(Training::class, 'training_id', 'training_id');
+    }
+
+    public function module()
+    {
+        return $this->belongsTo(Module::class, 'module_id', 'id');
     }
 
     public function submissions()
