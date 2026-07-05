@@ -7,6 +7,7 @@ use App\Models\Announcement;
 use App\Models\Assessment;
 use App\Models\AssessmentAttempt;
 use App\Models\Attendance;
+use App\Models\Content;
 use App\Models\Enrollment;
 use App\Models\Module;
 use App\Models\Schedule;
@@ -14,6 +15,7 @@ use App\Models\Task;
 use App\Models\TaskSubmission;
 use App\Models\Training;
 use App\Notifications\NewAnnouncementNotification;
+use App\Support\ModuleSelectorHelper;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -140,6 +142,65 @@ class TeacherController extends Controller
         $course->update(['banner_path' => $path]);
 
         return back()->with('success', 'Banner subido correctamente.');
+    }
+
+    public function storeContent(Request $request)
+    {
+        $validated = $request->validate([
+            'training_id' => 'required|exists:trainings,training_id',
+            'module_id' => 'required|exists:modules,id',
+            'title' => 'required|string|max:150',
+            'description' => 'nullable|string|max:1000',
+            'type' => 'required|string|in:PDF,Video,Lectura',
+            'attachment' => 'nullable|file|max:20480',
+        ]);
+
+        $path = null;
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->store('course-contents', 'public');
+        }
+
+        Content::create([
+            'training_id' => $validated['training_id'],
+            'module_id' => $validated['module_id'],
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'type' => $validated['type'],
+            'order_index' => Content::where('module_id', $validated['module_id'])->count() + 1,
+            'file_path' => $path,
+        ]);
+
+        return back()->with('success', 'Contenido creado correctamente.');
+    }
+
+    public function updateContent(Request $request, $contentId)
+    {
+        $content = Content::findOrFail($contentId);
+
+        $validated = $request->validate([
+            'training_id' => 'required|exists:trainings,training_id',
+            'module_id' => 'required|exists:modules,id',
+            'title' => 'required|string|max:150',
+            'description' => 'nullable|string|max:1000',
+            'type' => 'required|string|in:PDF,Video,Lectura',
+            'attachment' => 'nullable|file|max:20480',
+        ]);
+
+        $path = $content->file_path;
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->store('course-contents', 'public');
+        }
+
+        $content->update([
+            'training_id' => $validated['training_id'],
+            'module_id' => $validated['module_id'],
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'type' => $validated['type'],
+            'file_path' => $path,
+        ]);
+
+        return back()->with('success', 'Contenido actualizado correctamente.');
     }
 
     public function calendar(Request $request)
@@ -307,8 +368,20 @@ class TeacherController extends Controller
         $modules = Module::where('course_id', $training->course_id)
             ->where('is_active', true)
             ->orderBy('order')
-            ->with(['tasks', 'assessments'])
             ->get();
+
+        ['modules' => $modules] = ModuleSelectorHelper::annotate($modules, $training);
+
+        foreach ($modules as $module) {
+            $module->module_id = $module->id;
+            $module->name = $module->title;
+            $module->contents = $module->contents()->orderBy('order_index')->get();
+            $module->assessments = $module->assessments()->with(['questions', 'attempts'])->orderBy('start_date')->orderBy('end_date')->get();
+            $module->tasks = $module->tasks()->with(['submissions'])->orderBy('due_date')->get();
+            $module->contents_count = $module->contents->count();
+            $module->assessments_count = $module->assessments->count();
+            $module->tasks_count = $module->tasks->count();
+        }
 
         $selectedModule = $modules->firstWhere('id', $moduleId) ?? $modules->first();
         $moduleId = $selectedModule?->id;

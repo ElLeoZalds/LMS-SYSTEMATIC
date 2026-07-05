@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use App\Models\Module;
 use App\Models\Task;
+use App\Support\ModuleSelectorHelper;
 use App\Models\TaskSubmission;
 use App\Models\Training;
 use Carbon\Carbon;
@@ -19,6 +19,11 @@ class TaskController extends Controller
         return auth()->user()?->roles->contains('name', 'Administrator') ?? false;
     }
 
+    private function moduleSelectionData(Training $training): array
+    {
+        return ModuleSelectorHelper::loadForTraining($training);
+    }
+
     public function create(Request $request, $training_id = null)
     {
         $trainingId = $request->input('training_id', $training_id);
@@ -29,13 +34,9 @@ class TaskController extends Controller
             ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
-        $courseId = $training->course?->course_id ?? $training->course_id;
-        $modules = Module::where('course_id', $courseId)
-            ->where('is_active', true)
-            ->orderBy('order')
-            ->get();
+        ['modules' => $modules, 'defaultModuleId' => $defaultModuleId] = $this->moduleSelectionData($training);
 
-        return view('teacher.tasks.create', compact('training', 'modules'));
+        return view('teacher.tasks.create', compact('training', 'modules', 'defaultModuleId'));
     }
 
     public function store(Request $request)

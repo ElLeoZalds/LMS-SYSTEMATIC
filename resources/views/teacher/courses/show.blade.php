@@ -508,177 +508,219 @@
                 @elseif(request('tab') === 'contenido')
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
                         <div>
-                            <h5 class="fw-bold text-dark mb-2">Evaluaciones del curso</h5>
-                            <p class="text-muted small mb-0">
-                                Inicio: <strong>{{ $training->start_date ? \Carbon\Carbon::parse($training->start_date)->format('d/m/Y') : 'Sin fecha' }}</strong>
-                                · Fin: <strong>{{ $training->end_date ? \Carbon\Carbon::parse($training->end_date)->format('d/m/Y') : 'Sin fecha' }}</strong>
-                            </p>
-                        </div>
-                        <div>
-                            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#createAssessmentModal">
-                                <i class="bi bi-plus-lg me-1"></i>Nueva Evaluación
-                            </button>
+                            <h5 class="fw-bold text-dark mb-2">Contenido y Evaluaciones</h5>
+                            <p class="text-muted small mb-0">Organiza el material de estudio y las evaluaciones por módulo para cada bloque del curso.</p>
                         </div>
                     </div>
 
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-light py-3">
-                            <h6 class="mb-0 fw-bold">Evaluaciones creadas</h6>
-                        </div>
-                        @if($training->assessments->count() > 0)
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Título</th>
-                                            <th>Módulo</th>
-                                            <th class="text-center">Inicio</th>
-                                            <th class="text-center">Fin</th>
-                                            <th class="text-center">Intentos</th>
-                                            <th class="text-center">Estado</th>
-                                            <th class="text-end">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($training->assessments as $assessment)
-                                            @php $hasAttempts = $assessment->attempts()->exists(); @endphp
-                                            <tr>
-                                                <td>
-                                                    <div class="fw-bold">{{ $assessment->title }}</div>
-                                                    @if(!empty($assessment->description))
-                                                        <small class="text-muted d-block">{{ $assessment->description }}</small>
-                                                    @endif
-                                                </td>
-                                                <td>{{ optional($assessment->module)->title ?? 'Sin módulo' }}</td>
-                                                <td class="text-center">{{ $assessment->start_date ? \Carbon\Carbon::parse($assessment->start_date)->format('d/m/Y') : 'Sin fecha' }}</td>
-                                                <td class="text-center">{{ $assessment->end_date ? \Carbon\Carbon::parse($assessment->end_date)->format('d/m/Y') : 'Sin fecha' }}</td>
-                                                <td class="text-center">{{ $assessment->allowed_attempts }}</td>
-                                                <td class="text-center">
-                                                    <span class="badge @if($assessment->active) bg-success @else bg-danger @endif">{{ $assessment->active ? 'Activo' : 'Inactivo' }}</span>
-                                                </td>
-                                                <td class="text-end">
-                                                    <div class="d-flex flex-column align-items-end gap-3">
-                                                        <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white mb-2">
-                                                            <i class="bi bi-pencil-square"></i> Gestionar Preguntas
-                                                        </a>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary edit-assessment-btn mb-2" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
-                                                            <i class="bi bi-pencil"></i> Editar
-                                                        </button>
-                                                        @if($hasAttempts && ! $isAdministrator)
-                                                            <span class="badge bg-warning text-dark mb-2">No se puede eliminar: tiene intentos</span>
-                                                        @else
-                                                            <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm mb-2" data-message="{{ $hasAttempts ? 'Esta evaluación tiene intentos registrados. Como administrador puedes eliminarla junto con sus datos relacionados. ¿Deseas continuar?' : '¿Estás seguro de eliminar esta evaluación?' }}">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                                    <i class="bi bi-trash"></i> {{ $hasAttempts ? 'Eliminar como admin' : 'Eliminar' }}
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                    <div class="accordion" id="courseContentAccordion">
+                        @forelse(($modules ?? collect()) as $index => $module)
+                            @php
+                                $moduleStatus = $module->module_status ?? 'Pendiente';
+                                $moduleStatusClass = $moduleStatus === 'En curso' ? 'success' : ($moduleStatus === 'Completado' ? 'secondary' : 'info');
+                                $moduleBorderColor = $moduleStatus === 'En curso' ? '#28a745' : ($moduleStatus === 'Completado' ? '#6c757d' : '#17a2b8');
+                            @endphp
+                            <div class="card mb-3" style="border-left: 4px solid {{ $moduleBorderColor }};">
+                                <div class="card-header bg-white p-3" id="contentHeading{{ $module->module_id ?? $module->id }}" data-toggle="collapse" data-target="#contentCollapse{{ $module->module_id ?? $module->id }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="contentCollapse{{ $module->module_id ?? $module->id }}" role="button" style="cursor: pointer;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-journal-bookmark-fill me-3 text-primary"></i>
+                                            <div>
+                                                <h6 class="mb-1 fw-bold text-dark">Módulo {{ $module->order }}: {{ $module->title }}</h6>
+                                                <small class="text-muted">
+                                                    <span class="badge badge-{{ $moduleStatusClass }} me-2">{{ $moduleStatus }}</span>
+                                                    {{ $module->contents_count ?? 0 }} material(es) · {{ $module->assessments_count ?? 0 }} evaluación(es)
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-chevron-{{ $index === 0 ? 'up' : 'down' }}"></i>
+                                    </div>
+                                </div>
+                                <div id="contentCollapse{{ $module->module_id ?? $module->id }}" class="collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="contentHeading{{ $module->module_id ?? $module->id }}" data-parent="#courseContentAccordion">
+                                    <div class="card-body p-4">
+                                        <div class="pt-1">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="mb-0 fw-bold text-dark">Evaluaciones</h6>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="openAssessmentModal({{ $module->module_id ?? $module->id }})">
+                                                    <i class="bi bi-plus-circle"></i> Nueva Evaluación
+                                                </button>
+                                            </div>
+                                            @if(($module->assessments_count ?? 0) > 0)
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover mb-0">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Título</th>
+                                                                <th>Fecha límite</th>
+                                                                <th>Estado</th>
+                                                                <th>Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach($module->assessments as $assessment)
+                                                                @php $hasAttempts = $assessment->attempts()->exists(); @endphp
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="fw-bold">{{ $assessment->title }}</div>
+                                                                        @if(!empty($assessment->description))
+                                                                            <small class="text-muted d-block">{{ Str::limit($assessment->description, 60) }}</small>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td>{{ $assessment->end_date ? \Carbon\Carbon::parse($assessment->end_date)->format('d/m/Y') : 'Sin fecha' }}</td>
+                                                                    <td>
+                                                                        <span class="badge @if($assessment->active) bg-success @else bg-danger @endif">{{ $assessment->active ? 'Activa' : 'Inactiva' }}</span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex flex-wrap gap-2">
+                                                                            <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white">
+                                                                                <i class="bi bi-question-circle"></i> Preguntas
+                                                                            </a>
+                                                                            <button type="button" class="btn btn-sm btn-outline-primary edit-assessment-btn" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "module_id" => $assessment->module_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
+                                                                                <i class="bi bi-pencil"></i> Editar
+                                                                            </button>
+                                                                            @if($hasAttempts && ! $isAdministrator)
+                                                                                <button type="button" class="btn btn-sm btn-danger" onclick="Swal.fire({ icon: 'warning', title: 'No es posible eliminar', text: 'Esta evaluación ya tiene intentos registrados y no puede eliminarse.' });">
+                                                                                    <i class="bi bi-trash"></i> Eliminar
+                                                                                </button>
+                                                                            @else
+                                                                                <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm" data-message="{{ $hasAttempts ? 'Esta evaluación tiene intentos registrados. Como administrador puedes eliminarla junto con sus datos relacionados. ¿Deseas continuar?' : '¿Estás seguro de eliminar esta evaluación?' }}">
+                                                                                    @csrf
+                                                                                    @method('DELETE')
+                                                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                                                        <i class="bi bi-trash"></i> {{ $hasAttempts ? 'Eliminar como admin' : 'Eliminar' }}
+                                                                                    </button>
+                                                                                </form>
+                                                                            @endif
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            @else
+                                                <div class="text-center py-3 border rounded bg-light">
+                                                    <i class="bi bi-journal-x h3 d-block text-muted mb-2"></i>
+                                                    <p class="text-muted mb-0">No hay evaluaciones en este módulo</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        @else
-                            <div class="card-body text-center text-muted py-4">
-                                <i class="bi bi-inbox h3 d-block text-secondary mb-2"></i>
-                                <p class="mb-0 small">No hay evaluaciones creadas aún para este curso.</p>
+                        @empty
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-info-circle me-2"></i>No hay módulos disponibles para esta capacitación.
                             </div>
-                        @endif
+                        @endforelse
                     </div>
 
                 @elseif(request('tab') === 'tareas')
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
                         <div>
-                            <h5 class="fw-bold text-dark mb-2">Tareas entregables</h5>
-                            <p class="text-muted small mb-0">Aquí puedes revisar y administrar las tareas creadas para tus estudiantes.</p>
-                        </div>
-                        <div>
-                            <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#createTaskModal">
-                                <i class="bi bi-plus-lg me-1"></i>Nueva Tarea
-                            </button>
+                            <h5 class="fw-bold text-dark mb-2">Tareas por Módulo</h5>
+                            <p class="text-muted small mb-0">Revisa y administra las tareas organizadas por módulo del curso.</p>
                         </div>
                     </div>
 
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-light py-3">
-                            <h6 class="mb-0 fw-bold">Tareas creadas</h6>
-                        </div>
-                        <div class="card-body">
-                            <p class="text-muted small mb-3">Las tareas entregables asignadas se listan a continuación.</p>
-                            @if($training->tasks && $training->tasks->count() > 0)
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0 align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Título</th>
-                                                <th>Módulo</th>
-                                                <th class="text-center">Vence</th>
-                                                <th class="text-center">Entregas</th>
-                                                <th class="text-center">Por revisar</th>
-                                                <th class="text-end">Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($training->tasks as $task)
-                                                @php $hasSubmissions = $task->submissions->isNotEmpty(); @endphp
-                                                <tr>
-                                                    <td>
-                                                        <div class="fw-bold">{{ $task->title }}</div>
-                                                        @if(!empty($task->description))
-                                                            <small class="text-muted d-block">{{ $task->description }}</small>
-                                                        @endif
-                                                        @if(!empty($task->file_path))
-                                                            <small class="d-block mt-1">
-                                                                <i class="bi bi-download me-1 text-primary"></i>
-                                                                <a href="{{ asset('storage/'.$task->file_path) }}" target="_blank" class="text-decoration-none text-primary fw-semibold">Archivo adjunto</a>
-                                                            </small>
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ optional($task->module)->title ?? 'Sin módulo' }}</td>
-                                                    <td class="text-center text-secondary small">{{ $task->due_date ? $task->due_date->format('d/m/Y H:i') : 'Sin fecha' }}</td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-light text-dark border px-2 py-1">{{ $task->submissions->count() }}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-warning text-dark px-2 py-1">{{ $task->submissions->whereNull('grade')->count() }} por revisar</span>
-                                                    </td>
-                                                    <td class="text-end">
-                                                        <div class="d-flex flex-column align-items-end gap-3">
-                                                            <a href="{{ route('teacher.tasks.submissions', $task->task_id) }}" class="btn btn-sm btn-success mb-2">
-                                                                <i class="bi bi-eye"></i> Revisar
-                                                            </a>
-                                                            <button type="button" class="btn btn-sm btn-primary edit-task-btn mb-2" data-task='{{ json_encode(["id" => $task->task_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}'>
-                                                                <i class="bi bi-pencil"></i> Editar
-                                                            </button>
-                                                            @if($hasSubmissions && ! $isAdministrator)
-                                                                <span class="badge bg-warning text-dark mb-2">No se puede eliminar: tiene entregas</span>
-                                                            @else
-                                                                <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="swal-confirm mb-2" data-message="{{ $hasSubmissions ? 'Esta tarea tiene entregas registradas. Como administrador puedes eliminarla junto con sus datos relacionados. ¿Deseas continuar?' : '¿Deseas eliminar esta tarea?' }}">
-                                                                    @csrf
-                                                                    @method('DELETE')
-                                                                    <button type="submit" class="btn btn-sm btn-danger">
-                                                                        <i class="bi bi-trash"></i> {{ $hasSubmissions ? 'Eliminar como admin' : 'Eliminar' }}
-                                                                    </button>
-                                                                </form>
-                                                            @endif
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                    <div class="accordion" id="courseTasksAccordion">
+                        @forelse(($modules ?? collect()) as $index => $module)
+                            @php
+                                $moduleStatus = $module->module_status ?? 'Pendiente';
+                                $moduleStatusClass = $moduleStatus === 'En curso' ? 'success' : ($moduleStatus === 'Completado' ? 'secondary' : 'info');
+                                $moduleBorderColor = $moduleStatus === 'En curso' ? '#28a745' : ($moduleStatus === 'Completado' ? '#6c757d' : '#17a2b8');
+                            @endphp
+                            <div class="card mb-3" style="border-left: 4px solid {{ $moduleBorderColor }};">
+                                <div class="card-header bg-white p-3" id="tasksHeading{{ $module->module_id ?? $module->id }}" data-toggle="collapse" data-target="#tasksCollapse{{ $module->module_id ?? $module->id }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="tasksCollapse{{ $module->module_id ?? $module->id }}" role="button" style="cursor: pointer;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-dark">Módulo {{ $module->order }}: {{ $module->title }}</h6>
+                                            <small class="text-muted">
+                                                <span class="badge badge-{{ $moduleStatusClass }} me-2">{{ $moduleStatus }}</span>
+                                                {{ $module->tasks_count ?? 0 }} tarea(s)
+                                            </small>
+                                        </div>
+                                        <i class="bi bi-chevron-{{ $index === 0 ? 'up' : 'down' }}"></i>
+                                    </div>
                                 </div>
-                            @else
-                                <div class="text-center text-muted py-3 small">
-                                    <i class="bi bi-journal-text h4 d-block text-secondary mb-2"></i>
-                                    No hay tareas independientes registradas.
+                                <div id="tasksCollapse{{ $module->module_id ?? $module->id }}" class="collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="tasksHeading{{ $module->module_id ?? $module->id }}" data-parent="#courseTasksAccordion">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div>
+                                                <h6 class="fw-bold text-dark mb-1">Tareas de este módulo</h6>
+                                                <small class="text-muted">Crea y gestiona las entregas para este módulo.</small>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-success" onclick="event.stopPropagation(); openTaskModal({{ $module->module_id ?? $module->id }})">
+                                                <i class="bi bi-plus-lg me-1"></i>Crear Tarea
+                                            </button>
+                                        </div>
+                                        @if(($module->tasks_count ?? 0) > 0)
+                                            <div class="table-responsive">
+                                                <table class="table table-hover mb-0 align-middle">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Título</th>
+                                                            <th>Vence</th>
+                                                            <th>Entregas</th>
+                                                            <th>Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($module->tasks as $task)
+                                                            @php $hasSubmissions = $task->submissions->isNotEmpty(); @endphp
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="fw-bold">{{ $task->title }}</div>
+                                                                    @if(!empty($task->description))
+                                                                        <small class="text-muted d-block">{{ Str::limit($task->description, 80) }}</small>
+                                                                    @endif
+                                                                </td>
+                                                                <td class="text-secondary small">{{ $task->due_date ? $task->due_date->format('d/m/Y H:i') : 'Sin fecha' }}</td>
+                                                                <td>
+                                                                    <span class="badge bg-light text-dark border px-2 py-1">{{ $task->submissions->count() }}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex flex-wrap gap-2">
+                                                                        <a href="{{ route('teacher.tasks.submissions', $task->task_id) }}" class="btn btn-sm btn-success">
+                                                                            <i class="bi bi-eye"></i> Revisar
+                                                                        </a>
+                                                                        <button type="button" class="btn btn-sm btn-primary edit-task-btn" data-task='{{ json_encode(["id" => $task->task_id, "module_id" => $task->module_id, "title" => $task->title, "description" => $task->description, "due_date" => $task->due_date ? $task->due_date->format('Y-m-d') : null, "file_path" => $task->file_path ?? null]) }}'>
+                                                                            <i class="bi bi-pencil"></i> Editar
+                                                                        </button>
+                                                                        @if($hasSubmissions && ! $isAdministrator)
+                                                                            <button type="button" class="btn btn-sm btn-danger" onclick="Swal.fire({ icon: 'warning', title: 'No es posible eliminar', text: 'Esta tarea ya tiene entregas registradas y no puede eliminarse.' });">
+                                                                                <i class="bi bi-trash"></i> Eliminar
+                                                                            </button>
+                                                                        @else
+                                                                            <form action="{{ route('teacher.tasks.destroy', $task->task_id) }}" method="POST" class="swal-confirm" data-message="{{ $hasSubmissions ? 'Esta tarea tiene entregas registradas. Como administrador puedes eliminarla junto con sus datos relacionados. ¿Deseas continuar?' : '¿Deseas eliminar esta tarea?' }}">
+                                                                                @csrf
+                                                                                @method('DELETE')
+                                                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                                                    <i class="bi bi-trash"></i> {{ $hasSubmissions ? 'Eliminar como admin' : 'Eliminar' }}
+                                                                                </button>
+                                                                            </form>
+                                                                        @endif
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @else
+                                            <div class="text-center py-3 border rounded bg-light">
+                                                <i class="bi bi-journal-text h3 d-block text-muted mb-2"></i>
+                                                <p class="text-muted mb-0">No hay tareas en este módulo</p>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
-                            @endif
-                        </div>
+                            </div>
+                        @empty
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-info-circle me-2"></i>No hay módulos disponibles para esta capacitación.
+                            </div>
+                        @endforelse
                     </div>
 
                 @elseif(request('tab') === 'anuncios')
@@ -887,6 +929,61 @@
         </div>
     </div>
 
+    <div class="modal fade" id="createContentModal" tabindex="-1" aria-labelledby="createContentModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="createContentModalLabel">Nuevo Material de Estudio</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('teacher.contents.store') }}" method="POST" enctype="multipart/form-data" id="createContentForm">
+                    @csrf
+                    <input type="hidden" name="training_id" value="{{ $training->training_id }}">
+                    <input type="hidden" name="content_id" id="content-id" value="">
+                    <input type="hidden" name="module_id" id="content-modal-module-id" value="">
+                    <div class="modal-body">
+                        <div class="form-group mb-3">
+                            <label for="content-module" class="form-label fw-bold">Módulo</label>
+                            <select name="module_id_select" id="content-module" class="form-control" required>
+                                <option value="">Selecciona un módulo</option>
+                                @foreach(($modules ?? collect()) as $module)
+                                    <option value="{{ optional($module)->id }}">{{ optional($module)->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="content-title" class="form-label fw-bold">Título</label>
+                            <input type="text" name="title" id="content-title" class="form-control" required placeholder="Ej. Lectura introductoria">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="content-description" class="form-label">Descripción</label>
+                            <textarea name="description" id="content-description" class="form-control" rows="3" placeholder="Describe brevemente el recurso..."></textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="content-type" class="form-label fw-bold">Tipo</label>
+                            <select name="type" id="content-type" class="form-control" required>
+                                <option value="">Selecciona un tipo</option>
+                                <option value="PDF">PDF</option>
+                                <option value="Video">Video</option>
+                                <option value="Lectura">Lectura</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="content-attachment" class="form-label">Archivo</label>
+                            <input type="file" name="attachment" id="content-attachment" class="form-control" accept=".pdf,.mp4,.mov,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.zip">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Contenido</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="createAssessmentModal" tabindex="-1" aria-labelledby="createAssessmentModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -899,17 +996,8 @@
                 <form action="{{ route('teacher.assessments.store') }}" method="POST" id="createAssessmentForm">
                     @csrf
                     <input type="hidden" name="training_id" value="{{ $training->training_id }}">
+                    <input type="hidden" name="module_id" id="assessment-modal-module-id" value="">
                     <div class="modal-body">
-                        <div class="form-group mb-3">
-                            <label for="assessment-module" class="form-label fw-bold">Módulo</label>
-                            <select name="module_id" id="assessment-module" class="form-control" required>
-                                <option value="">Selecciona un módulo</option>
-                                @foreach(($modules ?? collect()) as $module)
-                                    <option value="{{ optional($module)->id }}">{{ optional($module)->title }}</option>
-                                @endforeach
-                            </select>
-                            <small class="form-text text-muted">Selecciona el módulo al que pertenece esta evaluación.</small>
-                        </div>
                         <div class="form-group mb-3">
                             <label for="assessment-title" class="form-label fw-bold">Título</label>
                             <input type="text" name="title" id="assessment-title" class="form-control" required placeholder="Ej. Examen Parcial I">
@@ -970,17 +1058,8 @@
                 <form action="{{ route('teacher.tasks.store') }}" method="POST" enctype="multipart/form-data" id="createTaskForm">
                     @csrf
                     <input type="hidden" name="training_id" value="{{ $training->training_id }}">
+                    <input type="hidden" name="module_id" id="task-modal-module-id" value="">
                     <div class="modal-body">
-                        <div class="form-group mb-3">
-                            <label for="task-module" class="form-label fw-bold">Módulo</label>
-                            <select name="module_id" id="task-module" class="form-control" required>
-                                <option value="">Selecciona un módulo</option>
-                                @foreach(($modules ?? collect()) as $module)
-                                    <option value="{{ optional($module)->id }}">{{ optional($module)->title }}</option>
-                                @endforeach
-                            </select>
-                            <small class="form-text text-muted">Selecciona el módulo al que pertenece esta tarea.</small>
-                        </div>
                         <div class="form-group mb-3">
                             <label for="task-title" class="form-label fw-bold">Título de la Tarea</label>
                             <input type="text" name="title" id="task-title" class="form-control" required placeholder="Ej. Informe de Laboratorio 1">
@@ -1011,7 +1090,71 @@
     </div>
 
     <script>
+        function openContentModal(moduleId, contentData = null) {
+            const form = document.getElementById('createContentForm');
+            const select = document.getElementById('content-module');
+            const hidden = document.getElementById('content-modal-module-id');
+            const contentId = document.getElementById('content-id');
+            if (form) {
+                form.action = '{{ route('teacher.contents.store') }}';
+                const methodInput = form.querySelector('input[name="_method"]');
+                if (methodInput) methodInput.remove();
+                if (contentData) {
+                    form.action = '{{ route('teacher.contents.store') }}'.replace('/contents', '/contents/' + contentData.id);
+                    let methodInputUpdate = form.querySelector('input[name="_method"]');
+                    if (!methodInputUpdate) {
+                        methodInputUpdate = document.createElement('input');
+                        methodInputUpdate.type = 'hidden';
+                        methodInputUpdate.name = '_method';
+                        form.appendChild(methodInputUpdate);
+                    }
+                    methodInputUpdate.value = 'PUT';
+                    if (contentId) contentId.value = contentData.id || '';
+                    document.getElementById('content-title').value = contentData.title || '';
+                    document.getElementById('content-description').value = contentData.description || '';
+                    document.getElementById('content-type').value = contentData.type || '';
+                } else {
+                    if (contentId) contentId.value = '';
+                    form.reset();
+                }
+            }
+            if (select) select.value = moduleId || '';
+            if (hidden) hidden.value = moduleId || '';
+            $('#createContentModal').modal('show');
+        }
+
+        function openAssessmentModal(moduleId) {
+            const select = document.getElementById('assessment-module');
+            const hidden = document.getElementById('assessment-modal-module-id');
+            if (select) {
+                select.value = moduleId || '';
+            }
+            if (hidden) {
+                hidden.value = moduleId || '';
+            }
+            if (select) {
+                select.removeAttribute('required');
+            }
+            $('#createAssessmentModal').modal('show');
+        }
+
+        function openTaskModal(moduleId) {
+            const select = document.getElementById('task-module');
+            const hidden = document.getElementById('task-modal-module-id');
+            if (select) {
+                select.value = moduleId || '';
+            }
+            if (hidden) {
+                hidden.value = moduleId || '';
+            }
+            $('#createTaskModal').modal('show');
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            const assessmentSelect = document.getElementById('assessment-module');
+            const assessmentHidden = document.getElementById('assessment-modal-module-id');
+            const taskSelect = document.getElementById('task-module');
+            const taskHidden = document.getElementById('task-modal-module-id');
             const startDateInput = document.getElementById('assessment-start-date');
             const endDateInput = document.getElementById('assessment-end-date');
             const timeLimitInput = document.getElementById('assessment-time-limit');
@@ -1028,6 +1171,18 @@
             };
 
             const todayDate = getLocalToday();
+            if (assessmentSelect && assessmentHidden) {
+                assessmentSelect.addEventListener('change', function() {
+                    assessmentHidden.value = this.value || '';
+                });
+            }
+
+            if (taskSelect && taskHidden) {
+                taskSelect.addEventListener('change', function() {
+                    taskHidden.value = this.value || '';
+                });
+            }
+
             if (startDateInput && endDateInput) {
                 const assessmentMin = startDateInput.getAttribute('min') || todayDate;
                 startDateInput.min = assessmentMin;
@@ -1090,6 +1245,19 @@
                 });
             }
 
+            document.querySelectorAll('.edit-content-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const data = JSON.parse(this.getAttribute('data-content'));
+                    openContentModal(data.module_id || '', data);
+                });
+            });
+
+            document.querySelectorAll('button[data-target="#createContentModal"]').forEach(function(b){
+                b.addEventListener('click', function(){
+                    openContentModal('');
+                });
+            });
+
             // Edit assessment via modal
             document.querySelectorAll('.edit-assessment-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
@@ -1105,6 +1273,8 @@
                         form.appendChild(methodInput);
                     }
                     methodInput.value = 'PUT';
+                    document.getElementById('assessment-module').value = data.module_id || '';
+                    document.getElementById('assessment-modal-module-id').value = data.module_id || '';
                     document.getElementById('assessment-title').value = data.title || '';
                     document.getElementById('assessment-description').value = data.description || '';
                     document.getElementById('assessment-start-date').value = data.start_date || '';
@@ -1122,6 +1292,8 @@
                     form.action = '{{ route('teacher.assessments.store') }}';
                     const methodInput = form.querySelector('input[name="_method"]');
                     if (methodInput) methodInput.remove();
+                    document.getElementById('assessment-module').value = '';
+                    document.getElementById('assessment-modal-module-id').value = '';
                     form.reset();
                 });
             });
@@ -1141,6 +1313,8 @@
                         form.appendChild(methodInput);
                     }
                     methodInput.value = 'PUT';
+                    document.getElementById('task-module').value = data.module_id || '';
+                    document.getElementById('task-modal-module-id').value = data.module_id || '';
                     document.getElementById('task-title').value = data.title || '';
                     document.getElementById('task-description').value = data.description || '';
                     document.getElementById('task-due-date').value = data.due_date || '';
@@ -1155,6 +1329,8 @@
                     form.action = '{{ route('teacher.tasks.store') }}';
                     const methodInput = form.querySelector('input[name="_method"]');
                     if (methodInput) methodInput.remove();
+                    document.getElementById('task-module').value = '';
+                    document.getElementById('task-modal-module-id').value = '';
                     form.reset();
                 });
             });

@@ -11,10 +11,12 @@ class Content extends Model
 
     protected $fillable = [
         'training_id',
+        'module_id',
         'description',
         'title',
         'type',
         'order_index',
+        'file_path',
     ];
 
     public function training()

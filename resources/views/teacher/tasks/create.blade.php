@@ -30,12 +30,12 @@
                             <select class="form-control form-control-sm" id="module_id" name="module_id" required>
                                 <option value="">Selecciona un módulo</option>
                                 @foreach($modules ?? [] as $module)
-                                    <option value="{{ $module->id }}" {{ old('module_id') == $module->id ? 'selected' : '' }}>
-                                        {{ $module->title }}
+                                    <option value="{{ $module->id }}" {{ (string) old('module_id', $defaultModuleId ?? '') === (string) $module->id ? 'selected' : '' }}>
+                                        Módulo {{ $module->order }}: {{ $module->title }} — {{ $module->module_status ?? 'Sin estado' }}
                                     </option>
                                 @endforeach
                             </select>
-                            <small class="form-text text-muted">Selecciona el módulo al que pertenece esta tarea.</small>
+                            <small class="form-text text-muted">Selecciona el módulo al que pertenece esta actividad. Se recomienda asignarla al módulo en curso.</small>
                             @error('module_id') <div class="text-danger small">{{ $message }}</div> @enderror
                         </div>
 

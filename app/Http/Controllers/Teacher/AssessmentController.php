@@ -7,6 +7,7 @@ use App\Models\Alternative;
 use App\Models\Assessment;
 use App\Models\Module;
 use App\Models\Question;
+use App\Support\ModuleSelectorHelper;
 use App\Models\Training;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -23,6 +24,11 @@ class AssessmentController extends Controller
         return auth()->user()?->roles->contains('name', 'Administrator') ?? false;
     }
 
+    private function moduleSelectionData(Training $training): array
+    {
+        return ModuleSelectorHelper::loadForTraining($training);
+    }
+
     public function index()
     {
         $user = auth()->user();
@@ -37,22 +43,27 @@ class AssessmentController extends Controller
     {
         $user = auth()->user();
 
-        $training = Training::with([
-            'course',
-            'assessments.questions.alternatives',
-            'assessments.attempts.user',
-        ])
+        $training = Training::with(['course'])
             ->where('training_id', $training_id)
             ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
-        $courseId = $training->course?->course_id ?? $training->course_id;
-        $modules = Module::where('course_id', $courseId)
+        $course = $training->course;
+        $modules = Module::where('course_id', $course?->course_id)
             ->where('is_active', true)
             ->orderBy('order')
             ->get();
 
-        return view('teacher.assessments.manage', compact('training', 'modules'));
+        ['modules' => $modules, 'defaultModuleId' => $defaultModuleId] = ModuleSelectorHelper::annotate($modules, $training);
+
+        foreach ($modules as $module) {
+            $module->module_id = $module->id;
+            $module->name = $module->title;
+            $module->assessments = $module->assessments()->with(['questions', 'attempts'])->orderBy('start_date')->orderBy('end_date')->get();
+            $module->assessments_count = $module->assessments->count();
+        }
+
+        return view('teacher.assessments.manage', compact('training', 'course', 'modules', 'defaultModuleId'));
     }
 
     public function showAssessment($assessment_id)

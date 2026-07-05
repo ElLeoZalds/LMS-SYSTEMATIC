@@ -96,6 +96,9 @@ Route::prefix('teacher')
         Route::get('/attendance/check', [TeacherAttendanceController::class, 'check'])->name('attendance.check');
         Route::get('/attendance/list/{training_id}', [TeacherAttendanceController::class, 'listPrevious'])->name('attendance.list');
 
+        Route::post('/contents', [TeacherController::class, 'storeContent'])->name('contents.store');
+        Route::put('/contents/{contentId}', [TeacherController::class, 'updateContent'])->name('contents.update');
+
         Route::post('/tasks/store', [TaskController::class, 'store'])->name('tasks.store');
         Route::put('/tasks/{task_id}', [TaskController::class, 'update'])->name('tasks.update');
         Route::delete('/tasks/{task_id}', [TaskController::class, 'destroy'])->name('tasks.destroy');
