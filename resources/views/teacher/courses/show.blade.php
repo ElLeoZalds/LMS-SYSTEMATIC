@@ -295,73 +295,61 @@
             <div class="card-body">
 
                 @if(request('tab', 'inicio') === 'inicio')
-                    <div class="row g-4">
-                        <div class="col-lg-7">
-                            <div class="card shadow-sm border-0 h-100">
-                                <div class="card-header bg-white py-3">
-                                    <h5 class="mb-0 fw-bold text-dark">Resumen del curso</h5>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm mb-3">
+                                <div class="card-header bg-light border-0 py-2 px-3">
+                                    <h4 class="h6 fw-bold text-dark mb-0">Información del curso</h4>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body p-3">
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <div class="border rounded p-3 h-100">
-                                                <div class="d-flex align-items-start gap-2">
-                                                    <i class="bi bi-info-circle text-primary mt-1"></i>
-                                                    <div>
-                                                        <h6 class="fw-bold mb-2">Información general</h6>
-                                                        <p class="small text-muted mb-1"><strong>Especialidad:</strong> {{ optional($training->course->specialty)->specialty ?? 'Sin especialidad' }}</p>
-                                                        <p class="small text-muted mb-1"><strong>Modalidad:</strong> {{ ucfirst($training->modality) }}</p>
-                                                        <p class="small text-muted mb-1"><strong>Inicio:</strong> {{ $training->start_date ? $training->start_date->format('d/m/Y') : 'Sin fecha' }}</p>
-                                                        <p class="small text-muted mb-0"><strong>Fin:</strong> {{ $training->end_date ? $training->end_date->format('d/m/Y') : 'Sin fecha' }}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <div class="text-muted small mb-1">Curso</div>
+                                            <div class="fw-bold text-dark">{{ optional($training->course)->title ?? 'Sin curso' }}</div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="border rounded p-3 h-100">
-                                                <div class="d-flex align-items-start gap-2">
-                                                    <i class="bi bi-megaphone text-success mt-1"></i>
-                                                    <div class="w-100">
-                                                        <h6 class="fw-bold mb-2">Últimos anuncios</h6>
-                                                        @if($latestAnnouncements->isEmpty())
-                                                            <p class="small text-muted mb-0">Aún no hay anuncios publicados para esta capacitación.</p>
-                                                        @else
-                                                            <ul class="list-unstyled mb-0">
-                                                                @foreach($latestAnnouncements as $announcement)
-                                                                    <li class="small mb-2">
-                                                                        <div class="fw-semibold text-dark">{{ $announcement->title }}</div>
-                                                                        <div class="text-muted">{{ \Illuminate\Support\Str::limit(strip_tags($announcement->message), 90) }}</div>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <div class="text-muted small mb-1">Especialidad</div>
+                                            <div class="fw-bold text-dark">{{ optional($training->course->specialty)->specialty ?? 'Sin especialidad' }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="text-muted small mb-1">Modalidad</div>
+                                            <div class="fw-bold text-dark">{{ ucfirst($training->modality) }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="text-muted small mb-1">Fechas</div>
+                                            <div class="fw-bold text-dark">{{ $training->start_date ? $training->start_date->format('d/m/Y') : 'Sin fecha' }} - {{ $training->end_date ? $training->end_date->format('d/m/Y') : 'Sin fecha' }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="text-muted small mb-1">Estudiantes</div>
+                                            <div class="fw-bold text-dark">{{ $totalStudents }} matriculados</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="text-muted small mb-1">Estado</div>
+                                            <div class="fw-bold text-dark">{{ $training->isActive() ? 'Activo' : 'Inactivo' }}</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-lg-5">
-                            <div class="card shadow-sm border-0 h-100">
-                                <div class="card-header bg-white py-3">
-                                    <h5 class="mb-0 fw-bold text-dark">Próximas sesiones</h5>
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm mb-3">
+                                <div class="card-header bg-light border-0 py-2 px-3">
+                                    <h4 class="h6 fw-bold text-dark mb-0">Próximas sesiones</h4>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body p-3">
                                     @if($upcomingSchedules->isEmpty())
-                                        <div class="alert alert-light border mb-0">No hay sesiones programadas próximas.</div>
+                                        <p class="text-muted mb-0">No hay sesiones programadas</p>
                                     @else
                                         <div class="list-group list-group-flush">
-                                            @foreach($upcomingSchedules as $schedule)
-                                                <div class="list-group-item px-0 py-3">
-                                                    <div class="d-flex justify-content-between align-items-start gap-3">
+                                            @foreach($upcomingSchedules->take(5) as $schedule)
+                                                <div class="list-group-item border-0 px-0 py-2 bg-transparent">
+                                                    <div class="d-flex justify-content-between align-items-center gap-3">
                                                         <div>
-                                                            <div class="fw-semibold text-dark">{{ $schedule->date ? $schedule->date->format('d/m/Y') : 'Sin fecha' }}</div>
-                                                            <div class="small text-muted">{{ $schedule->start_time ? \Carbon\Carbon::parse($schedule->start_time)->format('H:i') : 'Sin hora' }} - {{ $schedule->end_time ? \Carbon\Carbon::parse($schedule->end_time)->format('H:i') : 'Sin hora' }}</div>
+                                                            <div class="fw-bold text-dark">{{ $schedule->date ? $schedule->date->format('d/m/Y') : 'Sin fecha' }}</div>
+                                                            <div class="small text-muted">{{ $schedule->date ? \Carbon\Carbon::parse($schedule->date)->translatedFormat('l') : 'Sin día' }}</div>
                                                         </div>
-                                                        <span class="badge bg-primary-subtle text-primary">Programada</span>
+                                                        <div class="text-muted small">{{ $schedule->start_time ? \Carbon\Carbon::parse($schedule->start_time)->format('H:i') : 'Sin hora' }}</div>
                                                     </div>
                                                 </div>
                                             @endforeach
@@ -371,43 +359,30 @@
                             </div>
                         </div>
 
-
                         <div class="col-12">
-                            <div class="card shadow-sm border-0">
-                                <div class="card-header bg-white py-3">
-                                    <h5 class="mb-0 fw-bold text-dark">Módulos del curso</h5>
+                            <div class="card border-0 shadow-sm mb-3">
+                                <div class="card-header bg-light border-0 py-2 px-3">
+                                    <h4 class="h6 fw-bold text-dark mb-0">Módulos del curso</h4>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body p-3">
                                     @if(($modules ?? collect())->isEmpty())
-                                        <div class="alert alert-secondary mb-0">Aún no se han creado módulos para esta capacitación.</div>
+                                        <p class="text-muted mb-0">No hay módulos registrados</p>
                                     @else
-                                        <div class="row g-4">
+                                        <div class="list-group list-group-flush">
                                             @foreach($modules as $module)
                                                 @php
                                                     $moduleKey = $module->module_id ?? $module->id;
                                                     $moduleContents = $training->contents->where('module_id', $moduleKey);
                                                     $moduleTasks = $training->tasks->where('module_id', $moduleKey);
                                                     $moduleAssessments = $training->assessments->where('module_id', $moduleKey);
+                                                    $moduleTotal = $moduleContents->count() + $moduleTasks->count() + $moduleAssessments->count();
                                                 @endphp
-                                                <div class="col-lg-6">
-                                                    <div class="module-card h-100">
-                                                        <div class="d-flex justify-content-between align-items-start gap-2">
-                                                            <div>
-                                                                <h6 class="fw-bold mb-1 text-dark">{{ $module->title }}</h6>
-                                                                @if(!empty($module->description))
-                                                                    <small class="text-muted">{{ $module->description }}</small>
-                                                                @endif
-                                                            </div>
-                                                            <span class="module-badge">{{ $moduleContents->count() + $moduleTasks->count() + $moduleAssessments->count() }} elementos</span>
-                                                        </div>
-                                                        <div class="mt-3 small text-muted">
-                                                            <div class="d-flex gap-3 flex-wrap">
-                                                                <span><i class="bi bi-file-earmark-text me-1 module-stat-icon"></i>{{ $moduleContents->count() }} contenidos</span>
-                                                                <span><i class="bi bi-list-task me-1 module-stat-icon tasks"></i>{{ $moduleTasks->count() }} tareas</span>
-                                                                <span><i class="bi bi-clipboard-check me-1 module-stat-icon assessments"></i>{{ $moduleAssessments->count() }} evaluaciones</span>
-                                                            </div>
-                                                        </div>
+                                                <div class="list-group-item border-0 px-0 py-2 bg-transparent d-flex justify-content-between align-items-center">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <i class="bi bi-journals text-muted"></i>
+                                                        <span class="fw-bold text-dark">{{ $module->title }}</span>
                                                     </div>
+                                                    <span class="small text-muted">{{ $moduleTotal }} elementos</span>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -460,7 +435,7 @@
                                             <td><small>{{ optional($enrollment->student->person)->email }}</small></td>
                                             <td><small>{{ optional($enrollment->student->person)->phone }}</small></td>
                                             <td>
-                                                <span class="badge {{ $isActive ? 'bg-success' : 'bg-secondary' }}">
+                                                <span class="badge {{ $isActive ? 'bg-success' : 'bg-danger' }}">
                                                     {{ $isActive ? 'Activo' : 'Inactivo' }}
                                                 </span>
                                             </td>
@@ -490,7 +465,7 @@
                                                 <div class="col-12">
                                                     <div class="border rounded p-3">
                                                         <div class="small text-muted mb-1">Estado de matrícula</div>
-                                                        <span class="badge {{ strtoupper((string) $enrollment->status) === 'A' ? 'bg-success' : 'bg-secondary' }}">
+                                                        <span class="badge {{ strtoupper((string) $enrollment->status) === 'A' ? 'bg-success' : 'bg-danger' }}">
                                                             {{ strtoupper((string) $enrollment->status) === 'A' ? 'Activo' : 'Inactivo' }}
                                                         </span>
                                                     </div>
@@ -579,7 +554,7 @@
                                                 <td class="text-center">{{ $assessment->end_date ? \Carbon\Carbon::parse($assessment->end_date)->format('d/m/Y') : 'Sin fecha' }}</td>
                                                 <td class="text-center">{{ $assessment->allowed_attempts }}</td>
                                                 <td class="text-center">
-                                                    <span class="badge @if($assessment->active) bg-success @else bg-secondary @endif">{{ $assessment->active ? 'Activo' : 'Inactivo' }}</span>
+                                                    <span class="badge @if($assessment->active) bg-success @else bg-danger @endif">{{ $assessment->active ? 'Activo' : 'Inactivo' }}</span>
                                                 </td>
                                                 <td class="text-end">
                                                     <div class="d-flex flex-column align-items-end gap-3">

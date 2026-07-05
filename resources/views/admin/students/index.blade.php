@@ -40,7 +40,7 @@
                                     <td class="align-middle">{{ $fullName }}</td>
                                     <td class="align-middle">{{ $student->person->email ?? 'Sin email' }}</td>
                                     <td class="align-middle">
-                                        <span class="badge {{ $student->status === 'A' ? 'bg-success' : 'bg-secondary' }}">{{ $student->status === 'A' ? 'Activo' : 'Inactivo' }}</span>
+                                        <span class="badge {{ $student->status === 'A' ? 'bg-success' : 'bg-danger' }}">{{ $student->status === 'A' ? 'Activo' : 'Inactivo' }}</span>
                                     </td>
                                     <td class="align-middle">{{ $student->created_at ? $student->created_at->format('d/m/Y H:i') : '—' }}</td>
                                     <td class="align-middle text-end">

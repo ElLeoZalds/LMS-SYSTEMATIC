@@ -65,7 +65,7 @@
                                     <td class="align-middle">{{ $user->person->email ?? 'Sin email' }}</td>
                                     <td class="align-middle">{{ $roleLabel }}</td>
                                     <td class="align-middle">
-                                        <span class="badge {{ $user->status === 'A' ? 'bg-success' : 'bg-secondary' }}">{{ $user->status === 'A' ? 'Activo' : 'Inactivo' }}</span>
+                                        <span class="badge {{ $user->status === 'A' ? 'bg-success' : 'bg-danger' }}">{{ $user->status === 'A' ? 'Activo' : 'Inactivo' }}</span>
                                     </td>
                                     <td class="align-middle">—</td>
                                     <td class="align-middle text-end">

@@ -1,7 +1,7 @@
 @props(['isActive' => false])
 
 @php
-    $badgeClass = $isActive ? 'badge-success' : 'badge-danger';
+    $badgeClass = $isActive ? 'bg-success' : 'bg-danger';
     $label = $isActive ? 'Activo' : 'Inactivo';
 @endphp
 

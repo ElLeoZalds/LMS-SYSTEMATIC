@@ -109,7 +109,12 @@ class TrainingController extends Controller
     public function toggleActive($id)
     {
         $training = Training::findOrFail($id);
-        $training->update(['is_active' => ! $training->isActive()]);
+        $newIsActive = ! (bool) $training->getAttribute('is_active');
+
+        $training->update([
+            'is_active' => $newIsActive,
+            'status' => $newIsActive ? Training::STATUS_ACTIVE : Training::STATUS_DRAFT,
+        ]);
 
         return redirect()
             ->route('admin.trainings.index')

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -22,9 +23,8 @@ class TrainingsSeeder extends Seeder
         $trainings = [];
 
         foreach ($courseIds as $index => $courseId) {
-            $baseDate = now()->year(2026)->month(1 + ($index % 12))->day(10 + ($index % 15));
-            $startDate = $baseDate->copy()->subDays($index % 3 === 0 ? 30 : 15);
-            $endDate = $startDate->copy()->addMonths(2)->addDays(10);
+            $startDate = Carbon::create(2026, 6, 25)->addDays(rand(0, 11));
+            $endDate = Carbon::create(2026, 9, 1)->addDays(rand(0, 29));
             $status = $index % 4 === 0 ? 0 : 1;
 
             $trainings[] = [

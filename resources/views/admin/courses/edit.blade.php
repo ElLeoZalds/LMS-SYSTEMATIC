@@ -129,7 +129,7 @@
                                                     <form action="{{ route('admin.courses.modules.toggle-active', ['course' => $course->course_id, 'module' => $module->id]) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button type="submit" class="btn btn-sm {{ $module->is_active ? 'btn-outline-secondary' : 'btn-outline-success' }}">
+                                                        <button type="submit" class="btn btn-sm {{ $module->is_active ? 'btn-outline-danger' : 'btn-outline-success' }}">
                                                             <i class="fas {{ $module->is_active ? 'fa-toggle-off' : 'fa-toggle-on' }}"></i> {{ $module->is_active ? 'Desactivar' : 'Activar' }}
                                                         </button>
                                                     </form>

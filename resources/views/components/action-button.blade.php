@@ -18,7 +18,7 @@
     $buttonClass = $class ?? match ($type) {
         'edit' => 'btn btn-sm btn-warning',
         'delete' => 'btn btn-sm btn-outline-danger',
-        'toggle' => 'btn btn-sm btn-outline-secondary',
+        'toggle' => ($isActive ? 'btn btn-sm btn-outline-danger' : 'btn btn-sm btn-outline-success'),
         default => 'btn btn-sm btn-secondary',
     };
 @endphp

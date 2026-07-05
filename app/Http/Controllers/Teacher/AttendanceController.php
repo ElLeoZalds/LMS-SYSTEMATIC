@@ -36,7 +36,10 @@ class AttendanceController extends Controller
         $training = null;
         $date = $request->date ?? date('Y-m-d');
         $selectedScheduleId = null;
+        $selectedSession = null;
         $attendances = collect();
+        $allSessions = collect();
+        $currentDate = Carbon::today()->toDateString();
 
         if ($request->filled('training_id')) {
             $training = $trainings->firstWhere('training_id', $request->training_id);
@@ -47,20 +50,91 @@ class AttendanceController extends Controller
 
             $training->load(['enrollments.student.person', 'schedules']);
 
+            $studentCount = $training->enrollments->count();
+            $today = Carbon::today();
+            $currentDate = $today->toDateString();
+
+            $attendanceMap = Attendance::whereIn('schedule_id', $training->schedules->pluck('schedule_id')->toArray())
+                ->get()
+                ->groupBy('schedule_id');
+
+            $allSessions = $training->schedules->sortBy('date')->map(function ($schedule) use ($studentCount, $today, $attendanceMap) {
+                $scheduleDate = $schedule->date ? Carbon::parse($schedule->date) : null;
+                $attendancesForSchedule = $attendanceMap->get($schedule->schedule_id, collect());
+                $attendanceCount = $attendancesForSchedule->count();
+                $presentCount = $attendancesForSchedule->filter(function ($item) {
+                    return data_get($item->attendance, 'status') === 'present';
+                })->count();
+                $hasAttendance = $attendanceCount > 0;
+                $isToday = $scheduleDate?->isToday();
+                $isFuture = $scheduleDate?->isFuture();
+                $status = $isToday ? 'today' : ($isFuture ? 'future' : ($hasAttendance ? 'completed' : 'pending'));
+                $badgeLabel = $status === 'today' ? 'Hoy' : ($status === 'future' ? 'Futura' : ($status === 'completed' ? 'Asistencia registrada' : 'Pendiente'));
+                $badgeClass = $status === 'today' ? 'bg-primary' : ($status === 'future' ? 'bg-warning text-dark' : ($status === 'completed' ? 'bg-success' : 'bg-secondary'));
+
+                return [
+                    'schedule_id' => $schedule->schedule_id,
+                    'date' => $scheduleDate?->toDateString(),
+                    'start_time' => $schedule->start_time,
+                    'end_time' => $schedule->end_time,
+                    'formattedDate' => $scheduleDate ? $scheduleDate->locale('es')->isoFormat('dddd, DD [de] MMMM [de] YYYY') : 'Fecha no disponible',
+                    'formattedTime' => trim(($schedule->start_time ? Carbon::parse($schedule->start_time)->format('h:mm A') : '--:--') . ' - ' . ($schedule->end_time ? Carbon::parse($schedule->end_time)->format('h:mm A') : '--:--')),
+                    'has_attendance' => $hasAttendance,
+                    'attendance_count' => $attendanceCount,
+                    'student_count' => $studentCount,
+                    'present_count' => $presentCount,
+                    'attendance_percentage' => $studentCount ? round(($presentCount / max($studentCount, 1)) * 100, 1) : null,
+                    'is_today' => $isToday,
+                    'is_future' => $isFuture,
+                    'status' => $status,
+                    'badge_label' => $badgeLabel,
+                    'badge_class' => $badgeClass,
+                ];
+            });
+
             if ($request->filled('schedule_id')) {
                 $schedule = $this->scheduleForTraining($request->schedule_id, $training->training_id);
 
                 if ($schedule) {
                     $selectedScheduleId = $schedule->schedule_id;
+                    $selectedSession = $allSessions->firstWhere('schedule_id', $selectedScheduleId);
                     $attendances = Attendance::where('schedule_id', $selectedScheduleId)->with('enrollment')->get();
                     $date = $schedule->date ?? $date;
+                } else {
+                    $attendances = collect();
+                }
+            } elseif ($training->schedules->isNotEmpty()) {
+                $defaultSchedule = $training->schedules
+                    ->filter(fn ($schedule) => $schedule->date && Carbon::parse($schedule->date)->isToday())
+                    ->sortBy('date')
+                    ->first();
+
+                if (! $defaultSchedule) {
+                    $defaultSchedule = $training->schedules
+                        ->filter(fn ($schedule) => $schedule->date && Carbon::parse($schedule->date)->isFuture())
+                        ->sortBy('date')
+                        ->first();
+                }
+
+                if (! $defaultSchedule) {
+                    $defaultSchedule = $training->schedules
+                        ->filter(fn ($schedule) => $schedule->date && Carbon::parse($schedule->date)->isPast())
+                        ->sortByDesc('date')
+                        ->first();
+                }
+
+                if ($defaultSchedule) {
+                    $selectedScheduleId = $defaultSchedule->schedule_id;
+                    $selectedSession = $allSessions->firstWhere('schedule_id', $selectedScheduleId);
+                    $attendances = Attendance::where('schedule_id', $selectedScheduleId)->with('enrollment')->get();
+                    $date = $defaultSchedule->date ?? $date;
                 } else {
                     $attendances = collect();
                 }
             }
         }
 
-        return view('teacher.attendance', compact('trainings', 'training', 'date', 'attendances', 'selectedScheduleId'));
+        return view('teacher.attendance', compact('trainings', 'training', 'date', 'attendances', 'selectedScheduleId', 'selectedSession', 'allSessions', 'currentDate'));
     }
 
     public function store(Request $request)

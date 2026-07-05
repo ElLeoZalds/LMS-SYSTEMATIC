@@ -60,11 +60,9 @@
                                     </td>
                                     <td class="align-middle">
                                         @php
-                                            $isActive = (int) $training->status === 1;
-                                            $badgeClass = $isActive ? 'bg-success' : 'bg-secondary';
-                                            $badgeText = $isActive ? 'Activo' : 'Inactivo';
+                                            $isActive = (bool) ($training->getAttribute('is_active') ?? false);
                                         @endphp
-                                        <span class="badge {{ $badgeClass }}">{{ $badgeText }}</span>
+                                        <x-status-badge :is-active="$isActive" />
                                     </td>
                                     <td class="align-middle text-end">
                                         <a href="{{ route('teacher.courses.show', $training->training_id) }}" class="btn btn-sm btn-info text-white">
@@ -80,7 +78,7 @@
                                             data-modality="{{ $training->modality }}">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <x-action-button type="toggle" :route="route('admin.trainings.toggle-active', $training->training_id)" :is-active="$training->isActive()" />
+                                        <x-action-button type="toggle" :route="route('admin.trainings.toggle-active', $training->training_id)" :is-active="$isActive" />
                                     </td>
                                 </tr>
                             @empty

@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-success px-3 py-2">
+                        <span class="badge {{ $user->status === 'A' ? 'bg-success' : 'bg-danger' }} px-3 py-2">
                             <i class="bi bi-circle-fill me-1" style="font-size: 0.65rem;"></i>
                             {{ $user->status === 'A' ? 'Activo' : 'Inactivo' }}
                         </span>

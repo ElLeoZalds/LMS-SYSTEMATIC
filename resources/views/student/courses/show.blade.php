@@ -301,7 +301,7 @@
                                                     </p>
                                                 </div>
                                                 <div class="text-end">
-                                                    <span class="badge bg-{{ $assessment->active ? 'success' : 'secondary' }} mb-2">
+                                                    <span class="badge {{ $assessment->active ? 'bg-success' : 'bg-danger' }} mb-2">
                                                         {{ $assessment->active ? 'Activo' : 'Inactivo' }}
                                                     </span>
                                                     @if($assessmentAvailable && $pendingAttempt)
@@ -315,7 +315,7 @@
                                                     @elseif($assessmentAvailable)
                                                         <span class="badge bg-danger">Intentos agotados</span>
                                                     @elseif(! $assessmentAvailable && $assessment->active)
-                                                        <span class="badge bg-secondary">No disponible</span>
+                                                        <span class="badge bg-danger">No disponible</span>
                                                     @endif
                                                 </div>
                                             </div>

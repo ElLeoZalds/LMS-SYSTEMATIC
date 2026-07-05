@@ -55,7 +55,7 @@
                     <div class="card-body">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Estado del curso</div>
                         <div class="mt-2">
-                            <span class="badge badge-success px-3 py-2">Activo</span>
+                            <span class="badge bg-success px-3 py-2">Activo</span>
                         </div>
                     </div>
                 </div>
@@ -159,7 +159,7 @@
                                     <p class="text-muted small mb-0">Puntaje total configurado: {{ $totalScore }} / 20 pts</p>
                                 </div>
                                 <div class="text-md-right mt-2 mt-md-0">
-                                    <span class="badge badge-{{ $assessment->active ? 'primary' : 'secondary' }} mb-2 d-block d-md-inline-block">
+                                    <span class="badge {{ $assessment->active ? 'bg-success' : 'bg-danger' }} mb-2 d-block d-md-inline-block">
                                         {{ $assessment->active ? 'Activo' : 'Inactivo' }}
                                     </span>
                                     <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">

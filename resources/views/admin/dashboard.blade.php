@@ -111,7 +111,7 @@
                                                 <td>{{ optional($enrollment->student->person)->first_names }} {{ optional($enrollment->student->person)->last_names }}</td>
                                                 <td>{{ optional($enrollment->training->course)->title ?? 'Sin curso' }}</td>
                                                 <td>
-                                                    <span class="badge {{ $enrollment->status === 'A' ? 'bg-success' : 'bg-secondary' }}">{{ $enrollment->status === 'A' ? 'Activo' : 'Pendiente' }}</span>
+                                                    <span class="badge {{ $enrollment->status === 'A' ? 'bg-success' : 'bg-danger' }}">{{ $enrollment->status === 'A' ? 'Activo' : 'Pendiente' }}</span>
                                                 </td>
                                             </tr>
                                         @endforeach
