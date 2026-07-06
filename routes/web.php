@@ -124,6 +124,7 @@ Route::prefix('student')
     ->group(function () {
         Route::get('/dashboard', [StudentController::class, 'index'])->name('dashboard');
         Route::get('/calendar', [StudentCourseController::class, 'calendar'])->name('calendar');
+        Route::get('/notifications', [StudentController::class, 'notifications'])->name('notifications');
 
         Route::get('/courses', [StudentController::class, 'courses'])->name('courses.index');
         Route::get('/courses/{id}', [StudentCourseController::class, 'show'])->name('courses.show');
