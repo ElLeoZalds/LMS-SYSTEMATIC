@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\TrainingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Teacher\AssessmentController;
@@ -35,6 +36,10 @@ Route::middleware('throttle:10,1')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
     Route::post('/enroll/{training}', [EnrollmentController::class, 'store'])
         ->name('enroll.store');
 });
@@ -47,6 +52,7 @@ Route::prefix('admin')
 
         Route::resource('courses', CourseController::class);
         Route::patch('courses/{course}/toggle-active', [CourseController::class, 'toggleActive'])->name('courses.toggle-active');
+        Route::get('courses/{course}/can-deactivate', [CourseController::class, 'canDeactivate'])->name('courses.can-deactivate');
         Route::get('courses/{course}/modules', [CourseController::class, 'modules'])->name('courses.modules');
         Route::post('courses/{course}/modules', [CourseController::class, 'storeModule'])->name('courses.modules.store');
         Route::patch('courses/{course}/modules/{module}', [CourseController::class, 'updateModule'])->name('courses.modules.update');
@@ -55,7 +61,10 @@ Route::prefix('admin')
         // Route::patch('modules/{module}/toggle-active', [ModuleController::class, 'toggleActive'])->name('modules.toggle-active');
         Route::resource('specialties', SpecialtyController::class);
         Route::patch('specialties/{specialty}/toggle-active', [SpecialtyController::class, 'toggleActive'])->name('specialties.toggle-active');
-        Route::resource('users', UserController::class);
+        Route::get('specialties/{specialty}/can-deactivate', [SpecialtyController::class, 'canDeactivate'])->name('specialties.can-deactivate');
+        Route::resource('users', UserController::class)->except(['edit', 'update']);
+        Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::get('students', [AdminStudentController::class, 'index'])->name('students.index');
         Route::get('students/{user}', [AdminStudentController::class, 'show'])->name('students.show');
         Route::resource('contents', ContentController::class);
@@ -131,6 +140,7 @@ Route::prefix('student')
         Route::get('/courses/{training}/content/{content}', [StudentCourseController::class, 'viewContent'])->name('courses.view-content');
         Route::post('/courses/{training}/content/{content}/complete', [StudentCourseController::class, 'markContentComplete'])->name('courses.content.complete');
         Route::get('/assessment/{id}/take', [StudentCourseController::class, 'takeExam'])->name('assessment.take');
+        Route::get('/assessment/{id}/results', [StudentCourseController::class, 'showAssessmentResults'])->name('assessment.results');
         Route::post('/assessment/{id}/submit', [StudentCourseController::class, 'submitExam'])->name('assessment.submit');
 
         Route::post('/tasks/{task_id}/submit', [StudentCourseController::class, 'submitTask'])->name('tasks.submit');

@@ -87,10 +87,11 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'email' => 'required|email|max:150|unique:people,email,'.$user->person_id.',person_id',
-            'password' => 'nullable|string|min:6|confirmed',
-            'status' => 'sometimes|in:A,I',
+            'first_names' => 'required|string|max:255',
+            'last_names' => 'required|string|max:255',
+            'email' => ['required', 'email', 'max:150', Rule::unique('people', 'email')->ignore($user->person?->person_id, 'person_id')],
+            'password' => 'nullable|string|min:8|confirmed',
+            'status' => 'required|in:A,I',
             'role_id' => ['required', Rule::in($this->allowedRoleIds())],
         ]);
 
@@ -100,12 +101,10 @@ class UserController extends Controller
             ])->withInput();
         }
 
-        [$firstName, $lastName] = $this->splitFullName($data['full_name']);
-
-        DB::transaction(function () use ($user, $data, $firstName, $lastName) {
+        DB::transaction(function () use ($user, $data) {
             $user->person->update([
-                'first_names' => $firstName,
-                'last_names' => $lastName,
+                'first_names' => $data['first_names'],
+                'last_names' => $data['last_names'],
                 'email' => $data['email'],
             ]);
 

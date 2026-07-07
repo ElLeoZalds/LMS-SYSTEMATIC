@@ -87,6 +87,11 @@
                     </a>
                 @endif
 
+                <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                    <i class="fas fa-user-edit fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Mi perfil
+                </a>
+
                 <div class="dropdown-divider"></div>
 
                 <form method="POST" action="{{ route('logout') }}" class="d-inline">

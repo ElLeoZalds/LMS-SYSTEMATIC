@@ -34,11 +34,17 @@ class CourseController extends Controller
             'assessments',
             'tasks',
             'contents.training',
-            'announcements',
             'enrollments.student.person',
         ])
             ->where('training_id', $id)
             ->firstOrFail();
+
+        $announcements = $training->announcements()
+            ->latest('created_at')
+            ->get()
+            ->unique('announcement_id')
+            ->values();
+        $isFinished = $training->isFinished();
 
         $course = $training->course;
         $isEnrolled = Enrollment::where('student_id', $studentId)
@@ -52,6 +58,13 @@ class CourseController extends Controller
 
             $attendances = Attendance::where('enrollment_id', $enrollment->enrollment_id)
                 ->with('schedule')
+                ->get();
+
+            $attempts = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
+                ->get();
+
+            $submissions = TaskSubmission::where('student_id', $studentId)
+                ->whereIn('task_id', $training->tasks->pluck('task_id'))
                 ->get();
 
             $modules = Module::where('course_id', $training->course_id)
@@ -153,12 +166,16 @@ class CourseController extends Controller
                 'course',
                 'isEnrolled',
                 'attendances',
+                'attempts',
+                'submissions',
                 'modules',
                 'moduleReports',
                 'averageGrade',
                 'generalAverage',
                 'courseContents',
-                'completedContentIds'
+                'completedContentIds',
+                'announcements',
+                'isFinished'
             ));
         }
 
@@ -246,6 +263,25 @@ class CourseController extends Controller
             ->with('success', '¡Módulo completado!');
     }
 
+    public function showAssessmentResults($assessment_id)
+    {
+        $studentId = auth()->id();
+
+        $assessment = Assessment::where('assessment_id', $assessment_id)->firstOrFail();
+
+        $enrollment = Enrollment::where('student_id', $studentId)
+            ->where('training_id', $assessment->training_id)
+            ->firstOrFail();
+
+        $attempt = AssessmentAttempt::where('enrollment_id', $enrollment->enrollment_id)
+            ->where('assessment_id', $assessment_id)
+            ->whereNotNull('submitted_at')
+            ->latest('submitted_at')
+            ->firstOrFail();
+
+        return view('student.assessments.result', compact('attempt'));
+    }
+
     public function takeExam(Request $request, $assessment_id)
     {
         $studentId = auth()->id();
@@ -258,8 +294,9 @@ class CourseController extends Controller
             ->where('training_id', $assessment->training_id)
             ->firstOrFail();
 
-        if ($assessment->training->isClosed()) {
-            abort(403, 'El curso ya se cerró y no se pueden responder evaluaciones.');
+        if ($assessment->training->isFinished()) {
+            return redirect()->route('student.courses.show', $assessment->training_id)
+                ->with('error', 'No puedes realizar actividades en una capacitación finalizada.');
         }
 
         $this->validateAssessmentAvailability($assessment);
@@ -358,8 +395,9 @@ class CourseController extends Controller
             ->where('training_id', $assessment->training_id)
             ->firstOrFail();
 
-        if ($assessment->training->isClosed()) {
-            abort(403, 'El curso ya se cerró y no se pueden responder evaluaciones.');
+        if ($assessment->training->isFinished()) {
+            return redirect()->route('student.courses.show', $assessment->training_id)
+                ->with('error', 'No puedes realizar actividades en una capacitación finalizada.');
         }
 
         $this->validateAssessmentAvailability($assessment);
@@ -426,8 +464,9 @@ class CourseController extends Controller
             ->where('training_id', $task->training_id)
             ->firstOrFail();
 
-        if ($task->training->isClosed()) {
-            abort(403, 'El curso ya se cerró y no se aceptan nuevas entregas.');
+        if ($task->training->isFinished()) {
+            return redirect()->route('student.courses.show', $task->training_id)
+                ->with('error', 'No puedes realizar actividades en una capacitación finalizada.');
         }
 
         $validated = $request->validate([

@@ -43,6 +43,11 @@ class TaskController extends Controller
     {
         $data = $this->validatedData($request, true);
         $training = $this->trainingForCurrentUser($data['training_id']);
+
+        if ($training->isFinished()) {
+            return redirect()->back()->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
+
         $dueDate = Carbon::parse($data['delivery_date'])->endOfDay();
 
         if ($error = $this->dateValidationError($training, $dueDate, true)) {
@@ -94,6 +99,11 @@ class TaskController extends Controller
     {
         $data = $this->validatedData($request);
         $task = $this->taskForCurrentUser($task_id);
+
+        if ($task->training->isFinished()) {
+            return redirect()->back()->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
+
         $dueDate = Carbon::parse($data['delivery_date'])->endOfDay();
 
         if ($error = $this->dateValidationError($task->training, $dueDate)) {
@@ -118,6 +128,11 @@ class TaskController extends Controller
     public function destroy($task_id)
     {
         $task = $this->taskForCurrentUser($task_id);
+
+        if ($task->training->isFinished()) {
+            return redirect()->route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])
+                ->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
 
         if (! $this->isAdministrator() && $task->submissions()->exists()) {
             return redirect()->route('teacher.courses.show', ['id' => $task->training_id, 'tab' => 'contenido'])

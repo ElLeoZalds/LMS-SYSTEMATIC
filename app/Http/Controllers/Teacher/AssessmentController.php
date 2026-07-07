@@ -100,6 +100,10 @@ class AssessmentController extends Controller
             ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
 
+        if ($training->isFinished()) {
+            return redirect()->back()->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
+
         $startDate = Carbon::parse($request->start_date);
         $endDate = Carbon::parse($request->end_date)->endOfDay();
 
@@ -300,6 +304,10 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
+        if ($assessment->training->isFinished()) {
+            return redirect()->back()->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
+
         if ($assessment->training->end_date) {
             $courseEnd = Carbon::parse($assessment->training->end_date)->endOfDay();
             $startDate = Carbon::parse($request->start_date);
@@ -314,8 +322,10 @@ class AssessmentController extends Controller
             }
         }
 
-        if ($assessment->attempts()->exists()) {
-            return redirect()->back()->withErrors(['assessment' => 'No se puede modificar.']);
+        $hasAttempts = $assessment->attempts()->whereNotNull('submitted_at')->exists();
+
+        if ($hasAttempts) {
+            return redirect()->back()->with('error', 'No se puede modificar esta evaluación porque ya tiene intentos registrados de estudiantes.');
         }
 
         $assessment->update([
@@ -340,10 +350,17 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
+        if ($assessment->training->isFinished()) {
+            return redirect()->route('teacher.courses.show', ['id' => $assessment->training_id, 'tab' => 'contenido'])
+                ->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
+
         $trainingId = $assessment->training_id;
-        if (! $this->isAdministrator() && $assessment->attempts()->exists()) {
+        $hasAttempts = $assessment->attempts()->whereNotNull('submitted_at')->exists();
+
+        if ($hasAttempts) {
             return redirect()->route('teacher.courses.show', ['id' => $trainingId, 'tab' => 'contenido'])
-                ->with('error', 'No se puede eliminar la evaluación porque ya tiene intentos registrados.');
+                ->with('error', 'No se puede modificar esta evaluación porque ya tiene intentos registrados de estudiantes.');
         }
 
         $assessment->delete();

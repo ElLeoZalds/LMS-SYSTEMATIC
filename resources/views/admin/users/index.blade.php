@@ -69,9 +69,9 @@
                                     </td>
                                     <td class="align-middle">—</td>
                                     <td class="align-middle text-end">
-                                        <button type="button" class="btn btn-sm btn-info me-1" data-toggle="modal" data-target="#editUserModal{{ $user->user_id }}">
+                                        <a href="{{ route('admin.users.edit', $user->user_id) }}" class="btn btn-sm btn-info me-1">
                                             <i class="fas fa-edit"></i> Editar
-                                        </button>
+                                        </a>
                                         <form action="{{ route('admin.users.update', $user->user_id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('PUT')

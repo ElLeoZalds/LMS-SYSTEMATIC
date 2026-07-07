@@ -13,7 +13,12 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                     <div>
-                        <h1 class="h3 mb-2 text-gray-800">{{ optional($training->course)->title ?? 'Sin curso' }}</h1>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <h1 class="h3 mb-0 text-gray-800">{{ optional($training->course)->title ?? 'Sin curso' }}</h1>
+                            @if($training->isFinished())
+                                <span class="badge bg-warning text-dark">Finalizada</span>
+                            @endif
+                        </div>
                         <p class="text-muted mb-2">{{ optional($training->course->specialty)->specialty ?? 'Sin especialidad' }}</p>
                         <div class="small text-muted">
                             <span class="me-3"><i class="bi bi-code-square me-1"></i>Código: {{ $training->code ?? 'N/A' }}</span>
@@ -22,12 +27,24 @@
                         </div>
                     </div>
                     <div class="text-end">
-                        <span class="badge bg-success mb-2">Activo</span>
+                        <span class="badge {{ $training->isFinished() ? 'bg-warning text-dark' : 'bg-success' }} mb-2">{{ $training->isFinished() ? 'Finalizada' : 'Activa' }}</span>
                         <div class="small text-muted">{{ $totalStudents }} estudiantes matriculados</div>
                     </div>
                 </div>
             </div>
         </div>
+
+        @if($training->isFinished())
+            <div class="alert alert-warning border-0 shadow-sm mb-4" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <strong>Capacitación finalizada el {{ optional($training->end_date)->format('d/m/Y') ?? 'sin fecha' }}.</strong>
+                        Solo puedes consultar información; no se permiten cambios ni nuevas acciones.
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <div class="row g-3 mb-4">
             <div class="col-12 col-md-4">
@@ -361,28 +378,85 @@
 
                         <div class="col-12">
                             <div class="card border-0 shadow-sm mb-3">
-                                <div class="card-header bg-light border-0 py-2 px-3">
+                                <div class="card-header bg-light border-0 py-2 px-3 d-flex justify-content-between align-items-center">
                                     <h4 class="h6 fw-bold text-dark mb-0">Módulos del curso</h4>
+                                    <span class="badge badge-secondary">{{ ($modules ?? collect())->count() }} módulos</span>
                                 </div>
                                 <div class="card-body p-3">
                                     @if(($modules ?? collect())->isEmpty())
                                         <p class="text-muted mb-0">No hay módulos registrados</p>
                                     @else
-                                        <div class="list-group list-group-flush">
+                                        <div class="row g-3">
                                             @foreach($modules as $module)
                                                 @php
                                                     $moduleKey = $module->module_id ?? $module->id;
-                                                    $moduleContents = $training->contents->where('module_id', $moduleKey);
-                                                    $moduleTasks = $training->tasks->where('module_id', $moduleKey);
-                                                    $moduleAssessments = $training->assessments->where('module_id', $moduleKey);
-                                                    $moduleTotal = $moduleContents->count() + $moduleTasks->count() + $moduleAssessments->count();
+                                                    $moduleContents = $module->contents ?? collect();
+                                                    $moduleTasks = $module->tasks ?? collect();
+                                                    $moduleAssessments = $module->assessments ?? collect();
                                                 @endphp
-                                                <div class="list-group-item border-0 px-0 py-2 bg-transparent d-flex justify-content-between align-items-center">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <i class="bi bi-journals text-muted"></i>
-                                                        <span class="fw-bold text-dark">{{ $module->title }}</span>
+                                                <div class="col-12">
+                                                    <div class="border rounded p-3 h-100">
+                                                        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                                                            <div>
+                                                                <div class="fw-bold text-dark">Módulo {{ $module->order }} • {{ $module->title }}</div>
+                                                                <div class="small text-muted">
+                                                                    {{ $moduleContents->count() }} contenido(s) · {{ $moduleAssessments->count() }} evaluación(es) · {{ $moduleTasks->count() }} tarea(s)
+                                                                </div>
+                                                            </div>
+                                                            @if($training->isFinished())
+                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">
+                                                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                                        <i class="bi bi-plus-circle me-1"></i>Agregar Contenido
+                                                                    </button>
+                                                                </span>
+                                                            @else
+                                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="openContentModal({{ $moduleKey }})">
+                                                                    <i class="bi bi-plus-circle me-1"></i>Agregar Contenido
+                                                                </button>
+                                                            @endif
+                                                        </div>
+
+                                                        @if($moduleContents->isEmpty())
+                                                            <div class="border rounded bg-light p-3 text-center text-muted small">
+                                                                <i class="bi bi-journal-text me-1"></i>No hay contenidos aún en este módulo.
+                                                            </div>
+                                                        @else
+                                                            <div class="list-group list-group-flush">
+                                                                @foreach($moduleContents as $content)
+                                                                    <div class="list-group-item border-0 px-0 py-2 bg-transparent">
+                                                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                                                            <div class="d-flex gap-2">
+                                                                                <i class="bi bi-file-earmark-text text-primary mt-1"></i>
+                                                                                <div>
+                                                                                    <div class="fw-bold text-dark">{{ $content->title }}</div>
+                                                                                    @if(! empty($content->description))
+                                                                                        <div class="small text-muted">{{ Str::limit($content->description, 90) }}</div>
+                                                                                    @endif
+                                                                                    <div class="small text-muted mt-1">
+                                                                                        <span class="badge badge-light text-muted">{{ $content->type ?? 'Material' }}</span>
+                                                                                        @if(! empty($content->file_path))
+                                                                                            <span class="ms-2"><i class="bi bi-paperclip"></i> Archivo adjunto</span>
+                                                                                        @endif
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            @if($training->isFinished())
+                                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">
+                                                                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                                                        <i class="bi bi-pencil me-1"></i>Editar
+                                                                                    </button>
+                                                                                </span>
+                                                                            @else
+                                                                                <button type="button" class="btn btn-sm btn-outline-primary edit-content-btn" data-content='{{ json_encode(["id" => $content->content_id, "module_id" => $content->module_id, "title" => $content->title, "description" => $content->description, "type" => $content->type]) }}'>
+                                                                                    <i class="bi bi-pencil me-1"></i>Editar
+                                                                                </button>
+                                                                            @endif
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        @endif
                                                     </div>
-                                                    <span class="small text-muted">{{ $moduleTotal }} elementos</span>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -398,19 +472,6 @@
                             <h5 class="fw-bold text-dark mb-0">Estudiantes Matriculados <span class="badge bg-primary">{{ $students->count() }}</span></h5>
                             <p class="text-muted small mb-0">Directorio simple y filtrable por estado o búsqueda.</p>
                         </div>
-                        <div class="d-flex flex-wrap gap-2 align-items-center">
-                            <button type="button" id="filterStudentsBtn" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-funnel me-1"></i>Filtrar Estudiantes
-                                @if($activeStudentFiltersCount > 0)
-                                    <span class="badge bg-info text-dark ms-2">Filtros activos: {{ $activeStudentFiltersCount }}</span>
-                                @endif
-                            </button>
-                            @if($activeStudentFiltersCount > 0)
-                                <a href="{{ route('teacher.courses.show', ['id' => $training->training_id, 'tab' => 'estudiantes']) }}" class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-x-circle me-1"></i>Limpiar filtros
-                                </a>
-                            @endif
-                        </div>
                     </div>
 
                     @if($students->count() > 0)
@@ -423,7 +484,6 @@
                                         <th>Email</th>
                                         <th>Teléfono</th>
                                         <th><i class="bi bi-person-check me-1"></i>Estado</th>
-                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -438,11 +498,6 @@
                                                 <span class="badge {{ $isActive ? 'bg-success' : 'bg-danger' }}">
                                                     {{ $isActive ? 'Activo' : 'Inactivo' }}
                                                 </span>
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#student-detail-{{ $enrollment->enrollment_id }}">
-                                                    <i class="bi bi-eye me-1"></i>Ver detalle
-                                                </button>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -541,9 +596,17 @@
                                         <div class="pt-1">
                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                 <h6 class="mb-0 fw-bold text-dark">Evaluaciones</h6>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="openAssessmentModal({{ $module->module_id ?? $module->id }})">
-                                                    <i class="bi bi-plus-circle"></i> Nueva Evaluación
-                                                </button>
+                                                @if($training->isFinished())
+                                                    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                            <i class="bi bi-plus-circle"></i> Nueva Evaluación
+                                                        </button>
+                                                    </span>
+                                                @else
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="openAssessmentModal({{ $module->module_id ?? $module->id }})">
+                                                        <i class="bi bi-plus-circle"></i> Nueva Evaluación
+                                                    </button>
+                                                @endif
                                             </div>
                                             @if(($module->assessments_count ?? 0) > 0)
                                                 <div class="table-responsive">
@@ -558,8 +621,8 @@
                                                         </thead>
                                                         <tbody>
                                                             @foreach($module->assessments as $assessment)
-                                                                @php $hasAttempts = $assessment->attempts()->exists(); @endphp
-                                                                <tr>
+                                                                @php $hasAttempts = $assessment->attempts()->whereNotNull('submitted_at')->exists(); @endphp
+                                                                <tr style="border-left: 4px solid {{ $hasAttempts ? '#f59e0b' : 'transparent' }};">
                                                                     <td>
                                                                         <div class="fw-bold">{{ $assessment->title }}</div>
                                                                         @if(!empty($assessment->description))
@@ -568,26 +631,38 @@
                                                                     </td>
                                                                     <td>{{ $assessment->end_date ? \Carbon\Carbon::parse($assessment->end_date)->format('d/m/Y') : 'Sin fecha' }}</td>
                                                                     <td>
-                                                                        <span class="badge @if($assessment->active) bg-success @else bg-danger @endif">{{ $assessment->active ? 'Activa' : 'Inactiva' }}</span>
+                                                                        <div class="d-flex flex-column gap-1">
+                                                                            <span class="badge @if($assessment->active) bg-success @else bg-danger @endif">{{ $assessment->active ? 'Activa' : 'Inactiva' }}</span>
+                                                                            @if($hasAttempts)
+                                                                                <span class="badge badge-warning text-dark">Bloqueada</span>
+                                                                            @endif
+                                                                        </div>
                                                                     </td>
                                                                     <td>
                                                                         <div class="d-flex flex-wrap gap-2">
                                                                             <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white">
                                                                                 <i class="bi bi-question-circle"></i> Preguntas
                                                                             </a>
-                                                                            <button type="button" class="btn btn-sm btn-outline-primary edit-assessment-btn" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "module_id" => $assessment->module_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit ]) }}'>
-                                                                                <i class="bi bi-pencil"></i> Editar
-                                                                            </button>
-                                                                            @if($hasAttempts && ! $isAdministrator)
-                                                                                <button type="button" class="btn btn-sm btn-danger" onclick="Swal.fire({ icon: 'warning', title: 'No es posible eliminar', text: 'Esta evaluación ya tiene intentos registrados y no puede eliminarse.' });">
-                                                                                    <i class="bi bi-trash"></i> Eliminar
-                                                                                </button>
+                                                                            @if($hasAttempts)
+                                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Esta evaluación ya fue respondida por estudiantes y no puede modificarse">
+                                                                                    <button type="button" class="btn btn-sm btn-outline-secondary disabled" onclick="return false;" aria-disabled="true">
+                                                                                        <i class="bi bi-pencil"></i> Editar
+                                                                                    </button>
+                                                                                </span>
+                                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Esta evaluación ya fue respondida por estudiantes y no puede modificarse">
+                                                                                    <button type="button" class="btn btn-sm btn-outline-secondary disabled" onclick="return false;" aria-disabled="true">
+                                                                                        <i class="bi bi-trash"></i> Eliminar
+                                                                                    </button>
+                                                                                </span>
                                                                             @else
-                                                                                <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm" data-message="{{ $hasAttempts ? 'Esta evaluación tiene intentos registrados. Como administrador puedes eliminarla junto con sus datos relacionados. ¿Deseas continuar?' : '¿Estás seguro de eliminar esta evaluación?' }}">
+                                                                                <button type="button" class="btn btn-sm btn-outline-primary edit-assessment-btn" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "module_id" => $assessment->module_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit, "has_attempts" => $hasAttempts ]) }}'>
+                                                                                    <i class="bi bi-pencil"></i> Editar
+                                                                                </button>
+                                                                                <form action="{{ route('teacher.assessments.destroy', $assessment->assessment_id) }}" method="POST" class="swal-confirm" data-message="¿Estás seguro de eliminar esta evaluación?">
                                                                                     @csrf
                                                                                     @method('DELETE')
                                                                                     <button type="submit" class="btn btn-sm btn-danger">
-                                                                                        <i class="bi bi-trash"></i> {{ $hasAttempts ? 'Eliminar como admin' : 'Eliminar' }}
+                                                                                        <i class="bi bi-trash"></i> Eliminar
                                                                                     </button>
                                                                                 </form>
                                                                             @endif
@@ -650,9 +725,17 @@
                                                 <h6 class="fw-bold text-dark mb-1">Tareas de este módulo</h6>
                                                 <small class="text-muted">Crea y gestiona las entregas para este módulo.</small>
                                             </div>
-                                            <button type="button" class="btn btn-sm btn-success" onclick="event.stopPropagation(); openTaskModal({{ $module->module_id ?? $module->id }})">
-                                                <i class="bi bi-plus-lg me-1"></i>Crear Tarea
-                                            </button>
+                                            @if($training->isFinished())
+                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                        <i class="bi bi-plus-lg me-1"></i>Crear Tarea
+                                                    </button>
+                                                </span>
+                                            @else
+                                                <button type="button" class="btn btn-sm btn-success" onclick="event.stopPropagation(); openTaskModal({{ $module->module_id ?? $module->id }})">
+                                                    <i class="bi bi-plus-lg me-1"></i>Crear Tarea
+                                                </button>
+                                            @endif
                                         </div>
                                         @if(($module->tasks_count ?? 0) > 0)
                                             <div class="table-responsive">
@@ -767,7 +850,11 @@
                                             <small class="text-muted">Puedes subir varios archivos, 5 MB por archivo.</small>
                                         </div>
 
-                                        <button type="submit" class="btn btn-primary">Publicar anuncio</button>
+                                        @if($training->isFinished())
+                                            <button type="button" class="btn btn-primary" disabled aria-disabled="true" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">Publicar anuncio</button>
+                                        @else
+                                            <button type="submit" class="btn btn-primary">Publicar anuncio</button>
+                                        @endif
                                     </form>
                                 </div>
                             </div>
@@ -945,15 +1032,6 @@
                     <input type="hidden" name="module_id" id="content-modal-module-id" value="">
                     <div class="modal-body">
                         <div class="form-group mb-3">
-                            <label for="content-module" class="form-label fw-bold">Módulo</label>
-                            <select name="module_id_select" id="content-module" class="form-control" required>
-                                <option value="">Selecciona un módulo</option>
-                                @foreach(($modules ?? collect()) as $module)
-                                    <option value="{{ optional($module)->id }}">{{ optional($module)->title }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group mb-3">
                             <label for="content-title" class="form-label fw-bold">Título</label>
                             <input type="text" name="title" id="content-title" class="form-control" required placeholder="Ej. Lectura introductoria">
                         </div>
@@ -962,17 +1040,9 @@
                             <textarea name="description" id="content-description" class="form-control" rows="3" placeholder="Describe brevemente el recurso..."></textarea>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="content-type" class="form-label fw-bold">Tipo</label>
-                            <select name="type" id="content-type" class="form-control" required>
-                                <option value="">Selecciona un tipo</option>
-                                <option value="PDF">PDF</option>
-                                <option value="Video">Video</option>
-                                <option value="Lectura">Lectura</option>
-                            </select>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="content-attachment" class="form-label">Archivo</label>
+                            <label for="content-attachment" class="form-label">Archivo adjunto</label>
                             <input type="file" name="attachment" id="content-attachment" class="form-control" accept=".pdf,.mp4,.mov,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.zip">
+                            <small class="form-text text-muted">Máx. 20 MB. Tipos permitidos: PDF, DOC, DOCX, TXT, PPT, PPTX, JPG, PNG, ZIP.</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -998,6 +1068,10 @@
                     <input type="hidden" name="training_id" value="{{ $training->training_id }}">
                     <input type="hidden" name="module_id" id="assessment-modal-module-id" value="">
                     <div class="modal-body">
+                        <div id="assessment-blocked-warning" class="alert alert-warning" style="display:none;">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Esta evaluación ya tiene intentos registrados. Solo puedes ver la información, no modificarla.
+                        </div>
                         <div class="form-group mb-3">
                             <label for="assessment-title" class="form-label fw-bold">Título</label>
                             <input type="text" name="title" id="assessment-title" class="form-control" required placeholder="Ej. Examen Parcial I">
@@ -1039,7 +1113,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Crear Evaluación</button>
+                        <button type="submit" class="btn btn-primary" id="assessment-submit-btn">Crear Evaluación</button>
                     </div>
                 </form>
             </div>
@@ -1092,7 +1166,6 @@
     <script>
         function openContentModal(moduleId, contentData = null) {
             const form = document.getElementById('createContentForm');
-            const select = document.getElementById('content-module');
             const hidden = document.getElementById('content-modal-module-id');
             const contentId = document.getElementById('content-id');
             if (form) {
@@ -1112,13 +1185,11 @@
                     if (contentId) contentId.value = contentData.id || '';
                     document.getElementById('content-title').value = contentData.title || '';
                     document.getElementById('content-description').value = contentData.description || '';
-                    document.getElementById('content-type').value = contentData.type || '';
                 } else {
                     if (contentId) contentId.value = '';
                     form.reset();
                 }
             }
-            if (select) select.value = moduleId || '';
             if (hidden) hidden.value = moduleId || '';
             $('#createContentModal').modal('show');
         }
@@ -1159,8 +1230,32 @@
             const endDateInput = document.getElementById('assessment-end-date');
             const timeLimitInput = document.getElementById('assessment-time-limit');
             const attemptsInput = document.getElementById('assessment-allowed-attempts');
+            const assessmentSubmitBtn = document.getElementById('assessment-submit-btn');
+            const assessmentBlockedWarning = document.getElementById('assessment-blocked-warning');
+            const assessmentFields = [
+                document.getElementById('assessment-title'),
+                document.getElementById('assessment-description'),
+                document.getElementById('assessment-start-date'),
+                document.getElementById('assessment-end-date'),
+                document.getElementById('assessment-allowed-attempts'),
+                document.getElementById('assessment-time-limit'),
+                document.getElementById('assessment-active')
+            ].filter(Boolean);
             const taskAttachmentInput = document.getElementById('task-attachment');
             const taskForm = document.getElementById('createTaskForm');
+
+            const setAssessmentFormLocked = function(locked) {
+                assessmentFields.forEach(function(field) {
+                    field.disabled = locked;
+                });
+                if (assessmentSubmitBtn) {
+                    assessmentSubmitBtn.disabled = locked;
+                    assessmentSubmitBtn.textContent = locked ? 'Bloqueado' : 'Crear Evaluación';
+                }
+                if (assessmentBlockedWarning) {
+                    assessmentBlockedWarning.style.display = locked ? 'block' : 'none';
+                }
+            };
 
             const getLocalToday = function() {
                 const today = new Date();
@@ -1264,6 +1359,8 @@
                     const data = JSON.parse(this.getAttribute('data-assessment'));
                     const form = document.getElementById('createAssessmentForm');
                     form.action = '{{ route('teacher.assessments.store') }}'.replace('/assessments', '/assessments/' + data.id);
+                    const hasAttempts = Boolean(data.has_attempts);
+                    setAssessmentFormLocked(hasAttempts);
                     // set method PUT
                     let methodInput = form.querySelector('input[name="_method"]');
                     if (!methodInput) {
@@ -1295,6 +1392,7 @@
                     document.getElementById('assessment-module').value = '';
                     document.getElementById('assessment-modal-module-id').value = '';
                     form.reset();
+                    setAssessmentFormLocked(false);
                 });
             });
 

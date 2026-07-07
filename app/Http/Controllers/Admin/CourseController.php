@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Module;
 use App\Models\Specialty;
+use App\Models\Training;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class CourseController extends Controller
@@ -113,10 +115,78 @@ class CourseController extends Controller
     public function toggleActive($id)
     {
         $course = Course::findOrFail($id);
-        $course->update(['is_active' => ! $course->isActive()]);
+        $isActive = $course->isActive();
+
+        if (! $isActive) {
+            // Activar el curso
+            $course->update(['is_active' => true]);
+
+            return redirect()->route('admin.courses.index')
+                ->with('success', 'Curso activado correctamente.');
+        }
+
+        // Verificar si se puede desactivar
+        $activeTrainings = Training::where('course_id', $course->course_id)
+            ->where('status', Training::STATUS_ACTIVE)
+            ->where(function ($q) {
+                $q->whereNull('end_date')->orWhere('end_date', '>', now());
+            })
+            ->count();
+
+        if ($activeTrainings > 0) {
+            return redirect()->route('admin.courses.index')
+                ->with('error', "No se puede desactivar el curso '{$course->title}' porque tiene {$activeTrainings} capacitaciones en curso. Finalice o archive esas capacitaciones primero.");
+        }
+
+        // Desactivar el curso
+        DB::transaction(function () use ($course) {
+            $course->update(['is_active' => false]);
+
+            // Archivar capacitaciones finalizadas
+            Training::where('course_id', $course->course_id)
+                ->where('status', Training::STATUS_ACTIVE)
+                ->where('end_date', '<=', now())
+                ->update(['status' => Training::STATUS_ARCHIVED]);
+        });
+
+        $finishedTrainings = Training::where('course_id', $course->course_id)
+            ->where(fn ($q) => $q->where('status', Training::STATUS_ARCHIVED)
+                ->orWhere('status', Training::STATUS_FINISHED))
+            ->count();
 
         return redirect()->route('admin.courses.index')
-            ->with('success', $course->fresh()->isActive() ? 'Curso activado correctamente' : 'Curso desactivado correctamente');
+            ->with('success', "Curso desactivado. Sus {$finishedTrainings} capacitaciones finalizadas permanecen accesibles para consulta de estudiantes.");
+    }
+
+    public function canDeactivate($id)
+    {
+        $course = Course::findOrFail($id);
+
+        $activeTrainings = Training::where('course_id', $course->course_id)
+            ->where('status', Training::STATUS_ACTIVE)
+            ->where(function ($q) {
+                $q->whereNull('end_date')->orWhere('end_date', '>', now());
+            })
+            ->count();
+
+        $finishedTrainings = Training::where('course_id', $course->course_id)
+            ->where(function ($q) {
+                $q->where('status', Training::STATUS_FINISHED)
+                    ->orWhere(fn ($subQ) => $subQ->where('status', Training::STATUS_ACTIVE)->where('end_date', '<=', now()));
+            })
+            ->count();
+
+        $archivedTrainings = Training::where('course_id', $course->course_id)
+            ->where('status', Training::STATUS_ARCHIVED)
+            ->count();
+
+        return response()->json([
+            'can_deactivate' => $activeTrainings === 0,
+            'reason' => $activeTrainings > 0 ? "Tiene {$activeTrainings} capacitaciones en curso" : null,
+            'active_trainings' => $activeTrainings,
+            'finished_trainings' => $finishedTrainings,
+            'archived_trainings' => $archivedTrainings,
+        ]);
     }
 
     public function modules($course_id)

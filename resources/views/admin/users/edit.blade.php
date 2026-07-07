@@ -9,35 +9,41 @@
 
         <div class="card shadow mb-4">
             <div class="card-body">
+                @if($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('admin.users.update', $user->user_id) }}">
                     @csrf
                     @method('PUT')
 
-                    @if($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Nombre completo</label>
-                            <input type="text" name="full_name" value="{{ old('full_name', trim(($user->person->first_names ?? '') . ' ' . ($user->person->last_names ?? ''))) }}" class="form-control" required>
+                            <label class="form-label">Nombres *</label>
+                            <input type="text" name="first_names" value="{{ old('first_names', $user->person->first_names ?? '') }}" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Correo</label>
-                            <input type="email" name="email" value="{{ old('email', $user->person->email ?? '') }}" class="form-control" required>
+                            <label class="form-label">Apellidos *</label>
+                            <input type="text" name="last_names" value="{{ old('last_names', $user->person->last_names ?? '') }}" class="form-control" required>
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Correo *</label>
+                        <input type="email" name="email" value="{{ old('email', $user->person->email ?? '') }}" class="form-control" required>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nueva contraseña</label>
                             <input type="password" name="password" class="form-control">
+                            <small class="form-text text-muted">Dejar en blanco para mantener la contraseña actual.</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Confirmar contraseña</label>
@@ -47,7 +53,7 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Rol</label>
+                            <label class="form-label">Rol *</label>
                             <select name="role_id" class="form-control" required>
                                 @foreach($roles as $role)
                                     <option value="{{ $role->role_id }}" {{ old('role_id', optional($user->roles->first())->role_id) == $role->role_id ? 'selected' : '' }}>{{ $role->name }}</option>
@@ -55,8 +61,8 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Estado</label>
-                            <select name="status" class="form-control">
+                            <label class="form-label">Estado *</label>
+                            <select name="status" class="form-control" required>
                                 <option value="A" {{ old('status', $user->status) === 'A' ? 'selected' : '' }}>Activo</option>
                                 <option value="I" {{ old('status', $user->status) === 'I' ? 'selected' : '' }}>Inactivo</option>
                             </select>

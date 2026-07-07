@@ -8,8 +8,11 @@ use App\Models\Module;
 
 class Training extends Model
 {
-    public const STATUS_DRAFT = 0;
+    public const STATUS_INACTIVE = 0;
     public const STATUS_ACTIVE = 1;
+    public const STATUS_ARCHIVED = 2;
+    public const STATUS_FINISHED = 3;
+    public const STATUS_DRAFT = 4;
 
     protected $primaryKey = 'training_id';
 
@@ -109,6 +112,67 @@ class Training extends Model
         return $this->normalizedStatus() === self::STATUS_DRAFT;
     }
 
+    public function hasActiveStudents(): bool
+    {
+        return $this->enrollments()
+            ->where('status', 'A')
+            ->exists();
+    }
+
+    public function hasAcademicHistory(): bool
+    {
+        $hasAssessmentAttempts = $this->assessments()
+            ->whereHas('attempts', fn ($q) => $q->whereNotNull('submitted_at'))
+            ->exists();
+
+        $hasTaskGrades = $this->tasks()
+            ->whereHas('submissions', fn ($q) => $q->whereNotNull('grade'))
+            ->exists();
+
+        return $hasAssessmentAttempts || $hasTaskGrades;
+    }
+
+    public function isCurrentlyActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE
+            && $this->end_date
+            && Carbon::parse($this->end_date)->isFuture();
+    }
+
+    public function canBeDeactivated(): bool
+    {
+        // No puede desactivarse si tiene estudiantes activos
+        if ($this->hasActiveStudents()) {
+            return false;
+        }
+
+        // Si tiene historial académico pero no estudiantes activos, puede archivarse
+        // pero no desactivarse completamente
+        return ! $this->hasAcademicHistory();
+    }
+
+    public function getDeactivationBlockReason(): ?string
+    {
+        $activeStudents = $this->enrollments()
+            ->where('status', 'A')
+            ->count();
+
+        if ($activeStudents > 0) {
+            return "Tiene {$activeStudents} estudiantes activos en esta capacitación.";
+        }
+
+        if ($this->hasAcademicHistory()) {
+            return 'Tiene historial académico (calificaciones, entregas) registrado.';
+        }
+
+        return null;
+    }
+
+    public function isFinished(): bool
+    {
+        return (bool) ($this->end_date && Carbon::parse($this->end_date)->endOfDay()->isPast());
+    }
+
     public function isActive(): bool
     {
         if (array_key_exists('is_active', $this->attributes)) {
@@ -119,13 +183,7 @@ class Training extends Model
             return false;
         }
 
-        $today = Carbon::today();
-
-        if ($this->start_date && $today->lt(Carbon::parse($this->start_date)->startOfDay())) {
-            return false;
-        }
-
-        if ($this->end_date && $today->gt(Carbon::parse($this->end_date)->endOfDay())) {
+        if ($this->isFinished()) {
             return false;
         }
 

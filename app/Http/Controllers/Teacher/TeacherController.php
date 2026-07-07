@@ -151,9 +151,14 @@ class TeacherController extends Controller
             'module_id' => 'required|exists:modules,id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string|max:1000',
-            'type' => 'required|string|in:PDF,Video,Lectura',
             'attachment' => 'nullable|file|max:20480',
         ]);
+
+        $training = Training::where('training_id', $validated['training_id'])->firstOrFail();
+
+        if ($training->isFinished()) {
+            return back()->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
 
         $path = null;
         if ($request->hasFile('attachment')) {
@@ -165,7 +170,7 @@ class TeacherController extends Controller
             'module_id' => $validated['module_id'],
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
-            'type' => $validated['type'],
+            'type' => $request->input('type', 'Lectura'),
             'order_index' => Content::where('module_id', $validated['module_id'])->count() + 1,
             'file_path' => $path,
         ]);
@@ -182,9 +187,14 @@ class TeacherController extends Controller
             'module_id' => 'required|exists:modules,id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string|max:1000',
-            'type' => 'required|string|in:PDF,Video,Lectura',
             'attachment' => 'nullable|file|max:20480',
         ]);
+
+        $training = Training::where('training_id', $validated['training_id'])->firstOrFail();
+
+        if ($training->isFinished()) {
+            return back()->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
 
         $path = $content->file_path;
         if ($request->hasFile('attachment')) {
@@ -196,7 +206,7 @@ class TeacherController extends Controller
             'module_id' => $validated['module_id'],
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
-            'type' => $validated['type'],
+            'type' => $request->input('type', $content->type ?? 'Lectura'),
             'file_path' => $path,
         ]);
 
@@ -666,6 +676,10 @@ class TeacherController extends Controller
         $training = Training::where('training_id', $id)
             ->when(! $this->isAdministrator(), fn ($query) => $query->where('teacher_id', $user->user_id))
             ->firstOrFail();
+
+        if ($training->isFinished()) {
+            return back()->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
 
         $validated = $request->validate([
             'content' => 'required|string|max:3000',
