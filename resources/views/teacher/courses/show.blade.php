@@ -1242,6 +1242,7 @@
                 document.getElementById('assessment-active')
             ].filter(Boolean);
             const taskAttachmentInput = document.getElementById('task-attachment');
+            const contentAttachmentInput = document.getElementById('content-attachment');
             const taskForm = document.getElementById('createTaskForm');
 
             const setAssessmentFormLocked = function(locked) {
@@ -1299,6 +1300,18 @@
                 if (taskDueDateInput.value && taskDueDateInput.value < taskMin) {
                     taskDueDateInput.value = taskMin;
                 }
+            }
+
+            if (contentAttachmentInput) {
+                contentAttachmentInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (!file) return;
+                    const maxSizeMB = 20;
+                    if (file.size > maxSizeMB * 1024 * 1024) {
+                        Swal.fire({ icon: 'error', title: 'Archivo demasiado grande', text: 'El archivo supera el tamaño máximo de 20 MB.' });
+                        this.value = '';
+                    }
+                });
             }
 
             if (taskAttachmentInput) {

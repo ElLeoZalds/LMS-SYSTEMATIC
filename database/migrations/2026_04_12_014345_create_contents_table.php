@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->string('title', 150);
             $table->string('type', 50);
+            $table->string('file_path')->nullable();
             $table->integer('order_index');
             $table->timestamps();
         });

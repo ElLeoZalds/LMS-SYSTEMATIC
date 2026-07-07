@@ -861,7 +861,7 @@ class TeacherController extends Controller
             ->first();
 
         if (! $training) {
-            abort(403, 'No autorizado: Este training no te pertenece.');
+            abort(403, 'No autorizado: esta capacitación no te pertenece.');
         }
 
         Task::create([
