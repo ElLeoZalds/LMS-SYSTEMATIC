@@ -134,8 +134,10 @@ class TrainingController extends Controller
             'student_id' => 'required|exists:users,user_id',
         ]);
 
-        if ($this->alreadyEnrolled($training->training_id, $data['student_id'])) {
-            return response()->json(['success' => false, 'message' => 'El alumno ya está inscrito en este curso.']);
+        $validation = Enrollment::validateEnrollment($data['student_id'], $training->training_id);
+
+        if (! $validation['success']) {
+            return response()->json(['success' => false, 'message' => $validation['message']]);
         }
 
         Enrollment::create([

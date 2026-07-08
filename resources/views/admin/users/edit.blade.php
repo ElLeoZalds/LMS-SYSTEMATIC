@@ -53,12 +53,33 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Rol *</label>
-                            <select name="role_id" class="form-control" required>
+                            <label class="form-label fw-bold">Roles asignados *</label>
+                            <div class="border rounded p-3">
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->role_id }}" {{ old('role_id', optional($user->roles->first())->role_id) == $role->role_id ? 'selected' : '' }}>{{ $role->name }}</option>
+                                    <div class="form-check mb-2">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               name="role_ids[]"
+                                               value="{{ $role->role_id }}"
+                                               id="role-{{ $role->role_id }}"
+                                               {{ in_array($role->role_id, old('role_ids', $user->roles->pluck('role_id')->toArray())) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="role-{{ $role->role_id }}">
+                                            {{ $role->name }}
+                                            @if($role->name === 'Administrator')
+                                                <small class="text-muted d-block">Acceso completo al sistema</small>
+                                            @elseif($role->name === 'Teacher')
+                                                <small class="text-muted d-block">Puede gestionar cursos y evaluaciones</small>
+                                            @elseif($role->name === 'Student')
+                                                <small class="text-muted d-block">Puede matricularse en cursos</small>
+                                            @endif
+                                        </label>
+                                    </div>
                                 @endforeach
-                            </select>
+                            </div>
+                            <small class="form-text text-muted">Un usuario puede tener múltiples roles simultáneamente.</small>
+                            @error('role_ids')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Estado *</label>

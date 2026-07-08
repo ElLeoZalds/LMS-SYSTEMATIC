@@ -69,9 +69,9 @@
                                     </td>
                                     <td class="align-middle">—</td>
                                     <td class="align-middle text-end">
-                                        <a href="{{ route('admin.users.edit', $user->user_id) }}" class="btn btn-sm btn-info me-1">
+                                        <button type="button" class="btn btn-sm btn-info me-1" data-toggle="modal" data-target="#editUserModal{{ $user->user_id }}">
                                             <i class="fas fa-edit"></i> Editar
-                                        </a>
+                                        </button>
                                         <form action="{{ route('admin.users.update', $user->user_id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('PUT')
@@ -141,40 +141,66 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label">Nombre completo</label>
-                                            <input type="text" name="full_name" value="{{ old('full_name', $modalFullName) }}" class="form-control" required>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Nombres *</label>
+                                                <input type="text" name="first_names" value="{{ old('first_names', $userModal->person->first_names ?? '') }}" class="form-control" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Apellidos *</label>
+                                                <input type="text" name="last_names" value="{{ old('last_names', $userModal->person->last_names ?? '') }}" class="form-control" required>
+                                            </div>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Correo</label>
+                                            <label class="form-label">Correo *</label>
                                             <input type="email" name="email" value="{{ old('email', $userModal->person->email ?? '') }}" class="form-control" required>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Nueva contraseña</label>
                                                 <input type="password" name="password" class="form-control">
+                                                <small class="form-text text-muted">Dejar en blanco para mantenerla.</small>
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Confirmar contraseña</label>
                                                 <input type="password" name="password_confirmation" class="form-control">
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Rol</label>
-                                                <select name="role_id" class="form-control" required>
-                                                    @foreach($roles as $role)
-                                                        <option value="{{ $role->role_id }}" {{ old('role_id', $modalRoleId) == $role->role_id ? 'selected' : '' }}>{{ $role->name }}</option>
-                                                    @endforeach
-                                                </select>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Roles asignados *</label>
+                                            <div class="border rounded p-3">
+                                                @foreach($roles as $role)
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox"
+                                                               class="form-check-input"
+                                                               name="role_ids[]"
+                                                               value="{{ $role->role_id }}"
+                                                               id="modal-role-{{ $userModal->user_id }}-{{ $role->role_id }}"
+                                                               {{ in_array($role->role_id, old('role_ids', $userModal->roles->pluck('role_id')->toArray())) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="modal-role-{{ $userModal->user_id }}-{{ $role->role_id }}">
+                                                            {{ $role->name }}
+                                                            @if($role->name === 'Administrator')
+                                                                <small class="text-muted d-block">Acceso completo al sistema</small>
+                                                            @elseif($role->name === 'Teacher')
+                                                                <small class="text-muted d-block">Puede gestionar cursos y evaluaciones</small>
+                                                            @elseif($role->name === 'Student')
+                                                                <small class="text-muted d-block">Puede matricularse en cursos</small>
+                                                            @endif
+                                                        </label>
+                                                    </div>
+                                                @endforeach
                                             </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Estado</label>
-                                                <select name="status" class="form-control">
-                                                    <option value="A" {{ old('status', $userModal->status) === 'A' ? 'selected' : '' }}>Activo</option>
-                                                    <option value="I" {{ old('status', $userModal->status) === 'I' ? 'selected' : '' }}>Inactivo</option>
-                                                </select>
-                                            </div>
+                                            <small class="form-text text-muted">Un usuario puede tener múltiples roles simultáneamente.</small>
+                                            @error('role_ids')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Estado *</label>
+                                            <select name="status" class="form-control">
+                                                <option value="A" {{ old('status', $userModal->status) === 'A' ? 'selected' : '' }}>Activo</option>
+                                                <option value="I" {{ old('status', $userModal->status) === 'I' ? 'selected' : '' }}>Inactivo</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="modal-footer">

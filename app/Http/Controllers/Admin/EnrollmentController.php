@@ -30,7 +30,19 @@ class EnrollmentController extends Controller
         $trainingId = (int) $request->training_id;
         $studentIds = array_unique($request->student_ids);
         $training = Training::with('course')->findOrFail($trainingId);
-        $newStudentIds = $this->newStudentIds($studentIds, $training, $trainingId);
+
+        $validatedStudentIds = [];
+        foreach ($studentIds as $studentId) {
+            $validation = Enrollment::validateEnrollment((int) $studentId, $trainingId);
+
+            if (! $validation['success']) {
+                return back()->with('error', $validation['message']);
+            }
+
+            $validatedStudentIds[] = (int) $studentId;
+        }
+
+        $newStudentIds = $this->newStudentIds($validatedStudentIds, $training, $trainingId);
 
         $createdCount = count($newStudentIds);
 

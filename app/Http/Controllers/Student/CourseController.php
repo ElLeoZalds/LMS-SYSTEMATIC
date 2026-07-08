@@ -28,15 +28,18 @@ class CourseController extends Controller
     {
         $studentId = auth()->id();
 
-        $training = Training::with([
-            'course.specialty',
-            'teacher.person',
-            'assessments',
-            'tasks',
-            'contents.training',
-            'enrollments.student.person',
-        ])
-            ->where('training_id', $id)
+        $training = Training::where('training_id', $id)
+            ->whereHas('enrollments', function ($query) use ($studentId) {
+                $query->where('student_id', $studentId);
+            })
+            ->with([
+                'course.specialty',
+                'teacher.person',
+                'assessments',
+                'tasks',
+                'contents.training',
+                'enrollments.student.person',
+            ])
             ->firstOrFail();
 
         $announcements = $training->announcements()

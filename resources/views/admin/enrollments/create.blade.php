@@ -61,11 +61,20 @@
                                             $studentName = trim(($student->person->first_names ?? 'Sin nombre') . ' ' . ($student->person->last_names ?? ''));
                                             $checked = is_array(old('student_ids')) && in_array($student->user_id, old('student_ids'));
                                         @endphp
+                                        @php
+                                            $isTeacherOfSelectedTraining = isset($selectedTraining) && $selectedTraining->teacher_id == $student->user_id;
+                                        @endphp
                                         <div class="form-check student-checkbox mb-2" data-student-name="{{ strtolower($studentName . ' ' . $student->username) }}">
-                                            <input class="form-check-input" type="checkbox" name="student_ids[]" value="{{ $student->user_id }}" id="student_{{ $student->user_id }}" @checked($checked)>
+                                            <input class="form-check-input" type="checkbox" name="student_ids[]" value="{{ $student->user_id }}" id="student_{{ $student->user_id }}" @checked($checked) @disabled($isTeacherOfSelectedTraining)>
                                             <label class="form-check-label" for="student_{{ $student->user_id }}">
                                                 {{ $studentName }} ({{ $student->username }})
                                             </label>
+                                            @if($isTeacherOfSelectedTraining)
+                                                <div class="alert alert-warning py-2 px-3 mt-2 mb-0 small">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                    Este usuario es el profesor de la capacitación y no puede matricularse como estudiante.
+                                                </div>
+                                            @endif
                                         </div>
                                     @empty
                                         <div class="text-muted small">

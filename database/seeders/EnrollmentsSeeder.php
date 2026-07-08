@@ -14,6 +14,24 @@ class EnrollmentsSeeder extends Seeder
         DB::table('enrollments')->truncate();
         Schema::enableForeignKeyConstraints();
 
+        $mariaTeacher = \App\Models\User::where('username', 'maria.lopez.teacher')->first();
+        $otherTraining = \App\Models\Training::query();
+
+        if ($mariaTeacher) {
+            $otherTraining = \App\Models\Training::where('teacher_id', '!=', $mariaTeacher->user_id)->first();
+        }
+
+        if ($mariaTeacher && $otherTraining) {
+            \App\Models\Enrollment::create([
+                'student_id' => $mariaTeacher->user_id,
+                'training_id' => $otherTraining->training_id,
+                'administrator_id' => 1,
+                'enrollment_date' => now(),
+                'scholarship_percentage' => 0,
+                'status' => 'A',
+            ]);
+        }
+
         DB::table('enrollments')->insert([
             [
                 'training_id' => 1,

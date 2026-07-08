@@ -18,7 +18,22 @@ class StudentController extends Controller
     {
         $student = Auth::user();
 
-        $enrollments = $student->enrollments()
+        $studentId = $student->user_id;
+        $enrolledTrainingIds = Enrollment::where('student_id', $studentId)
+            ->pluck('training_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $trainings = \App\Models\Training::whereHas('enrollments', function ($query) use ($studentId) {
+            $query->where('student_id', $studentId);
+        })
+            ->with(['course.specialty', 'teacher.person'])
+            ->get();
+
+        $enrollments = Enrollment::where('student_id', $studentId)
+            ->whereIn('training_id', $enrolledTrainingIds)
             ->with([
                 'training.course',
                 'training.teacher.person',
@@ -70,6 +85,9 @@ class StudentController extends Controller
     {
         $studentId = Auth::user()->user_id;
 
+        $enrolledTrainingIds = Enrollment::where('student_id', $studentId)
+            ->pluck('training_id');
+
         $courses = Enrollment::with([
             'training.course',
             'training.teacher.person',
@@ -80,6 +98,7 @@ class StudentController extends Controller
             'progress',
         ])
             ->where('student_id', $studentId)
+            ->whereIn('training_id', $enrolledTrainingIds)
             ->get()
             ->map(function ($enrollment) {
                 $schedule = $enrollment->training?->schedules?->sortBy('date')->first();

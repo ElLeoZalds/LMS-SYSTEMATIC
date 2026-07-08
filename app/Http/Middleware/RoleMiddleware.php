@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RoleMiddleware
 {
@@ -15,8 +16,34 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        if (! $this->canAccessRole($user, $role)) {
-            abort(403, 'No autorizado');
+        Log::info('RoleMiddleware', [
+            'required_role' => $role,
+            'active_role_id' => session('active_role_id'),
+            'active_role_name' => session('active_role_name'),
+            'user_roles' => $user->roles->pluck('name')->toArray(),
+        ]);
+
+        $requiredRoleName = $role;
+        $userHasRole = $user->roles->contains('name', $requiredRoleName);
+
+        if (! $userHasRole) {
+            abort(403, 'No tienes permisos para acceder a esta sección.');
+        }
+
+        if ($user->roles->count() > 1) {
+            $activeRoleId = session('active_role_id');
+            $activeRole = $user->roles->firstWhere('role_id', $activeRoleId);
+
+            if (! $activeRole || $activeRole->name !== $requiredRoleName) {
+                session(['show_role_modal' => true]);
+
+                return $next($request);
+            }
+
+            session(['active_role_id' => $activeRole->role_id, 'active_role_name' => $activeRole->name, 'show_role_modal' => false]);
+        } else {
+            $singleRole = $user->roles->first();
+            session(['active_role_id' => $singleRole->role_id, 'active_role_name' => $singleRole->name, 'show_role_modal' => false]);
         }
 
         return $next($request);

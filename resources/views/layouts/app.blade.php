@@ -747,6 +747,65 @@
 
 <body id="page-top">
 
+    @php
+        $showRoleModal = auth()->check()
+            && auth()->user()->hasMultipleRoles()
+            && (session('show_role_modal', false) || ! session('active_role_id'));
+        $roleOptions = auth()->check() ? auth()->user()->roles->sortBy('name') : collect();
+    @endphp
+
+    @if($showRoleModal)
+        <div class="modal fade" id="roleSelectionModal" tabindex="-1" aria-labelledby="roleSelectionModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="roleSelectionModalLabel">
+                            <i class="fas fa-user-shield me-2"></i> Selecciona tu rol
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted mb-4">Tu cuenta tiene varios roles disponibles. Elige el contexto que deseas usar para continuar.</p>
+                        <div class="d-grid gap-2">
+                            @foreach($roleOptions as $role)
+                                @php
+                                    $roleLabel = match ($role->name) {
+                                        'Administrator' => 'Administrador',
+                                        'Teacher' => 'Profesor',
+                                        'Student' => 'Estudiante',
+                                        default => $role->name,
+                                    };
+                                    $roleRoute = match ($role->name) {
+                                        'Administrator' => route('admin.dashboard'),
+                                        'Teacher' => route('teacher.dashboard'),
+                                        'Student' => route('student.dashboard'),
+                                        default => route('login'),
+                                    };
+                                @endphp
+                                <form method="POST" action="{{ route('role.set') }}" class="d-grid">
+                                    @csrf
+                                    <input type="hidden" name="role" value="{{ $role->role_id }}">
+                                    <button type="submit" class="btn btn-outline-primary text-start">
+                                        <i class="fas fa-arrow-right me-2"></i>{{ $roleLabel }}
+                                    </button>
+                                </form>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const modal = document.getElementById('roleSelectionModal');
+                if (modal) {
+                    const bootstrapModal = new bootstrap.Modal(modal);
+                    bootstrapModal.show();
+                }
+            });
+        </script>
+    @endif
+
     <!-- Page Wrapper -->
     <div id="wrapper">
 

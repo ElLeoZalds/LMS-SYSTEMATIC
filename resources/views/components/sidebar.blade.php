@@ -1,5 +1,5 @@
 @php
-    $role = optional(auth()->user()->roles->first())->name;
+    $role = session('active_role_name') ?: optional(auth()->user()->roles->first())->name;
     $person = optional(auth()->user()->person);
     $fullName = trim(($person->last_names ? $person->last_names . ' ' : '') . ($person->first_names ?? ''));
     $displayRole = 'Usuario';

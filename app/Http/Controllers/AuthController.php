@@ -63,12 +63,73 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            $user = Auth::user();
+
+            if ($user->hasMultipleRoles()) {
+                session(['active_role_id' => null, 'active_role_name' => null, 'show_role_modal' => true]);
+
+                return $this->redirectAuthenticatedUser();
+            }
+
             return $this->redirectAuthenticatedUser();
         }
 
         return back()->withErrors([
             'username' => 'Las credenciales no coinciden o el usuario se encuentra inactivo.',
         ]);
+    }
+
+    public function showRoleSelector()
+    {
+        $user = auth()->user();
+
+        return view('auth.select-role', ['roles' => $user?->roles ?? collect()]);
+    }
+
+    public function setActiveRole(Request $request)
+    {
+        $request->validate(['role' => 'required|exists:roles,role_id']);
+
+        $user = auth()->user();
+        $role = $user?->roles->firstWhere('role_id', $request->role);
+
+        if (! $role) {
+            abort(403, 'No tienes ese rol asignado.');
+        }
+
+        $request->session()->put('active_role_id', $role->role_id);
+        $request->session()->put('active_role_name', $role->name);
+        $request->session()->put('show_role_modal', false);
+        $request->session()->regenerate();
+
+        return match ($role->name) {
+            'Administrator' => redirect()->route('admin.dashboard'),
+            'Teacher' => redirect()->route('teacher.dashboard'),
+            'Student' => redirect()->route('student.dashboard'),
+            default => redirect()->route('login'),
+        };
+    }
+
+    public function switchRole(Request $request, $roleId)
+    {
+        $user = auth()->user();
+        $role = $user?->roles->firstWhere('role_id', $roleId);
+
+        if (! $role) {
+            abort(403, 'No tienes ese rol asignado.');
+        }
+
+        $request->session()->put('active_role_id', $role->role_id);
+        $request->session()->put('active_role_name', $role->name);
+        $request->session()->put('show_role_modal', false);
+        $request->session()->regenerate();
+
+        return match ($role->name) {
+            'Administrator' => redirect()->route('admin.dashboard'),
+            'Teacher' => redirect()->route('teacher.dashboard'),
+            'Student' => redirect()->route('student.dashboard'),
+            default => redirect()->route('login'),
+        };
     }
 
     public function logout(Request $request)
@@ -129,6 +190,24 @@ class AuthController extends Controller
     private function redirectAuthenticatedUser(?string $message = null)
     {
         $user = Auth::user();
+
+        if ($user->hasMultipleRoles()) {
+            session(['active_role_id' => null, 'active_role_name' => null, 'show_role_modal' => true]);
+
+            $preferredRole = $user->roles->sortBy('name')->first();
+            $response = match ($preferredRole?->name) {
+                'Administrator' => redirect()->route('admin.dashboard'),
+                'Teacher' => redirect()->route('teacher.dashboard'),
+                'Student' => redirect()->route('student.dashboard'),
+                default => redirect()->route('login'),
+            };
+
+            if ($message) {
+                return $response->with('success', $message);
+            }
+
+            return $response;
+        }
 
         if ($user->isAdministrator()) {
             $response = redirect()->route('admin.dashboard');

@@ -51,9 +51,9 @@
                                         </div>
                                     </td>
                                     <td class="align-middle">
-                                        <a href="{{ route('admin.courses.edit', $course->course_id) }}" class="fw-bold text-primary">
+                                        <div class="fw-bold text-dark">
                                             {{ $course->title }}
-                                        </a>
+                                        </div>
                                         <div class="text-muted small">
                                             {{ optional($course->specialty)->specialty ?? 'Sin especialidad' }}
                                         </div>

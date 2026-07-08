@@ -72,6 +72,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->roles->contains(fn ($role) => strcasecmp((string) $role->name, $roleName) === 0);
     }
 
+    public function hasMultipleRoles(): bool
+    {
+        return $this->roles->count() > 1;
+    }
+
+    public function getAvailableRoles(): \Illuminate\Support\Collection
+    {
+        return $this->roles;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->roles->contains('name', 'Administrator');
+    }
+
     public function isAdministrator(): bool
     {
         return $this->hasRole('Administrator');

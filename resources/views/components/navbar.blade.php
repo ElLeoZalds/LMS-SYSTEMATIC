@@ -3,7 +3,8 @@
     <ul class="navbar-nav ml-auto">
         @php
             $currentUser = auth()->user();
-            $role = optional($currentUser?->roles->first())->name;
+            $activeRoleName = session('active_role_name') ?: optional($currentUser?->roles->first())->name;
+            $role = $activeRoleName;
             $unreadNotifications = $role === 'Student' ? $currentUser?->unreadNotifications()->latest()->take(10)->get() ?? collect() : collect();
             $unreadNotificationsCount = $role === 'Student' ? $currentUser?->unreadNotifications->count() : 0;
         @endphp
@@ -66,10 +67,33 @@
                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">
                     {{ auth()->user()->username }}
                 </span>
+                @if($currentUser && $currentUser->hasMultipleRoles() && $activeRoleName)
+                    <span class="badge badge-primary ml-2">{{ $activeRoleName }}</span>
+                @endif
                 <img class="img-profile rounded-circle" src="{{ asset('img/undraw_profile.svg') }}">
             </a>
 
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                @if($currentUser && $currentUser->hasMultipleRoles())
+                    <div class="dropdown-header font-weight-bold text-gray-800">
+                        <i class="bi bi-arrow-repeat me-2"></i>Cambiar rol
+                    </div>
+                    @foreach($currentUser->roles as $roleOption)
+                        <form method="POST" action="{{ route('role.set') }}" class="d-block">
+                            @csrf
+                            <input type="hidden" name="role" value="{{ $roleOption->role_id }}">
+                            <button type="submit" class="dropdown-item {{ session('active_role_id') == $roleOption->role_id ? 'active font-weight-bold text-primary' : '' }}">
+                                <i class="bi bi-{{ $roleOption->name === 'Administrator' ? 'shield-lock' : ($roleOption->name === 'Teacher' ? 'person-workspace' : 'book') }} me-2"></i>
+                                {{ $roleOption->name }}
+                                @if(session('active_role_id') == $roleOption->role_id)
+                                    <span class="text-muted small">(actual)</span>
+                                @endif
+                            </button>
+                        </form>
+                    @endforeach
+                    <div class="dropdown-divider"></div>
+                @endif
+
                 @if($role === 'Teacher')
                     <a class="dropdown-item" href="{{ route('teacher.dashboard') }}">
                         <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>

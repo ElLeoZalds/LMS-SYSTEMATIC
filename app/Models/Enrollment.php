@@ -59,6 +59,31 @@ class Enrollment extends Model
         return $this->hasMany(Payment::class, 'enrollment_id', 'enrollment_id');
     }
 
+    public static function validateEnrollment(int $studentId, int $trainingId): array
+    {
+        $training = Training::findOrFail($trainingId);
+
+        if ($training->teacher_id === $studentId) {
+            return [
+                'success' => false,
+                'message' => 'Un profesor no puede matricularse como estudiante en su propia capacitación.',
+            ];
+        }
+
+        $exists = self::where('student_id', $studentId)
+            ->where('training_id', $trainingId)
+            ->exists();
+
+        if ($exists) {
+            return [
+                'success' => false,
+                'message' => 'El estudiante ya está matriculado en esta capacitación.',
+            ];
+        }
+
+        return ['success' => true];
+    }
+
     public function completedContentsCount()
     {
         if (! $this->training) {

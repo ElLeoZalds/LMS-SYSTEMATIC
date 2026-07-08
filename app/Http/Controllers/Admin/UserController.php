@@ -92,7 +92,8 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:150', Rule::unique('people', 'email')->ignore($user->person?->person_id, 'person_id')],
             'password' => 'nullable|string|min:8|confirmed',
             'status' => 'required|in:A,I',
-            'role_id' => ['required', Rule::in($this->allowedRoleIds())],
+            'role_ids' => ['required', 'array', 'min:1'],
+            'role_ids.*' => ['required', Rule::in($this->allowedRoleIds())],
         ]);
 
         if ($this->shouldPreventStatusChange($user, $data['status'] ?? $user->status)) {
@@ -117,7 +118,7 @@ class UserController extends Controller
             }
 
             $user->update($userData);
-            $user->roles()->sync([$data['role_id']]);
+            $user->roles()->sync($data['role_ids']);
         });
 
         return redirect()->route('admin.users.index')
@@ -167,7 +168,7 @@ class UserController extends Controller
 
     private function allowedRoles()
     {
-        return Role::whereIn('name', ['Administrator', 'Teacher'])->get();
+        return Role::whereIn('name', ['Administrator', 'Teacher', 'Student'])->get();
     }
 
     private function allowedRoleIds(): array

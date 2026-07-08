@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    Route::get('/select-role', [AuthController::class, 'showRoleSelector'])->name('role.select');
+    Route::post('/select-role', [AuthController::class, 'setActiveRole'])->name('role.set');
+    Route::get('/switch-role/{roleId}', [AuthController::class, 'switchRole'])->name('role.set.quick');
 
     Route::post('/enroll/{training}', [EnrollmentController::class, 'store'])
         ->name('enroll.store');

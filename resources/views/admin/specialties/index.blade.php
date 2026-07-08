@@ -74,7 +74,7 @@
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
                                         @if($specialty->isActive() && $specialty->active_trainings > 0)
-                                            <button type="button" class="btn btn-sm btn-outline-danger" disabled data-toggle="tooltip" title="No se puede desactivar: tiene {{ $specialty->active_trainings }} capacitaciones en curso">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" disabled data-toggle="tooltip" title="No se puede desactivar: tiene {{ $specialty->active_trainings }} capacitación(es) en curso">
                                                 <i class="fas fa-lock"></i> Desactivar
                                             </button>
                                         @else
