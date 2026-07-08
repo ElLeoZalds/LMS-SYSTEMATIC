@@ -12,14 +12,19 @@
                 @csrf
                 <div id="methodContainer"></div>
                 <div class="modal-body">
+                    @if($hasAttempts ?? false)
+                        <div class="alert alert-danger mb-3" role="alert">
+                            <i class="fas fa-lock me-2"></i>Esta evaluación ya tiene intentos de estudiantes. No se puede modificar.
+                        </div>
+                    @endif
                     <div class="form-group mb-3">
                         <label for="question_text" class="text-gray-700 font-weight-bold">Pregunta</label>
-                        <input type="text" class="form-control form-control-sm" id="question_text" name="question_text" required>
+                        <input type="text" class="form-control form-control-sm" id="question_text" name="question_text" required @if($hasAttempts ?? false) disabled @endif>
                     </div>
                     <div class="form-group mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="text-gray-700 font-weight-bold mb-0">Alternativas</label>
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="addAlternativeBtn">+ Añadir Opción</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="addAlternativeBtn" @if($hasAttempts ?? false) disabled @endif>+ Añadir Opción</button>
                         </div>
                         <div id="alternativesContainer"></div>
                         <div class="form-group mt-3">
@@ -33,7 +38,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Guardar Pregunta</button>
+                    <button type="submit" class="btn btn-primary btn-sm" @if($hasAttempts ?? false) disabled @endif>Guardar Pregunta</button>
                 </div>
             </form>
         </div>
@@ -129,6 +134,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const button = event.target.closest('.add-question-btn, .edit-question-btn');
         if (!button) return;
 
+        if ({{ ($hasAttempts ?? false) ? 'true' : 'false' }}) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Evaluación bloqueada',
+                text: 'Esta evaluación ya tiene intentos de estudiantes y no puede modificarse.',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
         const activeMode = button.getAttribute('data-mode');
         const action = button.getAttribute('data-action');
         
@@ -175,6 +190,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Validate alternatives count before submit
     questionForm.addEventListener('submit', function(e) {
+        if ({{ ($hasAttempts ?? false) ? 'true' : 'false' }}) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Evaluación bloqueada',
+                text: 'Esta evaluación ya tiene intentos de estudiantes y no puede modificarse.',
+                confirmButtonText: 'Entendido'
+            });
+            return false;
+        }
+
         const file = questionImageInput && questionImageInput.files ? questionImageInput.files[0] : null;
 
         if (file && file.size > maxImageSizeBytes) {

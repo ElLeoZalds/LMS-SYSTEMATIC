@@ -20,6 +20,30 @@
 
         <div class="card shadow mb-4">
             <div class="card-body p-3">
+                <form method="GET" action="{{ route('admin.courses.index') }}" class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search_title" value="{{ $searchTitle ?? '' }}" class="form-control" placeholder="Buscar por título">
+                    </div>
+                    <div class="col-md-4">
+                        <select name="specialty_filter" class="form-control">
+                            <option value="">Todas las especialidades</option>
+                            @foreach($specialties as $specialty)
+                                <option value="{{ $specialty->specialty_id }}" {{ ($specialtyFilter ?? '') == $specialty->specialty_id ? 'selected' : '' }}>{{ $specialty->specialty }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status_filter" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="A" {{ ($statusFilter ?? '') === 'A' ? 'selected' : '' }}>Activo</option>
+                            <option value="I" {{ ($statusFilter ?? '') === 'I' ? 'selected' : '' }}>Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">Filtrar</button>
+                    </div>
+                </form>
+
                 <div class="table-responsive">
                     <table class="table table-sm table-striped table-hover">
                         <thead>

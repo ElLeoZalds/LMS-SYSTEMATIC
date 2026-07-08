@@ -15,14 +15,27 @@ class CourseController extends Controller
 {
     public function index()
     {
+        $searchTitle = trim((string) request('search_title', ''));
+        $specialtyFilter = trim((string) request('specialty_filter', ''));
+        $statusFilter = trim((string) request('status_filter', ''));
+
         $courses = Course::with('specialty')
             ->withCount('modules')
+            ->when($searchTitle !== '', fn ($query) => $query->where('title', 'like', '%' . $searchTitle . '%'))
+            ->when($specialtyFilter !== '', fn ($query) => $query->where('specialty_id', $specialtyFilter))
+            ->when($statusFilter !== '', function ($query) use ($statusFilter) {
+                if ($statusFilter === 'A') {
+                    $query->where('is_active', true);
+                } elseif ($statusFilter === 'I') {
+                    $query->where('is_active', false);
+                }
+            })
             ->orderBy('created_at', 'desc')
             ->get();
 
         $specialties = Specialty::orderBy('specialty', 'asc')->get();
 
-        return view('admin.courses.index', compact('courses', 'specialties'));
+        return view('admin.courses.index', compact('courses', 'specialties', 'searchTitle', 'specialtyFilter', 'statusFilter'));
     }
 
     public function create()

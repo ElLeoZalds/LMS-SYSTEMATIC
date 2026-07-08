@@ -386,17 +386,17 @@
                                     @if(($modules ?? collect())->isEmpty())
                                         <p class="text-muted mb-0">No hay módulos registrados</p>
                                     @else
-                                        <div class="row g-3">
-                                            @foreach($modules as $module)
+                                        <div class="accordion" id="teacherModulesAccordion">
+                                            @foreach($modules as $index => $module)
                                                 @php
                                                     $moduleKey = $module->module_id ?? $module->id;
                                                     $moduleContents = $module->contents ?? collect();
                                                     $moduleTasks = $module->tasks ?? collect();
                                                     $moduleAssessments = $module->assessments ?? collect();
                                                 @endphp
-                                                <div class="col-12">
-                                                    <div class="border rounded p-3 h-100">
-                                                        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                                                <div class="card mb-3 border-0 shadow-sm">
+                                                    <div class="card-header bg-light p-3" id="teacherModuleHeading{{ $moduleKey }}" data-toggle="collapse" data-target="#teacherModuleCollapse{{ $moduleKey }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="teacherModuleCollapse{{ $moduleKey }}" role="button" style="cursor:pointer;">
+                                                        <div class="d-flex justify-content-between align-items-start gap-2">
                                                             <div>
                                                                 <div class="fw-bold text-dark">Módulo {{ $module->order }} • {{ $module->title }}</div>
                                                                 <div class="small text-muted">
@@ -415,47 +415,51 @@
                                                                 </button>
                                                             @endif
                                                         </div>
+                                                    </div>
 
-                                                        @if($moduleContents->isEmpty())
-                                                            <div class="border rounded bg-light p-3 text-center text-muted small">
-                                                                <i class="bi bi-journal-text me-1"></i>No hay contenidos aún en este módulo.
-                                                            </div>
-                                                        @else
-                                                            <div class="list-group list-group-flush">
-                                                                @foreach($moduleContents as $content)
-                                                                    <div class="list-group-item border-0 px-0 py-2 bg-transparent">
-                                                                        <div class="d-flex justify-content-between align-items-start gap-2">
-                                                                            <div class="d-flex gap-2">
-                                                                                <i class="bi bi-file-earmark-text text-primary mt-1"></i>
-                                                                                <div>
-                                                                                    <div class="fw-bold text-dark">{{ $content->title }}</div>
-                                                                                    @if(! empty($content->description))
-                                                                                        <div class="small text-muted">{{ Str::limit($content->description, 90) }}</div>
-                                                                                    @endif
-                                                                                    <div class="small text-muted mt-1">
-                                                                                        <span class="badge badge-light text-muted">{{ $content->type ?? 'Material' }}</span>
-                                                                                        @if(! empty($content->file_path))
-                                                                                            <span class="ms-2"><i class="bi bi-paperclip"></i> Archivo adjunto</span>
+                                                    <div id="teacherModuleCollapse{{ $moduleKey }}" class="collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="teacherModuleHeading{{ $moduleKey }}" data-parent="#teacherModulesAccordion">
+                                                        <div class="card-body p-3">
+                                                            @if($moduleContents->isEmpty())
+                                                                <div class="border rounded bg-light p-3 text-center text-muted small">
+                                                                    <i class="bi bi-journal-text me-1"></i>No hay contenidos aún en este módulo.
+                                                                </div>
+                                                            @else
+                                                                <div class="list-group list-group-flush">
+                                                                    @foreach($moduleContents as $content)
+                                                                        <div class="list-group-item border-0 px-0 py-2 bg-transparent">
+                                                                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                                                                <div class="d-flex gap-2">
+                                                                                    <i class="bi bi-file-earmark-text text-primary mt-1"></i>
+                                                                                    <div>
+                                                                                        <div class="fw-bold text-dark">{{ $content->title }}</div>
+                                                                                        @if(! empty($content->description))
+                                                                                            <div class="small text-muted">{{ Str::limit($content->description, 90) }}</div>
                                                                                         @endif
+                                                                                        <div class="small text-muted mt-1">
+                                                                                            <span class="badge badge-light text-muted">{{ $content->type ?? 'Material' }}</span>
+                                                                                            @if(! empty($content->file_path))
+                                                                                                <span class="ms-2"><i class="bi bi-paperclip"></i> Archivo adjunto</span>
+                                                                                            @endif
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                            @if($training->isFinished())
-                                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">
-                                                                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                                                @if($training->isFinished())
+                                                                                    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">
+                                                                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                                                            <i class="bi bi-pencil me-1"></i>Editar
+                                                                                        </button>
+                                                                                    </span>
+                                                                                @else
+                                                                                    <button type="button" class="btn btn-sm btn-outline-primary edit-content-btn" data-content='{{ json_encode(["id" => $content->content_id, "module_id" => $content->module_id, "title" => $content->title, "description" => $content->description, "type" => $content->type]) }}'>
                                                                                         <i class="bi bi-pencil me-1"></i>Editar
                                                                                     </button>
-                                                                                </span>
-                                                                            @else
-                                                                                <button type="button" class="btn btn-sm btn-outline-primary edit-content-btn" data-content='{{ json_encode(["id" => $content->content_id, "module_id" => $content->module_id, "title" => $content->title, "description" => $content->description, "type" => $content->type]) }}'>
-                                                                                    <i class="bi bi-pencil me-1"></i>Editar
-                                                                                </button>
-                                                                            @endif
+                                                                                @endif
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                        @endif
+                                                                    @endforeach
+                                                                </div>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 </div>
                                             @endforeach
@@ -640,21 +644,26 @@
                                                                     </td>
                                                                     <td>
                                                                         <div class="d-flex flex-wrap gap-2">
-                                                                            <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white">
-                                                                                <i class="bi bi-question-circle"></i> Preguntas
-                                                                            </a>
                                                                             @if($hasAttempts)
-                                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Esta evaluación ya fue respondida por estudiantes y no puede modificarse">
+                                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Esta evaluación ya tiene intentos de estudiantes y no puede modificarse">
+                                                                                    <button type="button" class="btn btn-sm btn-info text-white disabled" onclick="return false;" aria-disabled="true">
+                                                                                        <i class="bi bi-question-circle"></i> Preguntas
+                                                                                    </button>
+                                                                                </span>
+                                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Esta evaluación ya tiene intentos de estudiantes y no puede modificarse">
                                                                                     <button type="button" class="btn btn-sm btn-outline-secondary disabled" onclick="return false;" aria-disabled="true">
                                                                                         <i class="bi bi-pencil"></i> Editar
                                                                                     </button>
                                                                                 </span>
-                                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Esta evaluación ya fue respondida por estudiantes y no puede modificarse">
+                                                                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Esta evaluación ya tiene intentos de estudiantes y no puede modificarse">
                                                                                     <button type="button" class="btn btn-sm btn-outline-secondary disabled" onclick="return false;" aria-disabled="true">
                                                                                         <i class="bi bi-trash"></i> Eliminar
                                                                                     </button>
                                                                                 </span>
                                                                             @else
+                                                                                <a href="{{ route('teacher.assessments.show', $assessment->assessment_id) }}" class="btn btn-sm btn-info text-white">
+                                                                                    <i class="bi bi-question-circle"></i> Preguntas
+                                                                                </a>
                                                                                 <button type="button" class="btn btn-sm btn-outline-primary edit-assessment-btn" data-assessment='{{ json_encode(["id" => $assessment->assessment_id, "module_id" => $assessment->module_id, "title" => $assessment->title, "description" => $assessment->description, "start_date" => $assessment->start_date ? $assessment->start_date->format('Y-m-d') : null, "end_date" => $assessment->end_date ? $assessment->end_date->format('Y-m-d') : null, "allowed_attempts" => $assessment->allowed_attempts, "time_limit" => $assessment->time_limit, "has_attempts" => $hasAttempts ]) }}'>
                                                                                     <i class="bi bi-pencil"></i> Editar
                                                                                 </button>

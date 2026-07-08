@@ -138,35 +138,44 @@
                         </div>
                         <div class="card-body">
                             @if($modules->isNotEmpty())
-                                @foreach($modules as $module)
-                                    <div class="border rounded-3 p-3 mb-3">
-                                        <div class="d-flex justify-content-between align-items-start gap-3">
-                                            <div>
-                                                <h6 class="mb-1 fw-bold text-dark">{{ $module->title }}</h6>
-                                                <p class="text-muted small mb-0">{{ $module->description ?: 'Explora los contenidos de este módulo.' }}</p>
+                                <div class="accordion" id="studentModulesAccordion">
+                                    @foreach($modules as $index => $module)
+                                        <div class="card mb-3 border-0 shadow-sm">
+                                            <div class="card-header bg-light p-3" id="studentModuleHeading{{ $module->module_id ?? $module->id }}" data-toggle="collapse" data-target="#studentModuleCollapse{{ $module->module_id ?? $module->id }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="studentModuleCollapse{{ $module->module_id ?? $module->id }}" role="button" style="cursor:pointer;">
+                                                <div class="d-flex justify-content-between align-items-center gap-3">
+                                                    <div>
+                                                        <h6 class="mb-1 fw-bold text-dark">{{ $module->title }}</h6>
+                                                        <p class="text-muted small mb-0">{{ $module->description ?: 'Explora los contenidos de este módulo.' }}</p>
+                                                    </div>
+                                                    <span class="badge bg-light text-dark">{{ $module->contents->count() }} contenidos</span>
+                                                </div>
                                             </div>
-                                            <span class="badge bg-light text-dark">{{ $module->contents->count() }} contenidos</span>
+
+                                            <div id="studentModuleCollapse{{ $module->module_id ?? $module->id }}" class="collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="studentModuleHeading{{ $module->module_id ?? $module->id }}" data-parent="#studentModulesAccordion">
+                                                <div class="card-body p-3">
+                                                    @if($module->contents->isNotEmpty())
+                                                        <div class="list-group">
+                                                            @foreach($module->contents as $contentItem)
+                                                                @php $isCompleted = in_array($contentItem->content_id, $completedContentIds ?? [], true); @endphp
+                                                                <a href="{{ route('student.courses.view-content', ['training' => $training->training_id, 'content' => $contentItem->content_id]) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                                    <span>
+                                                                        <i class="me-2 {{ $isCompleted ? 'bi bi-check-circle-fill text-success' : 'bi bi-circle text-secondary' }}"></i>
+                                                                        {{ $contentItem->title }}
+                                                                    </span>
+                                                                    <small class="text-muted text-uppercase">{{ $contentItem->type }}</small>
+                                                                </a>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <div class="alert alert-info small mb-0" role="alert">
+                                                            <i class="bi bi-info-circle me-2"></i>No hay contenidos registrados para este módulo todavía.
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </div>
-                                        @if($module->contents->isNotEmpty())
-                                            <div class="list-group mt-3">
-                                                @foreach($module->contents as $contentItem)
-                                                    @php $isCompleted = in_array($contentItem->content_id, $completedContentIds ?? [], true); @endphp
-                                                    <a href="{{ route('student.courses.view-content', ['training' => $training->training_id, 'content' => $contentItem->content_id]) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                                        <span>
-                                                            <i class="me-2 {{ $isCompleted ? 'bi bi-check-circle-fill text-success' : 'bi bi-circle text-secondary' }}"></i>
-                                                            {{ $contentItem->title }}
-                                                        </span>
-                                                        <small class="text-muted text-uppercase">{{ $contentItem->type }}</small>
-                                                    </a>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <div class="alert alert-info small mb-0 mt-3" role="alert">
-                                                <i class="bi bi-info-circle me-2"></i>No hay contenidos registrados para este módulo todavía.
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             @else
                                 <div class="alert alert-info mb-0" role="alert">
                                     <i class="bi bi-info-circle me-2"></i>No hay módulos disponibles para este curso.

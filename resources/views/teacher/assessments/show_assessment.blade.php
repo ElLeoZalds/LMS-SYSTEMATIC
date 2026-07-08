@@ -32,7 +32,13 @@
             <div class="card-body">
                 @php
                     $totalScore = $assessment->questions->sum('score');
+                    $hasAttempts = $assessment->attempts()->whereNotNull('submitted_at')->exists();
                 @endphp
+                @if($hasAttempts)
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-lock me-2"></i>Esta evaluación ya tiene intentos de estudiantes. No se puede modificar su estructura ni sus preguntas.
+                    </div>
+                @endif
                 <div class="mb-3">
                     <p class="text-muted small mb-1">Intentos permitidos: {{ $assessment->allowed_attempts }}</p>
                     <p class="text-muted small">Inicio: {{ optional($assessment->start_date)->format('d/m/Y') }} · Fin: {{ optional($assessment->end_date)->format('d/m/Y') }}</p>
@@ -41,14 +47,15 @@
 
                 <div class="mb-4">
                     <div class="d-flex flex-column flex-md-row gap-2">
-                        <button type="button" class="btn btn-sm btn-primary save-assessment-btn">
+                        <button type="button" class="btn btn-sm btn-primary save-assessment-btn" @if($hasAttempts) disabled @endif>
                             <i class="fas fa-save mr-1"></i> Guardar Evaluación
                         </button>
                         <button class="btn btn-sm btn-outline-success add-question-btn" type="button"
                             data-toggle="modal"
                             data-target="#questionModal"
                             data-mode="create"
-                            data-action="{{ route('teacher.assessments.questions.store', $assessment->assessment_id) }}">
+                            data-action="{{ route('teacher.assessments.questions.store', $assessment->assessment_id) }}"
+                            @if($hasAttempts) disabled title="Esta evaluación ya tiene intentos de estudiantes y no puede modificarse" @endif>
                             <i class="fas fa-plus-circle mr-1"></i> Nueva Pregunta
                         </button>
                     </div>
@@ -64,7 +71,7 @@
                                         <form action="{{ route('teacher.questions.score.update', $question->question_id) }}" method="POST" class="d-flex align-items-center mr-2 question-score-form">
                                             @csrf
                                             @method('PUT')
-                                            <input type="number" name="score" value="{{ $question->score }}" min="0" max="20" step="1" class="form-control form-control-sm text-center mr-1 question-score-input" style="width: 72px;">
+                                            <input type="number" name="score" value="{{ $question->score }}" min="0" max="20" step="1" class="form-control form-control-sm text-center mr-1 question-score-input" style="width: 72px;" @if($hasAttempts) disabled title="No se pueden cambiar los puntos una vez que la evaluación ya tiene intentos" @endif>
                                             <span class="text-muted small mr-2">pts</span>
                                         </form>
 
@@ -78,14 +85,15 @@
                                                 'alternatives' => $question->alternatives->map(function($alt) {
                                                     return ['text' => $alt->option_text, 'is_correct' => $alt->is_correct];
                                                 })
-                                            ]) }}" data-image="{{ $question->image_path ? asset('storage/'.$question->image_path) : '' }}">
+                                            ]) }}" data-image="{{ $question->image_path ? asset('storage/'.$question->image_path) : '' }}"
+                                            @if($hasAttempts) disabled title="Esta evaluación ya tiene intentos de estudiantes y no puede modificarse" @endif>
                                             <i class="fas fa-edit"></i>
                                         </button>
 
                                         <form action="{{ route('teacher.questions.destroy', $question->question_id) }}" method="POST" class="d-inline swal-confirm" data-message="¿Estás completamente seguro de eliminar esta pregunta? Esta acción no se puede deshacer.">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-light text-danger" title="Eliminar Pregunta">
+                                            <button type="submit" class="btn btn-sm btn-light text-danger" title="Eliminar Pregunta" @if($hasAttempts) disabled @endif>
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </form>

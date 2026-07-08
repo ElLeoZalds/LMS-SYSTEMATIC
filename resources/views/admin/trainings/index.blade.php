@@ -16,6 +16,31 @@
 
         <div class="card shadow mb-4">
             <div class="card-body p-3">
+                <form method="GET" action="{{ route('admin.trainings.index') }}" class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search_code" value="{{ $searchCode ?? '' }}" class="form-control" placeholder="Buscar por código">
+                    </div>
+                    <div class="col-md-4">
+                        <select name="course_filter" class="form-control">
+                            <option value="">Todos los cursos</option>
+                            @foreach($courses as $course)
+                                <option value="{{ $course->course_id }}" {{ ($courseFilter ?? '') == $course->course_id ? 'selected' : '' }}>{{ $course->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status_filter" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="active" {{ ($statusFilter ?? '') === 'active' ? 'selected' : '' }}>Activas</option>
+                            <option value="finished" {{ ($statusFilter ?? '') === 'finished' ? 'selected' : '' }}>Finalizadas</option>
+                            <option value="archived" {{ ($statusFilter ?? '') === 'archived' ? 'selected' : '' }}>Archivadas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">Filtrar</button>
+                    </div>
+                </form>
+
                 <div class="table-responsive">
                     <table class="table table-sm table-striped table-hover">
                         <thead>

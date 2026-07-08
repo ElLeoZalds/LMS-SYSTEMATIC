@@ -158,6 +158,10 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
+        if ($assessment->attempts()->whereNotNull('submitted_at')->exists()) {
+            return back()->with('error', 'No se puede modificar una evaluación que ya tiene intentos de estudiantes.');
+        }
+
         DB::transaction(function () use ($request, $assessment) {
             $imagePath = null;
             if ($request->hasFile('image')) {
@@ -202,6 +206,10 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
+        if ($question->assessment->attempts()->whereNotNull('submitted_at')->exists()) {
+            return back()->with('error', 'No se puede modificar una evaluación que ya tiene intentos de estudiantes.');
+        }
+
         DB::transaction(function () use ($request, $question) {
             if ($request->hasFile('image')) {
                 try {
@@ -239,8 +247,8 @@ class AssessmentController extends Controller
             abort(403, 'No autorizado.');
         }
 
-        if (! $this->isAdministrator() && $question->assessment->attempts()->exists()) {
-            return redirect()->back()->with('error', 'La evaluación ya tiene intentos.');
+        if ($question->assessment->attempts()->whereNotNull('submitted_at')->exists()) {
+            return redirect()->back()->with('error', 'No se puede modificar una evaluación que ya tiene intentos de estudiantes.');
         }
 
         $trainingId = $question->assessment->training_id;
@@ -270,6 +278,10 @@ class AssessmentController extends Controller
 
         if (! $this->isAdministrator() && $question->assessment->training->teacher_id !== $user->user_id) {
             abort(403, 'No autorizado.');
+        }
+
+        if ($question->assessment->attempts()->whereNotNull('submitted_at')->exists()) {
+            return redirect()->back()->with('error', 'No se puede modificar la estructura de una evaluación que ya tiene intentos de estudiantes.');
         }
 
         $otherQuestionsScore = (int) Question::where('assessment_id', $question->assessment_id)

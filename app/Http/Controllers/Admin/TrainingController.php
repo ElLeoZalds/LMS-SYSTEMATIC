@@ -14,8 +14,22 @@ class TrainingController extends Controller
 {
     public function index()
     {
+        $searchCode = trim((string) request('search_code', ''));
+        $courseFilter = trim((string) request('course_filter', ''));
+        $statusFilter = trim((string) request('status_filter', ''));
+
         $trainings = Training::with(['course', 'teacher.person', 'administrator.person'])
-            ->when(request('code'), fn ($query, $code) => $query->where('code', 'like', '%'.$code.'%'))
+            ->when($searchCode !== '', fn ($query, $code) => $query->where('code', 'like', '%' . $code . '%'))
+            ->when($courseFilter !== '', fn ($query) => $query->where('course_id', $courseFilter))
+            ->when($statusFilter !== '', function ($query) use ($statusFilter) {
+                if ($statusFilter === 'active') {
+                    $query->where('status', Training::STATUS_ACTIVE);
+                } elseif ($statusFilter === 'finished') {
+                    $query->where('status', Training::STATUS_FINISHED);
+                } elseif ($statusFilter === 'archived') {
+                    $query->where('status', Training::STATUS_ARCHIVED);
+                }
+            })
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -23,7 +37,7 @@ class TrainingController extends Controller
         $teachers = User::whereHas('roles', fn ($q) => $q->where('name', 'Teacher'))->with('person')->get();
         $students = User::whereHas('roles', fn ($q) => $q->where('name', 'Student'))->with('person')->take(100)->get();
 
-        return view('admin.trainings.index', compact('trainings', 'courses', 'teachers', 'students'));
+        return view('admin.trainings.index', compact('trainings', 'courses', 'teachers', 'students', 'searchCode', 'courseFilter', 'statusFilter'));
     }
 
     public function create()
