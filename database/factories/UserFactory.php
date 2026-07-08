@@ -15,10 +15,18 @@ class UserFactory extends Factory
 
     public function definition(): array
     {
+        $person = Person::create([
+            'first_names' => fake()->firstName(),
+            'last_names' => fake()->lastName(),
+            'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->numerify('9########'),
+            'document_number' => fake()->numerify('########'),
+        ]);
+
         return [
-            'person_id' => Person::query()->inRandomOrder()->value('person_id') ?? 1,
+            'person_id' => $person->person_id,
             'username' => fake()->unique()->userName(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => static::$password ??= Hash::make('password123'),
             'status' => 'A',
         ];
     }

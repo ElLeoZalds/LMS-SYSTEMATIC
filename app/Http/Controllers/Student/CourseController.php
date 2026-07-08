@@ -474,7 +474,19 @@ class CourseController extends Controller
 
         $validated = $request->validate([
             'submission_text' => 'nullable|string',
-            'attachment' => 'nullable|file|max:5120|mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
+            'attachment' => [
+                'nullable',
+                'file',
+                'max:20480',
+                'mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
+                'mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/jpeg,image/png,application/zip',
+            ],
+        ], [
+            'attachment.file' => 'El archivo debe ser un archivo válido.',
+            'attachment.max' => 'El archivo no debe superar los 20 MB.',
+            'attachment.mimes' => 'El archivo debe ser de tipo: PDF, DOC, DOCX, TXT, PPT, PPTX, JPG, PNG, ZIP.',
+            'attachment.mimetypes' => 'El tipo de archivo no es válido.',
+            'attachment.uploaded' => 'El archivo no se pudo subir. Verifica el tamaño y el formato.',
         ]);
 
         $submission = TaskSubmission::firstOrNew([

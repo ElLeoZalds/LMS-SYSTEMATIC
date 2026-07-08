@@ -89,18 +89,20 @@
                                     <iframe src="{{ asset('storage/' . ($content->file_path ?? '')) }}" title="PDF del contenido"></iframe>
                                 </div>
                             @elseif($content->type === 'video')
-                                @php $videoUrl = $content->description ?? ''; @endphp
+                                @php $videoUrl = $content->video_url ?: ($content->description ?? ''); @endphp
                                 <div class="ratio-wrapper">
-                                    @if(str_contains($videoUrl, 'youtube.com') || str_contains($videoUrl, 'youtu.be'))
+                                    @if($videoUrl && (str_contains($videoUrl, 'youtube.com') || str_contains($videoUrl, 'youtu.be')))
                                         @php $embedUrl = str_replace('watch?v=', 'embed/', $videoUrl); @endphp
                                         <iframe src="{{ $embedUrl }}" allowfullscreen></iframe>
-                                    @elseif(str_contains($videoUrl, 'vimeo.com'))
+                                    @elseif($videoUrl && str_contains($videoUrl, 'vimeo.com'))
                                         @php $embedUrl = str_replace('vimeo.com/', 'player.vimeo.com/video/', $videoUrl); @endphp
                                         <iframe src="{{ $embedUrl }}" allowfullscreen></iframe>
-                                    @else
+                                    @elseif($videoUrl)
                                         <video controls preload="metadata" poster="{{ asset('images/default-video.jpg') }}">
                                             <source src="{{ $videoUrl }}" type="video/mp4">
                                         </video>
+                                    @else
+                                        <div class="p-4 text-muted">No hay una URL de video disponible para este contenido.</div>
                                     @endif
                                 </div>
                             @elseif($content->type === 'link')

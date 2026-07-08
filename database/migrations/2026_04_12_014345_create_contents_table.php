@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('title', 150);
             $table->string('type', 50);
             $table->string('file_path')->nullable();
+            $table->string('video_url')->nullable();
             $table->integer('order_index');
             $table->timestamps();
         });

@@ -39,7 +39,7 @@ return [
     'ends_with' => 'El :attribute debe terminar con uno de los siguientes valores: :values.',
     'enum' => 'El :attribute seleccionado es inválido.',
     'exists' => 'El :attribute seleccionado no existe.',
-    'file' => 'El :attribute debe ser un archivo.',
+    'file' => 'El campo :attribute debe ser un archivo.',
     'filled' => 'El :attribute es obligatorio.',
     'gt' => [
         'array' => 'El :attribute debe tener más de :value elementos.',
@@ -76,12 +76,12 @@ return [
     ],
     'max' => [
         'array' => 'El :attribute no debe tener más de :max elementos.',
-        'file' => 'El :attribute no debe ser mayor que :max kilobytes.',
+        'file' => 'El campo :attribute no debe superar los :max kilobytes.',
         'numeric' => 'El :attribute no debe ser mayor que :max.',
         'string' => 'El :attribute no debe tener más de :max caracteres.',
     ],
-    'mimes' => 'El :attribute debe ser un archivo de tipo: :values.',
-    'mimetypes' => 'El :attribute debe ser un archivo de tipo: :values.',
+    'mimes' => 'El campo :attribute debe ser un archivo de tipo: :values.',
+    'mimetypes' => 'El campo :attribute debe ser un archivo de tipo: :values.',
     'min' => [
         'array' => 'El :attribute debe tener al menos :min elementos.',
         'file' => 'El :attribute debe ser de al menos :min kilobytes.',
@@ -124,7 +124,7 @@ return [
     'string' => 'El :attribute debe ser una cadena de texto.',
     'timezone' => 'El :attribute debe ser una zona horaria válida.',
     'unique' => 'El :attribute ya ha sido tomado.',
-    'uploaded' => 'No se pudo subir el :attribute.',
+    'uploaded' => 'El archivo :attribute no se pudo subir.',
     'uppercase' => 'El :attribute debe estar en mayúsculas.',
     'url' => 'El :attribute debe ser una URL válida.',
     'ulid' => 'El :attribute debe ser un ULID válido.',

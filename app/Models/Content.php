@@ -17,6 +17,7 @@ class Content extends Model
         'type',
         'order_index',
         'file_path',
+        'video_url',
     ];
 
     public function training()

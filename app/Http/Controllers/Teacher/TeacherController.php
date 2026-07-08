@@ -118,7 +118,21 @@ class TeacherController extends Controller
     public function uploadBanner(Request $request, $training_id)
     {
         $request->validate([
-            'banner' => 'required|image|mimes:jpg,png|max:2048',
+            'banner' => [
+                'required',
+                'file',
+                'image',
+                'max:20480',
+                'mimes:jpg,jpeg,png',
+                'mimetypes:image/jpeg,image/png',
+            ],
+        ], [
+            'banner.file' => 'El archivo debe ser un archivo válido.',
+            'banner.image' => 'El banner debe ser una imagen válida.',
+            'banner.max' => 'El archivo no debe superar los 20 MB.',
+            'banner.mimes' => 'El archivo debe ser de tipo: JPG, JPEG o PNG.',
+            'banner.mimetypes' => 'El tipo de archivo no es válido.',
+            'banner.uploaded' => 'El archivo no se pudo subir. Verifica el tamaño y el formato.',
         ]);
 
         $user = auth()->user();
@@ -151,7 +165,14 @@ class TeacherController extends Controller
             'module_id' => 'required|exists:modules,id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string|max:1000',
-            'attachment' => 'nullable|file|max:20480',
+            'content_type' => 'required|in:video,document,text,link',
+            'video_url' => 'nullable|required_if:content_type,video|url|max:2048',
+            'attachment' => 'nullable|file|max:5120|mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
+        ], [
+            'video_url.required_if' => 'La URL del recurso es obligatoria cuando el contenido es de tipo video.',
+            'video_url.url' => 'La URL del recurso debe tener un formato válido.',
+            'attachment.max' => 'El archivo adjunto no debe superar los 5 MB.',
+            'attachment.mimes' => 'El archivo adjunto tiene un formato no permitido.',
         ]);
 
         $training = Training::where('training_id', $validated['training_id'])->firstOrFail();
@@ -170,9 +191,10 @@ class TeacherController extends Controller
             'module_id' => $validated['module_id'],
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
-            'type' => $request->input('type', 'Lectura'),
+            'type' => $validated['content_type'],
             'order_index' => Content::where('module_id', $validated['module_id'])->count() + 1,
             'file_path' => $path,
+            'video_url' => $validated['video_url'] ?? null,
         ]);
 
         return back()->with('success', 'Contenido creado correctamente.');
@@ -187,7 +209,14 @@ class TeacherController extends Controller
             'module_id' => 'required|exists:modules,id',
             'title' => 'required|string|max:150',
             'description' => 'nullable|string|max:1000',
-            'attachment' => 'nullable|file|max:20480',
+            'content_type' => 'required|in:video,document,text,link',
+            'video_url' => 'nullable|required_if:content_type,video|url|max:2048',
+            'attachment' => 'nullable|file|max:5120|mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
+        ], [
+            'video_url.required_if' => 'La URL del recurso es obligatoria cuando el contenido es de tipo video.',
+            'video_url.url' => 'La URL del recurso debe tener un formato válido.',
+            'attachment.max' => 'El archivo adjunto no debe superar los 5 MB.',
+            'attachment.mimes' => 'El archivo adjunto tiene un formato no permitido.',
         ]);
 
         $training = Training::where('training_id', $validated['training_id'])->firstOrFail();
@@ -206,11 +235,39 @@ class TeacherController extends Controller
             'module_id' => $validated['module_id'],
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
-            'type' => $request->input('type', $content->type ?? 'Lectura'),
+            'type' => $validated['content_type'],
             'file_path' => $path,
+            'video_url' => $validated['video_url'] ?? null,
         ]);
 
         return back()->with('success', 'Contenido actualizado correctamente.');
+    }
+
+    public function destroyContent(Request $request, $contentId)
+    {
+        $content = Content::findOrFail($contentId);
+        $training = $content->training;
+
+        if (! $training) {
+            return back()->with('error', 'No se encontró la capacitación asociada.');
+        }
+
+        if ($training->isFinished()) {
+            return back()->with('error', 'No se pueden realizar cambios en una capacitación finalizada.');
+        }
+
+        $hasProgress = $content->training?->enrollments()->whereHas('progress', fn ($q) => $q->where('content_id', $content->content_id))->exists();
+        if ($hasProgress) {
+            return back()->with('error', 'No se puede eliminar un contenido que ya fue marcado como visto por estudiantes.');
+        }
+
+        if ($content->file_path) {
+            Storage::disk('public')->delete($content->file_path);
+        }
+
+        $content->delete();
+
+        return back()->with('success', 'Contenido eliminado correctamente.');
     }
 
     public function calendar(Request $request)
@@ -685,7 +742,19 @@ class TeacherController extends Controller
             'content' => 'required|string|max:3000',
             'link' => 'nullable|url|max:255',
             'attachments' => 'nullable|array|max:5',
-            'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt,ppt,pptx,zip',
+            'attachments.*' => [
+                'nullable',
+                'file',
+                'max:20480',
+                'mimes:pdf,doc,docx,txt,ppt,pptx,jpg,jpeg,png,zip',
+                'mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/jpeg,image/png,application/zip',
+            ],
+        ], [
+            'attachments.*.file' => 'El archivo debe ser un archivo válido.',
+            'attachments.*.max' => 'El archivo no debe superar los 20 MB.',
+            'attachments.*.mimes' => 'El archivo debe ser de tipo: PDF, DOC, DOCX, TXT, PPT, PPTX, JPG, PNG, ZIP.',
+            'attachments.*.mimetypes' => 'El tipo de archivo no es válido.',
+            'attachments.*.uploaded' => 'El archivo no se pudo subir. Verifica el tamaño y el formato.',
         ]);
 
         $attachments = [];

@@ -110,6 +110,7 @@ Route::prefix('teacher')
 
         Route::post('/contents', [TeacherController::class, 'storeContent'])->name('contents.store');
         Route::put('/contents/{contentId}', [TeacherController::class, 'updateContent'])->name('contents.update');
+        Route::delete('/contents/{contentId}', [TeacherController::class, 'destroyContent'])->name('contents.destroy');
 
         Route::post('/tasks/store', [TaskController::class, 'store'])->name('tasks.store');
         Route::put('/tasks/{task_id}', [TaskController::class, 'update'])->name('tasks.update');

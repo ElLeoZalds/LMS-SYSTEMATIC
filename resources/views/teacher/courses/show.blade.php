@@ -443,17 +443,34 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
-                                                                                @if($training->isFinished())
-                                                                                    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">
-                                                                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                                                <div class="d-flex gap-2">
+                                                                                    @if($training->isFinished())
+                                                                                        <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">
+                                                                                            <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                                                                <i class="bi bi-pencil me-1"></i>Editar
+                                                                                            </button>
+                                                                                        </span>
+                                                                                    @else
+                                                                                        <button type="button" class="btn btn-sm btn-outline-primary edit-content-btn" data-content='{{ json_encode(["id" => $content->content_id, "module_id" => $content->module_id, "title" => $content->title, "description" => $content->description, "type" => $content->type, "video_url" => $content->video_url, "has_attachment" => !empty($content->file_path)]) }}'>
                                                                                             <i class="bi bi-pencil me-1"></i>Editar
                                                                                         </button>
-                                                                                    </span>
-                                                                                @else
-                                                                                    <button type="button" class="btn btn-sm btn-outline-primary edit-content-btn" data-content='{{ json_encode(["id" => $content->content_id, "module_id" => $content->module_id, "title" => $content->title, "description" => $content->description, "type" => $content->type]) }}'>
-                                                                                        <i class="bi bi-pencil me-1"></i>Editar
-                                                                                    </button>
-                                                                                @endif
+                                                                                    @endif
+                                                                                    @if($training->isFinished())
+                                                                                        <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="No se puede modificar una capacitación finalizada">
+                                                                                            <button type="button" class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                                                                <i class="bi bi-trash me-1"></i>Eliminar
+                                                                                            </button>
+                                                                                        </span>
+                                                                                    @else
+                                                                                        <form action="{{ route('teacher.contents.destroy', $content->content_id) }}" method="POST" class="swal-confirm d-inline" data-message="Esta acción eliminará el contenido y no se podrá deshacer.">
+                                                                                            @csrf
+                                                                                            @method('DELETE')
+                                                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                                                <i class="bi bi-trash me-1"></i>Eliminar
+                                                                                            </button>
+                                                                                        </form>
+                                                                                    @endif
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     @endforeach
@@ -1049,9 +1066,23 @@
                             <textarea name="description" id="content-description" class="form-control" rows="3" placeholder="Describe brevemente el recurso..."></textarea>
                         </div>
                         <div class="form-group mb-3">
+                            <label for="content-type" class="form-label">Tipo de contenido</label>
+                            <select name="content_type" id="content-type" class="form-control" required>
+                                <option value="video">Video / recurso externo</option>
+                                <option value="document">Documento adjunto</option>
+                                <option value="text">Texto / lectura</option>
+                                <option value="link">Enlace externo</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-3" id="content-video-url-group">
+                            <label for="content-video-url" class="form-label">URL del recurso o video</label>
+                            <input type="url" name="video_url" id="content-video-url" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                            <small class="form-text text-muted">Se usará para videos, recursos externos o enlaces embebidos.</small>
+                        </div>
+                        <div class="form-group mb-3">
                             <label for="content-attachment" class="form-label">Archivo adjunto</label>
-                            <input type="file" name="attachment" id="content-attachment" class="form-control" accept=".pdf,.mp4,.mov,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.zip">
-                            <small class="form-text text-muted">Máx. 20 MB. Tipos permitidos: PDF, DOC, DOCX, TXT, PPT, PPTX, JPG, PNG, ZIP.</small>
+                            <input type="file" name="attachment" id="content-attachment" class="form-control" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.zip">
+                            <small class="form-text text-muted">Máx. 5 MB. Tipos permitidos: PDF, DOC, DOCX, TXT, PPT, PPTX, JPG, PNG, ZIP.</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1173,6 +1204,13 @@
     </div>
 
     <script>
+        function toggleContentTypeFields(selectedType) {
+            const videoGroup = document.getElementById('content-video-url-group');
+            if (videoGroup) {
+                videoGroup.style.display = selectedType === 'video' ? 'block' : 'none';
+            }
+        }
+
         function openContentModal(moduleId, contentData = null) {
             const form = document.getElementById('createContentForm');
             const hidden = document.getElementById('content-modal-module-id');
@@ -1194,9 +1232,21 @@
                     if (contentId) contentId.value = contentData.id || '';
                     document.getElementById('content-title').value = contentData.title || '';
                     document.getElementById('content-description').value = contentData.description || '';
+                    const contentTypeSelect = document.getElementById('content-type');
+                    if (contentTypeSelect) {
+                        contentTypeSelect.value = contentData.type || 'video';
+                    }
+                    const contentVideoUrlInput = document.getElementById('content-video-url');
+                    if (contentVideoUrlInput) {
+                        contentVideoUrlInput.value = contentData.video_url || '';
+                    }
                 } else {
                     if (contentId) contentId.value = '';
                     form.reset();
+                }
+                const contentTypeSelect = document.getElementById('content-type');
+                if (contentTypeSelect) {
+                    toggleContentTypeFields(contentTypeSelect.value);
                 }
             }
             if (hidden) hidden.value = moduleId || '';
@@ -1252,6 +1302,7 @@
             ].filter(Boolean);
             const taskAttachmentInput = document.getElementById('task-attachment');
             const contentAttachmentInput = document.getElementById('content-attachment');
+            const contentTypeSelect = document.getElementById('content-type');
             const taskForm = document.getElementById('createTaskForm');
 
             const setAssessmentFormLocked = function(locked) {
@@ -1311,13 +1362,18 @@
                 }
             }
 
+            if (contentTypeSelect) {
+                contentTypeSelect.addEventListener('change', function() {
+                    toggleContentTypeFields(this.value);
+                });
+            }
             if (contentAttachmentInput) {
                 contentAttachmentInput.addEventListener('change', function() {
                     const file = this.files[0];
                     if (!file) return;
-                    const maxSizeMB = 20;
+                    const maxSizeMB = 5;
                     if (file.size > maxSizeMB * 1024 * 1024) {
-                        Swal.fire({ icon: 'error', title: 'Archivo demasiado grande', text: 'El archivo supera el tamaño máximo de 20 MB.' });
+                        Swal.fire({ icon: 'error', title: 'Archivo demasiado grande', text: 'El archivo supera el tamaño máximo de 5 MB.' });
                         this.value = '';
                     }
                 });

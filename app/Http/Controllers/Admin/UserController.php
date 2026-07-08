@@ -86,6 +86,10 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $request->merge([
+            'role_ids' => $request->input('role_ids', $request->input('role_id') ? [$request->input('role_id')] : null),
+        ]);
+
         $data = $request->validate([
             'first_names' => 'required|string|max:255',
             'last_names' => 'required|string|max:255',
@@ -93,7 +97,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:8|confirmed',
             'status' => 'required|in:A,I',
             'role_ids' => ['required', 'array', 'min:1'],
-            'role_ids.*' => ['required', Rule::in($this->allowedRoleIds())],
+            'role_ids.*' => ['required', 'exists:roles,role_id'],
         ]);
 
         if ($this->shouldPreventStatusChange($user, $data['status'] ?? $user->status)) {

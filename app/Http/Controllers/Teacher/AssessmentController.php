@@ -148,7 +148,21 @@ class AssessmentController extends Controller
             'alternatives' => 'required|array|min:2|max:5',
             'alternatives.*.text' => 'required|string',
             'correct_alternative' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:2048',
+            'image' => [
+                'nullable',
+                'file',
+                'image',
+                'max:20480',
+                'mimes:jpg,jpeg,png',
+                'mimetypes:image/jpeg,image/png',
+            ],
+        ], [
+            'image.file' => 'El archivo debe ser un archivo válido.',
+            'image.image' => 'La imagen debe ser válida.',
+            'image.max' => 'El archivo no debe superar los 20 MB.',
+            'image.mimes' => 'El archivo debe ser de tipo: JPG, JPEG o PNG.',
+            'image.mimetypes' => 'El tipo de archivo no es válido.',
+            'image.uploaded' => 'El archivo no se pudo subir. Verifica el tamaño y el formato.',
         ]);
 
         $user = auth()->user();
@@ -196,7 +210,21 @@ class AssessmentController extends Controller
             'alternatives' => 'required|array|min:2|max:5',
             'alternatives.*.text' => 'required|string',
             'correct_alternative' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:2048',
+            'image' => [
+                'nullable',
+                'file',
+                'image',
+                'max:20480',
+                'mimes:jpg,jpeg,png',
+                'mimetypes:image/jpeg,image/png',
+            ],
+        ], [
+            'image.file' => 'El archivo debe ser un archivo válido.',
+            'image.image' => 'La imagen debe ser válida.',
+            'image.max' => 'El archivo no debe superar los 20 MB.',
+            'image.mimes' => 'El archivo debe ser de tipo: JPG, JPEG o PNG.',
+            'image.mimetypes' => 'El tipo de archivo no es válido.',
+            'image.uploaded' => 'El archivo no se pudo subir. Verifica el tamaño y el formato.',
         ]);
 
         $user = auth()->user();

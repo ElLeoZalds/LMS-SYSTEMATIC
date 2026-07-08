@@ -51,7 +51,7 @@ class AdminUserEditTest extends TestCase
             'email' => 'updated@example.com',
             'password' => 'newpassword123',
             'password_confirmation' => 'newpassword123',
-            'role_id' => $adminRole->role_id,
+            'role_ids' => [$adminRole->role_id],
             'status' => 'I',
         ]);
 
@@ -66,6 +66,6 @@ class AdminUserEditTest extends TestCase
         $targetUser->refresh();
         $this->assertTrue(Hash::check('newpassword123', $targetUser->password));
         $this->assertSame('I', $targetUser->status);
-        $this->assertTrue($targetUser->roles()->where('role_id', $adminRole->role_id)->exists());
+        $this->assertTrue($targetUser->roles()->where('roles.role_id', $adminRole->role_id)->exists());
     }
 }
