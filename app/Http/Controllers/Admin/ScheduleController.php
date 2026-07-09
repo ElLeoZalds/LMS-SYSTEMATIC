@@ -44,18 +44,52 @@ class ScheduleController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'training_id' => 'required|exists:trainings,training_id',
-            'date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+        $validator = Validator::make($request->all(), [
+            'training_id' => ['required', 'exists:trainings,training_id'],
+            'date' => ['required', 'date'],
+            'start_time' => ['required', 'date_format:H:i'],
+            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
         ]);
 
-        // Obtener el profesor asignado a la capacitación actual
+        if ($validator->fails()) {
+            if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Revisa los datos del horario.',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
         $training = Training::findOrFail($request->training_id);
+        $validator->after(function ($validator) use ($training, $request) {
+            $scheduleDate = Carbon::parse($request->date);
+
+            if ($training->start_date && $scheduleDate->lt(Carbon::parse($training->start_date)->startOfDay())) {
+                $validator->errors()->add('date', 'La fecha debe ser igual o posterior al inicio de la capacitación.');
+            }
+
+            if ($training->end_date && $scheduleDate->gt(Carbon::parse($training->end_date)->endOfDay())) {
+                $validator->errors()->add('date', 'La fecha debe ser igual o anterior al cierre de la capacitación.');
+            }
+        });
+
+        if ($validator->fails()) {
+            if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No fue posible guardar el horario.',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
         $teacherId = $training->teacher_id;
 
-        // Verificar si el profesor ya tiene un compromiso que se cruce en esa fecha y rango horario
         $overlap = Schedule::where('date', $request->date)
             ->whereHas('training', function ($query) use ($teacherId) {
                 $query->where('teacher_id', $teacherId);
@@ -67,6 +101,14 @@ class ScheduleController extends Controller
             ->exists();
 
         if ($overlap) {
+            if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El profesor asignado ya tiene otra capacitación programada que se cruza en este rango de horario.',
+                    'errors' => ['start_time' => ['El profesor asignado ya tiene otra capacitación programada que se cruza en este rango de horario.']],
+                ], 422);
+            }
+
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['start_time' => 'El profesor asignado ya tiene otra capacitación programada que se cruza en este rango de horario.']);
@@ -78,6 +120,13 @@ class ScheduleController extends Controller
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
         ]);
+
+        if ($request->wantsJson() || $request->ajax() || $request->isJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Horario creado correctamente.',
+            ]);
+        }
 
         return redirect()->route('admin.schedules.index')
             ->with('success', 'Horario creado correctamente.');
@@ -100,11 +149,11 @@ class ScheduleController extends Controller
     public function bulkStore(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'training_id' => 'required|exists:trainings,training_id',
-            'schedules' => 'required|array|min:1',
-            'schedules.*.date' => 'required|date|after_or_equal:today',
-            'schedules.*.start_time' => 'required|date_format:H:i',
-            'schedules.*.end_time' => 'required|date_format:H:i',
+            'training_id' => ['required', 'exists:trainings,training_id'],
+            'schedules' => ['required', 'array', 'min:1'],
+            'schedules.*.date' => ['required', 'date'],
+            'schedules.*.start_time' => ['required', 'date_format:H:i'],
+            'schedules.*.end_time' => ['required', 'date_format:H:i', 'after:schedules.*.start_time'],
         ]);
 
         if ($validator->fails()) {
@@ -122,16 +171,20 @@ class ScheduleController extends Controller
         $training = Training::findOrFail($request->training_id);
 
         foreach ($request->input('schedules', []) as $index => $scheduleData) {
-            // Validar que la fecha esté dentro del rango del entrenamiento
-            if ($training->start_date && $training->end_date) {
-                $scheduleDate = Carbon::createFromFormat('Y-m-d', $scheduleData['date']);
+            $scheduleDate = Carbon::parse($scheduleData['date']);
 
-                if ($scheduleDate->lt($training->start_date) || $scheduleDate->gt($training->end_date)) {
-                    $validator->errors()->add(
-                        "schedules.$index.date",
-                        "La fecha debe estar entre " . Carbon::parse($training->start_date)->format('d/m/Y') . " y " . Carbon::parse($training->end_date)->format('d/m/Y') . "."
-                    );
-                }
+            if ($training->start_date && $scheduleDate->lt(Carbon::parse($training->start_date)->startOfDay())) {
+                $validator->errors()->add(
+                    "schedules.$index.date",
+                    'La fecha debe ser igual o posterior al inicio de la capacitación.'
+                );
+            }
+
+            if ($training->end_date && $scheduleDate->gt(Carbon::parse($training->end_date)->endOfDay())) {
+                $validator->errors()->add(
+                    "schedules.$index.date",
+                    'La fecha debe ser igual o anterior al cierre de la capacitación.'
+                );
             }
 
             if (($scheduleData['end_time'] ?? null) <= ($scheduleData['start_time'] ?? null)) {
